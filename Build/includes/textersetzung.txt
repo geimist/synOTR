@@ -1,0 +1,2 @@
+s/Qüen/Queen/g
+s/qüen/queen/g
