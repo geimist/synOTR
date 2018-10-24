@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ -d "/tmp/synOTR" ]; then
+	rm -r /tmp/synOTR
+fi
+
+if [ -d "/usr/syno/synoman/webman/3rdparty/synOTR" ]; then
+	mkdir /tmp/synOTR
+    if [ -d "/usr/syno/synoman/webman/3rdparty/synOTR/app/etc" ]; then # Userdateien liegen erst ab V.3.9.2 im Verzeichnis /app/etc
+    	# cp -a /usr/syno/synoman/webman/3rdparty/synOTR/app/etc/ /tmp/synOTR
+        cp -rf /usr/syno/synoman/webman/3rdparty/synOTR/app/etc/* /tmp/synOTR
+
+
+    else
+        cp /usr/syno/synoman/webman/3rdparty/synOTR/Konfiguration.txt /tmp/synOTR/Konfiguration.txt
+        cp /usr/syno/synoman/webman/3rdparty/synOTR/app/synOTR.sqlite /tmp/synOTR/synOTR.sqlite
+    fi
+fi
+
+exit 0
