@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ -d "/tmp/synOTR" ] && [ -d "/usr/syno/synoman/webman/3rdparty/synOTR" ]; then
+    # rm -r /usr/syno/synoman/webman/3rdparty/synOTR/app/etc
+    # mkdir /usr/syno/synoman/webman/3rdparty/synOTR/app/etc
+    # cp -a /tmp/synOTR/ /usr/syno/synoman/webman/3rdparty/synOTR/app/etc
+    cp -rf /tmp/synOTR/* /usr/syno/synoman/webman/3rdparty/synOTR/app/etc
+    # cp /tmp/synOTR/Konfiguration.txt /usr/syno/synoman/webman/3rdparty/synOTR/Konfiguration.txt
+    # cp /tmp/synOTR/synOTR.sqlite /usr/syno/synoman/webman/3rdparty/synOTR/app/synOTR.sqlite
+    
+    # Konfiguration um neue Variablen ergänzen:
+    /usr/syno/synoman/webman/3rdparty/synOTR/upgradeconfig.sh
+fi
+
+exit 0
