@@ -1,0 +1,59 @@
+#--------------------------------------------------------------------
+#        allgemein                                                  |
+#--------------------------------------------------------------------
+WORKDIR="/volume1/video/_synOTR/"
+DESTDIR="/volume1/video/neue Filme/"
+OTRkeydir="/volume1/downloads/"
+OTRkeydeldir="/volume1/video/#recycle/"
+endgueltigloeschen="off"
+
+#--------------------------------------------------------------------
+#        .otrkey's decodieren:                                      |
+#--------------------------------------------------------------------
+decoderactiv="on"
+OTRuser="mail@domain.de"
+OTRpw="ganzsicherPW"
+
+#--------------------------------------------------------------------
+#       .avi's schneiden                                            |
+#--------------------------------------------------------------------
+OTRcutactiv="on"
+SMARTRENDERING="on"
+WaitOfCutlist="on"
+OTRlocalcutlistdir=""
+useallcutlistformat="1"
+FrameversatzAnfangCut=1
+FrameversatzEndeCut=1
+cutlistat_ID=""
+
+#--------------------------------------------------------------------
+#       .avi's / .mp4's umbenennen                                  |
+#--------------------------------------------------------------------
+OTRrenameactiv="on"
+TVDBlang="de"
+TVDB_APIKEY=""
+MOVIEDB_APIKEY=""
+NameSyntax="§tit [§ylong-§mon-§day §hou-§min §cha §heightp §redurmin§ac01]"
+NameSyntaxSerientitel="§sertit.S§sta.E§epi §epitit"
+
+#--------------------------------------------------------------------
+#       .avi's in native MP4's (MAC OS tauglich) umwandeln:         |
+#--------------------------------------------------------------------
+OTRavi2mp4active="on"
+OTRaacqal="80k"
+normalizeAudio="on"
+MP4BOX_DELAY="100"
+
+#--------------------------------------------------------------------
+#        DSM-Benachrichtigung und sonstige Einstellungen:           |
+#--------------------------------------------------------------------
+dsmtextnotify="on"
+MessageTo="admin"
+dsmbeepnotify="on"
+LOGlevel="1"
+reindex=1
+
+#--------------------------------------------------------------------
+#        durch Update ergänzte Einstellungen:                       |
+#--------------------------------------------------------------------
+
