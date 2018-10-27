@@ -1,1 +1,0 @@
-In diesen Ordner gehören Staticbuilds verschiedener Programme. gitea akzeptiert allerdings keine Änderung der Uploadgrößenbeschränkung von 3MB (wahrscheinlich ein Bug).
