@@ -10,5 +10,5 @@ synOTR übernimmt
 - Umbenennung 
 
 ## Installation:
-- benutze bitte das fertige und signierte Paket von [cphub.net](https://www.cphub.net/?id=37)
+- benutze bitte das fertige und signierte Paket von [cphub.net](https://www.cphub.net/?id=37#synOTR)
 - um ein eigenes SPK aus dem aktuellen master-branch zu bauen, nutze das Buildskript: build_spk.sh
