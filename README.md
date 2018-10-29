@@ -11,4 +11,4 @@ synOTR übernimmt
 
 ## Installation:
 - benutze bitte das fertige und signierte Paket von [cphub.net](https://www.cphub.net/?id=37#synOTR)
-- um ein eigenes SPK aus dem aktuellen master-branch zu bauen, nutze das Buildskript: build_spk.sh
+- um ein eigenes SPK aus dem aktuellen master-branch zu bauen, nutze das Buildskript: build_spk.sh. Lege das Buildskript in einen leeren Ordner und rufe es als root auf. Das Skript setzt eine git-Installation voraus, mit welcher das repository als Grundlage geklont wird.
