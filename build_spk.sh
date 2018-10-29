@@ -31,6 +31,31 @@ if [ -z ${gitpath} ]; then
     exit 1
 fi
 
+# Arbeitsverzeichnis auslesen und hineinwechseln:
+# ---------------------------------------------------------------------
+APPDIR=$(cd $(dirname $0);pwd)
+cd ${APPDIR}
+
+build_tmp="${APPDIR}/build_tmp"
+dir=${APPDIR}
+
+# Ausführung: Erstellen des SPK
+	echo ""
+	echo "-----------------------------------------------------------------------------------"
+	echo "   git holt die aktuelle Version ..."
+	echo "-----------------------------------------------------------------------------------"
+
+if [ -d "./${project}" ] ; then
+    cd ${project}
+    git pull #master #https://geimist.eu:30443/geimist/${project}.git
+    cd ${APPDIR}
+else
+    git clone https://geimist.eu:30443/geimist/${project}.git
+fi
+
+
+build_version=`cat "${APPDIR}/${project}/Pack/INFO" | grep version | awk -F '"' '{print $2}'`
+
 # welche Version soll gebaut werden:
 if [ -z $1 ]; then
     set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
@@ -41,17 +66,7 @@ else
     echo "ACHTUNG: Der master-branch wird verwendet!"
 fi
 
-echo " - INFO: Es wird foldende Version geladen und gebaut: $set_spk_version"
-
-# Arbeitsverzeichnis auslesen und hineinwechseln:
-# ---------------------------------------------------------------------
-APPDIR=$(cd $(dirname $0);pwd)
-cd ${APPDIR}
-
-build_tmp="${APPDIR}/build_tmp"
-dir=${APPDIR}
-
-git clone https://geimist.eu:30443/geimist/${project}.git
+echo " - INFO: Es wird foldende Version geladen und gebaut: $set_spk_version - BUILD-Version: $build_version"
 
 echo " - INFO: Erstelle den temporären Buildordner und kopiere Sourcen hinein ..."
 if [ -d "./build_tmp" ] ; then
@@ -60,15 +75,6 @@ fi
 mkdir "${build_tmp}"
 
 cp -r "${APPDIR}/${project}"/* "${build_tmp}/"
-
-
-#    git clone https://github.com/the-tcpdump-group/libpcap 
-#    cd libpcap
-#    git checkout origin/libpcap-1.6
-    
-#    git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg
-#    cd ffmpeg/
-#    git checkout n2.8.6
 
 # Ausführung: Erstellen des SPK
 	echo ""
