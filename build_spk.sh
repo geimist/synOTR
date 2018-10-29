@@ -82,7 +82,7 @@ else
 fi
 
 echo " - INFO: Es wird foldende Version geladen und gebaut: $set_spk_version - BUILD-Version (INFO-File): $build_version"
-exit
+
 echo " - INFO: Erstelle den temporären Buildordner und kopiere Sourcen hinein ..."
 if [ -d "./build_tmp" ] ; then
 	rm -rf "./build_tmp"
