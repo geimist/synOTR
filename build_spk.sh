@@ -47,7 +47,8 @@ dir=${APPDIR}
 
 if [ -d "./${project}" ] ; then
     cd ${project}
-    git pull #master #https://geimist.eu:30443/geimist/${project}.git
+    git pull
+    versions=`git tag`
     cd ${APPDIR}
 else
     git clone https://geimist.eu:30443/geimist/${project}.git
@@ -58,16 +59,30 @@ build_version=`cat "${APPDIR}/${project}/Pack/INFO" | grep version | awk -F '"' 
 
 # welche Version soll gebaut werden:
 if [ -z $1 ]; then
+     echo "git checkout zu master-branch"
+    cd ${project}
+    git checkout master
+    cd ${APPDIR}
     set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
 else
-    set_spk_version="$1"
-    set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
-    echo "Das Laden und Erstellen einer bestimmten Version (du wünscht Version $1) ist derzeit noch nicht implementiert."
-    echo "ACHTUNG: Der master-branch wird verwendet!"
+    if echo "$versions" | egrep -q "$1"; then
+        echo "git checkout zu $1"
+        cd ${project}
+        git checkout "$1"
+        set_spk_version="$1"
+        cd ${APPDIR}
+    else
+        echo "ACHTUNG: Die gewünschte Version wurde im Repository nicht gefunden!"
+        echo "Der master-branch wird verwendet!"
+        cd ${project}
+        git checkout master
+        cd ${APPDIR}
+        set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
+    fi
 fi
 
-echo " - INFO: Es wird foldende Version geladen und gebaut: $set_spk_version - BUILD-Version: $build_version"
-
+echo " - INFO: Es wird foldende Version geladen und gebaut: $set_spk_version - BUILD-Version (INFO-File): $build_version"
+exit
 echo " - INFO: Erstelle den temporären Buildordner und kopiere Sourcen hinein ..."
 if [ -d "./build_tmp" ] ; then
 	rm -rf "./build_tmp"
