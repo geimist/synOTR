@@ -1,6 +1,132 @@
-#!/bin/sh
-# Dieses Script clont das synOTR-Repository, passt die Dateirechte an und erstellt ein SPK
+#!/bin/bash
+# /volume1/homes/admin/script/SPK_DEVELOPING/synOTR/GIT_BUILD/build_spk.sh
+#----------------------------------------------------------------------------------------
+# Scriptaufruf:
+#----------------------------------------------------------------------------------------
+# erstellt das SPK aus dem aktuellen master-branch vom Server:
+# sh build_spk.sh 
+#
+# erstellt das SPK aus dem als Parameter übergebenen Release vom Server:
+# sh build_spk.sh 4.0.7
+#
+#----------------------------------------------------------------------------------------
+# Ordnerstruktur:
+#----------------------------------------------------------------------------------------
+# ./[NAME-DES-SPK]/Build --> Arbeitsumgebung (erstellen/editieren/verschieben)
+# ./[NAME-DES-SPK]/Pack  --> Archivordner zum Aufbau des SPK (Startscripte etc.)
+#
 
-echo "Dieses Skript befindet sich noch im Aufbau und steht noch nicht zur Verfügung!"
+project="synOTR"
 
-# git clone https://geimist.eu:30443/geimist/synOTR.git
+
+skriptuser=`whoami`
+if [ ${skriptuser} != "root" ]; then
+    echo "Dieses Skript muss von Root ausgeführt werden!"
+    exit 1
+fi
+
+gitpath=`which git`
+if [ -z ${gitpath} ]; then
+    echo "Das Programm git konnte nicht gefunden werden."
+    exit 1
+fi
+
+# welche Version soll gebaut werden:
+if [ -z $1 ]; then
+    set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
+else
+    set_spk_version="$1"
+    set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
+    echo "Das Laden und Erstellen einer bestimmten Version (du wünscht Version $1) ist derzeit noch nicht implementiert."
+    echo "ACHTUNG: Der master-branch wird verwendet!"
+fi
+
+echo " - INFO: Es wird foldende Version geladen und gebaut: $set_spk_version"
+
+# Arbeitsverzeichnis auslesen und hineinwechseln:
+# ---------------------------------------------------------------------
+APPDIR=$(cd $(dirname $0);pwd)
+cd ${APPDIR}
+
+build_tmp="${APPDIR}/build_tmp"
+dir=${APPDIR}
+
+git clone https://geimist.eu:30443/geimist/${project}.git
+
+echo " - INFO: Erstelle den temporären Buildordner und kopiere Sourcen hinein ..."
+if [ -d "./build_tmp" ] ; then
+	rm -rf "./build_tmp"
+fi
+mkdir "${build_tmp}"
+
+cp -r "${APPDIR}/${project}"/* "${build_tmp}/"
+
+
+#    git clone https://github.com/the-tcpdump-group/libpcap 
+#    cd libpcap
+#    git checkout origin/libpcap-1.6
+    
+#    git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg
+#    cd ffmpeg/
+#    git checkout n2.8.6
+
+# Ausführung: Erstellen des SPK
+	echo ""
+	echo "-----------------------------------------------------------------------------------"
+	echo "   SPK wird erstellt..."
+	echo "-----------------------------------------------------------------------------------"
+
+# Falls versteckter Ordners /.helptoc vorhanden, diesen nach /helptoc umbenennen
+	if test -d "${build_tmp}/.helptoc"; then
+		echo ""
+		echo " - INFO: Versteckter Ordner /.helptoc wurde lokalisiert und nach /helptoc umbenannt"
+		mv ${build_tmp}/.helptoc ${build_tmp}/helptoc
+	fi
+
+# Rechte anpassen
+	echo ""
+	echo " - INFO: Dateirechte anpassen ..."
+	for i in $(find "${build_tmp}/Pack/" -type f)
+        do
+            chmod 755 "$i"
+            chown root:root "$i"
+        done
+	
+	for i in $(find "${build_tmp}/Build/" -type f)
+        do
+            chmod 755 "$i"
+            chown root:root "$i"
+        done
+
+# Packen und Ablegen der aktuellen Installation in den entsprechenden /Pack - Ordner
+	echo ""
+	echo " - INFO: Das Archiv package.tgz wird erstellt..."
+	
+    tar -C ${build_tmp}/Build -czf ${build_tmp}/Pack/package.tgz .
+    
+# Wechsel in den Ablageort von package.tgz bezüglich Aufbau des SPK's
+	cd ${build_tmp}/Pack
+
+# Erstellen des eigentlichen SPK's
+	echo ""
+	echo " - INFO: Das SPK wird erstellt..."
+	tar -cf ${project}_$set_spk_version.spk *
+    mv ${project}_$set_spk_version.spk ${APPDIR}
+    
+# Löschen der temporären Daten
+	echo ""
+	echo " - INFO: Der temporäre Ordner wird wieder geschlöscht ..."
+	cd ${APPDIR}
+	if [ -d "./build_tmp" ] ; then
+    	rm -rf "./build_tmp"
+    fi
+
+echo ""
+echo "-----------------------------------------------------------------------------------"
+echo "   Das SPK wurde erstellt und befindet sich unter..."
+echo "-----------------------------------------------------------------------------------"
+echo ""
+echo "   ${APPDIR}/${project}_$set_spk_version.spk"
+echo ""
+
+exit 0
