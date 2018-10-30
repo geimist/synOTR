@@ -1,13 +1,12 @@
 #!/bin/bash
-# /volume1/homes/admin/script/SPK_DEVELOPING/synOTR/GIT_BUILD/build_spk.sh
 #----------------------------------------------------------------------------------------
 # Scriptaufruf:
 #----------------------------------------------------------------------------------------
 # erstellt das SPK aus dem aktuellen master-branch vom Server:
-# sh build_spk.sh 
+# sh ./build_spk.sh 
 #
 # erstellt das SPK aus dem als Parameter übergebenen Release vom Server:
-# sh build_spk.sh 4.0.7
+# sh ./build_spk.sh 4.0.7
 #
 #----------------------------------------------------------------------------------------
 # Ordnerstruktur:
