@@ -9,7 +9,9 @@ synOTR übernimmt
 - MP4-Konvertierung 
 - Umbenennung 
 
-Diskussion gern im Forum: https://www.synology-forum.de/showthread.html?61132-synOTR-scriptsammlung-f%C3%BCr-OTR-Workflow-auf-Synology-Diskstation
+Diskussion gern **[im Forum](https://www.synology-forum.de/showthread.html?61132-synOTR-scriptsammlung-f%C3%BCr-OTR-Workflow-auf-Synology-Diskstation)**.
+
+[Hier findest du die FAQ-Seite.](https://synotr.geimist.eu/faq/faq.html)
 
 ## Installation:
 - benutze bitte das fertige und signierte Paket von [cphub.net](https://www.cphub.net/?id=37#synOTR)
