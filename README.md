@@ -11,7 +11,21 @@ synOTR übernimmt
 
 Diskussion gern **[im Forum](https://www.synology-forum.de/showthread.html?61132-synOTR-scriptsammlung-f%C3%BCr-OTR-Workflow-auf-Synology-Diskstation)**.
 
-[Hier findest du die FAQ-Seite.](https://synotr.geimist.eu/faq/faq.html)
+
+-----
+
+
+Hier geht es zur FAQ-Seite: [FAQ-Seite.](https://synotr.geimist.eu/faq/faq.html)
+
+
+-----
+
+
+Das Change-LOG findest du hier: [Change-LOG](https://geimist.eu:30443/geimist/synOTR/src/branch/master/Pack/CHANGELOG)
+
+
+-----
+
 
 ## Installation:
 - benutze bitte das fertige und signierte Paket von [cphub.net](https://www.cphub.net/?id=37#synOTR)
