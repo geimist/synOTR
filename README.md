@@ -29,4 +29,4 @@ Das Change-LOG findest du hier: **[Change-LOG](https://geimist.eu:30443/geimist/
 
 ## Installation:
 - benutze bitte das fertige und signierte Paket von **[cphub.net](https://www.cphub.net/?id=37#synOTR)**
-- um ein eigenes SPK aus dem repository zu bauen, nutze das Buildskript: build_spk.sh. Lege das Buildskript in einen leeren Ordner und rufe es als root auf. Das Skript setzt eine git-Installation voraus, mit welcher das repository als Grundlage geklont wird. Gewünschte Version kann man dem Skript als Parameter übergeben (z.B. sh ./build_spk.sh 4.0.7). Wird kein Parameter übergeben, bzw. ist dieser ungültig, wird der master-branch verwendet.
+- um ein eigenes SPK aus dem repository zu bauen, nutze das Buildskript: build_spk.sh. Lege das Buildskript in einen leeren Ordner und rufe es als root auf. Das Skript setzt eine git-Installation voraus, mit welcher das repository als Grundlage geklont wird. Die gewünschte Version kann man dem Skript als Parameter übergeben (z.B. sh ./build_spk.sh 4.0.7). Wird kein Parameter übergeben, bzw. ist dieser ungültig, wird der master-branch verwendet.
