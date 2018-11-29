@@ -15,13 +15,13 @@ Diskussion gern **[im Forum](https://www.synology-forum.de/showthread.html?61132
 -----
 
 
-Hier geht es zur FAQ-Seite: [FAQ-Seite.](https://synotr.geimist.eu/faq/faq.html)
+Hier geht es zur FAQ-Seite: **[FAQ-Seite.](https://synotr.geimist.eu/faq/faq.html)**
 
 
 -----
 
 
-Das Change-LOG findest du hier: [Change-LOG](https://geimist.eu:30443/geimist/synOTR/src/branch/master/Pack/CHANGELOG)
+Das Change-LOG findest du hier: **[Change-LOG](https://geimist.eu:30443/geimist/synOTR/src/branch/master/Pack/CHANGELOG)**
 
 
 -----
