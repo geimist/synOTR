@@ -1197,7 +1197,7 @@ if [ $OTRcutactiv = "on" ] ; then
 		# In dieser Funktion wird die lokale Cutlist überprüft (Input von Stafan Weiss)
 		# Diese Methode greift, sobald die Variable '$OTRlocalcutlistdir' (in der Konfiguration.txt) gesetzt wurde:
 		# ---------------------------------------------------------------------
-		pushd $OTRlocalcutlistdir
+		pushd $OTRlocalcutlistdir >> /dev/null
 		filmOhnePfad=`basename "$film"`
 		local_cutlists=$(ls *.cutlist 2>/dev/null)	    # Variable mit allen Cutlists in $PWD
 		filesize=$(ls -l "$film" | awk '{ print $5 }')  # Dateigröße des Filmes
@@ -1241,7 +1241,7 @@ if [ $OTRcutactiv = "on" ] ; then
 				cp "$CUTLIST" "$tmp"
 			fi
 		fi
-		popd
+		popd >> /dev/null
 		}
 		
 		AC_getlocalcutlist_withoutCheck ()
