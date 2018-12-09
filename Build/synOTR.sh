@@ -1210,6 +1210,7 @@ if [ $OTRcutactiv = "on" ] ; then
 			echo -e "Keine lokale Cutlist gefunden!"
 		else
 			echo "okey"
+			echo -e "(localcutlistdir mit Prüfung ist aktiviert)"
 			echo -e "Überprüfe ob eine der lokalen Cutlists zum Film passt:"
 		
 			for f in $local_cutlists; do
