@@ -4,7 +4,8 @@ Release Notes
  	IMPLEMENTIERUNGEN:
  -  
  	BUGFIXES:
- -  
+ -  OTRdecoder für Intel 64bit auf "Dynamisch gelinkt, 64 Bit" gewechselt (Dateien über 4GB liesen sich nicht decodieren)
+ -	
 
 4.0.7 (RELEASE)
  	IMPLEMENTIERUNGEN:
