@@ -984,7 +984,7 @@ if [ $OTRcutactiv = "on" ] ; then
 	else
 		echo "==> schneiden:"
 	
-		if [ ${RAMmax} -lt 500 ]; then
+		if [ ${RAMmax} -lt 490 ]; then
 			SMARTRENDERING="off"
 			echo "Für das framegenaue Schneiden wird mindestens 500 MB installierter RAM benötigt ($RAMmax MB installiert)."
 			echo "Smartrendering wird aufgrund fehlenden Arbeitsspeichers deaktivert"
