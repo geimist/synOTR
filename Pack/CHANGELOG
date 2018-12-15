@@ -5,7 +5,7 @@ Release Notes
  -  
  	BUGFIXES:
  -  OTRdecoder für Intel 64bit auf "Dynamisch gelinkt, 64 Bit" gewechselt (Dateien über 4GB liesen sich nicht decodieren)
- -	
+ -	Grenzwert für Smartrendering von 500 MB auf 490 MB gesenkt
 
 4.0.7 (RELEASE)
  	IMPLEMENTIERUNGEN:
