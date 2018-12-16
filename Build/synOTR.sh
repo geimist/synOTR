@@ -1283,6 +1283,7 @@ if [ $OTRcutactiv = "on" ] ; then
 			cutlist_size=$(ls -l "$tmp/$CUTLIST" | awk '{ print $5 }')
 			if [ "$cutlist_size" -lt "100" ]; then
 				cutlist_okay=no
+				echo "Die Cutlist scheint beschädigt zu sein!"
 				if [ -f "$tmp/$CUTLIST" ]; then
                     rm -f "$tmp/$CUTLIST"
                 fi
