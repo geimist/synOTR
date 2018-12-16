@@ -1,248 +1,5 @@
 #!/bin/sh
 # /usr/syno/synoman/webman/3rdparty/synOTR/synOTR.sh
-	#
-	#	4.0.7 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Es wird jetzt auch versucht Serieninformationen aus der Cutlist zu lesen
-	#       (Formate: S01E01 / 01.01 / 01-01 / 01x01 - optional auch mit einleitendem S, E, T und führender Null)
-	#    -  AC3-Tonspur kann jetzt auch zu DivX- und HQ-Aufnahmen hinzugefügt werden
-	#	 	BUGFIXES:
-	#    -  avcut (Intel) wieder mit > DSM 6.2-23739 Update 1 kompatibel (Vielen Dank an stweiss!)
-	#    -  diverse Bugfixes
-	#       (in diesem Release wird kein ffmpeg [x86_64/i686] mitgeliefert. Daher steht auch kein Fraunhofer FDK AAC zur Verfügung)
-	#
-	#	4.0.5 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  auf Wunsch werden jetzt auch Cutlits für alternative Formate gefunden 
-	#       (Es werden nur Cutlists mit zeitbasierten Schnitten berücksichtigt / standardmäßig deaktivert)
-	#	 	BUGFIXES:
-	#    -  die Cutlistauswahl / Bewertungsanalyse wurde überarbeitet und sollte jetzt etwas robuster und genauer sein
-	#
-	#	4.0.4 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Einbindung der persönlichen cutlist.at-ID
-	#	 	BUGFIXES:
-	#    -  diverse Bugfixes
-	#
-	#	4.0.3 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Statistik implementiert
-	#	 	BUGFIXES:
-	#    -  verbessertes Errorhandling bei Rückgabefehlern von thetvdb.com
-	#    -  ein Fehler in Verbindung mit Leerzeichen in Ordnernamen beim AC3-Muxing (vielen Dank an Thomas!)
-	#    -  Detailverbesserungen
-	#	
-	#	4.0.2 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Konfigurationsimport implementiert um den Umstieg für User, die noch die bisherige Skriptversion verwenden, zu erleichtern
-	#	 	BUGFIXES:
-	#    -  Fehler abgefangen, wenn JSON-Abfragen nicht korrekt ausgewertet werden konnten
-	#    -  Detailverbesserungen
-	#
-	#	4.0.1 (RELEASE)
-	#	 	BUGFIXES:
-	#    -  ein Fehler im CSS behoben, wodurch der Bereich "sonstige Einstellungen" verdeckt war
-	#
-	#	4.0.0 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Layout-Anpassung an DSM
-	#    -  optionale Entfernung des Zeitplans bei einer Deinstallation
-	#
-	#	3.9.4 (SPK-Beta)
-	#	 	BUGFIXES:
-	#    -  Anpassung an geänderte Ausgabe von otr-serien.de
-	#	
-	#	3.9.3 (SPK-Beta)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Zeitplaner integriert
-	#    -  Workarround für DSM 6.2 Kompatibilität
-	#	
-	#	3.9.2 (SPK-Beta)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Hyperbackup integriert (Userdateien  liegen jetzt zentral unter ./app/etc)
-	#	
-	#	3.9.1 (SPK-Beta)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  Upgradeverbesserung (übernahme der Konfiguration und der Datenbank, Aktualisierung der Konfiguration nach einem Upgrade)
-	#    -  Layoutanpassungen
-	#    -  Schaltfläche für einen manuellen Start hinzugefügt
-	#    -  Schaltfläche für ein manuelles Backup der Konfiguration und der synOTR-Datenbank
-	#    -  Schaltfläche zum Download der Konfiguration
-	#	
-	#	3.9.0 (SPK-Beta)
-	#	 	IMPLEMENTIERUNGEN:
-	#    -  synOTR steht jetzt als SPK-Version zur Verfügung (Vielen Dank an Tommes, der mit viel Zeiteinsatz das SPK erstellt hat, für seine grandiose Hilfe!)
-	#	 	
-	#	3.4.2 (RELEASE)
-	#	 	BUGFIXES:
-	#    -  Korrektur des Autoupdates
-	#	 	
-	#	3.4.1 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	Integritätsprüfung und Autokorrektur der Installationsdateien im Loglevel 2
-	#	 	BUGFIXES:
-	#    -  Filme mit AC3-Tonspur können nicht mit avisplit geschnitten werden. Das wurde z.T. nicht richtig abgefangen
-	#	 	(in diesen Situationen wird das Schneiden übersprungen)
-	#	 -	defekte Umbenennung auf ARM-Geräten (der Librarypath musste für curl angepasst werden)
-	#	 	
-	#	3.4.0 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	lokale Cutlists können nun außer im Dekodierordner auch im Downloadordner abgelegt werden (wenn der Name mit dem Film übereinstimmt, wird die Cutlist ungeprüft übernommen)
-	#	 -	LOG-info: DB Größe und Anzahl Datensätze
-	#	 -	Autoupdate (nur geänderte Dateien) implementiert. Dateien, die nicht zur synOTR-Installation gehören, werden gelöscht! Deaktivierung von autoupdate mit dem Parameter autoupdate=off
-	#	 -	nach einem Update werden neue Parameter automatisch (inaktiv) in die Konfiguration.txt geschrieben (unabhängig von autoupdate)
-	#	 	BUGFIXES:
-	#	 -	ein Fehler, der u.U. dazu führte, dass Fehler in Cutlisten nicht erkannt wurden
-	#	 -	verbesserte Umlautkorrektur
-	#	 -	Fehler bei der Segmentierung des Dateinamens
-	#	 -	andere kleinere Fehler
-	#	 	
-	#	3.3.1 (RELEASE)
-	#	 	BUGFIXES:
-	#	 -	ein Fehler, der dazu führte, dass bei einer Neuinstallation u.U. die Datenbank nicht erstellt werden konnte
-	#	 	
-	#	3.3.0 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-    #	 -	Normalisierung der Audiospur (nur in Verbindung mit avi2mp4-Konvertierung bei mp3-Quellspur) / Deaktiverung über normalizeAudio="off"
-	#	 -	Serieninformationen werden jetzt (in Anlehnung an FileBot) zusätzlich von theTVDB.com abgefragt (sofern der Titel Serieninfos enthält)
-	#	 	=>	TVDBlang="de" (Sprache, in welcher nach Serien auf theTVDB.com gesucht werden soll)
-	#	 	=>	sollten mehrere gleichnamige Serien existieren, so wird die 1. verwendet 
-	#	 		Gibt es neuaufgelegte Serien, so hilft es, den Dateinamen um das Jahr zu ergänzen (Serienname_S01E01_17.10… => Serienname_(2017)_S01E01_17.10…)
-	#	 -	Asynchronitäten kann man mit der Variablen MP4BOX_DELAY="100" entgegenwirken (in Millisekunden / Feinabstimmung für den Audio-Video-Sync / Positive Werte verzögern den Ton; negative Werte verzögern das Bild ('holen den Ton nach vorn') / nur in Verbindung mit avi2mp4-Konvertierung)
-	#	 -	Ist die Zieldatei bereits vorhanden (z.B. bei Serien ohne Serieninformation), wird in der Datenbank die Anzahl der bisherigen Filme gezählt und der Dateiname entsprechende erweitert.
-	#	 	
-	#	 	Viele Serieninformationen stammen von der Website http://thetvdb.com. 
-	#	 	Bitte unterstützt diesen kostenlosen Service, indem ihr nach Möglichkeit Informationen und Grafiken beitragt.
-	#	 	
-	#	3.2.0 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-    #	 -	Pushbenachrichtigungen in Verbindung mit dem Notification Forwarder realisierbar
-	#	 	
-	#	3.1.2 (RELEASE)
-	#	 	BUGFIXES:
-	#	 -	otrdecoder getauscht / 32bit Kompatibilität
-	#	 	
-	#	3.1.1 (RELEASE)
-	#	 	BUGFIXES:
-	#	 -	aktuelle otrdecoder-Version
-	#	 -	behobener Fehler beim Auslesen der Cutlists (danke an stweiss)
-	#	 	
-	#	3.1.0 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	separates Arbeitsverzeichnis über die Variable WORKDIR definierbar
-	#	 -	das Warten auf passende Cutlisten kann mit der Variablen WaitOfCutlist=off (WaitOfCutlist=on > standard) umgangen werden
-	#	 	BUGFIXES:
-	#	 -	Funktion OTRautocut() auf IFS=$'\012' gesetzt und am Ende zurückgesetzt um in der Schleife Dateinamen mit Leerzeichen erkennen zu können
-	#	 -	Parameter für ReIndex geändert (gelöschte Aufnahmen werden jetzt auch aus dem Index entfernt. Es wird nach dem ersten Programmaufruf des Tages jeweils eine komplette Indexierung des Zielordners durchgeführt
-	#       das verlängt zwar den Indexprozess, aber verhindert Dateileichen in der VideoStation (deaktivieren mit reindex=0). Fertig gestellte Filme werden dem Index sofort hinzugefügt)
-	#	 -	nice (Prozesspriorität) kann für die entscheidensten Programme mit der Variable "niceness" angepasst werden. 0 ist Standard / 19 ist geringste Priorität. WICHTIG: keine neagtiven Werte verwenden!
-	#	 -	Zeitstempel der Datei wird nun auch geändert, wenn eine Episode nicht umbenannt werden kann, weil eine gleichnamige bereits vorhanden ist (z.B. bei fehlenden Serieninformationen)
-	#	 -	Bugfixes
-	#	 
-	#	3.0.0 (RELEASE)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	Limitierung für das framegenaue Schneiden: >= 500 MB installierter RAM für HQ-Filme / >= 1000 MB installierter RAM für HD-Filme
-	#	 -	Updateprüfung nur noch einmal täglich
-	#	 -	2. Methode zur lokalen Cutlistauswahl mit Prüfung integriert - Vielen Dank an Stefan Weiss (muss manuell über die Variable $OTRlocalcutlistdir aktiviert werden)
-	#	 -	Serientitel ist in der Konfiguration.txt individualisierbar
-	#	 	BUGFIXES:
-	#	 -	kleinere Korrekturen / Detailverbesserungen
-	#	 
-	#	2.4 (AC3Beta)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	dank JensB und Mario Kicherer jetzt mit Smartrendering (framegenaues Schneiden) für ARMv7 sowie i686 (also alle Plattformen, die synOTR unterstützt)
-	#	 -	manuelle lokale Cutlists verwendbar (gelegt in den Decodierordner […/_decodiert/ ] und gleicher Titel / Dateiname wie Film mit zusätzlicher Dateiendung *.cutlist - Cutlisten findet ihr hier: http://cutlist.at)
-	#	 -	Cutlist-Infos erscheinen im LOG (Fehler [Ende fehlt, EPG-Error] …)
-	#	 -	Es erfolgt jetzt ein Reindexing des Zielordners für die VideoStation / Mediaserver, sofern mindestens ein Film erstellt wurde
-	#	 -	Der Titel für Serien wurde für die VideoStation optimiert (Serienname.Season.Episode Episodentitel …)
-	#	 -	optionales endgültige Löschen der Quelldateien möglich (benötigt die Variable endgueltigloeschen="on" oder ="off" in der Konfiguration.txt)
-	#	 	BUGFIXES:
-	#	 -	Korrektur der FPS-Berechnung (z.B: 29.97 bei englischsprachigen Sendern [NTSC-Format])
-	#	 - 	Korrektur der Berechnung der Zeitstempel für avcut (Schnitt war immer um 1 Frame verschoben)
-	#	 
-	#	2.3 (AC3Beta)
-	#	 	BUGFIXES:
-	#	 -	Filme ließen sich nicht schneiden, sofern avcut fehlte (kein fallback auf avisplit)
-	#	 -	Korrekturen bei der automatischen Cutlistauswahl
-	#	 
-	#	2.2 (AC3Beta)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	Smartrendering (framegenaues Schneiden mit 'avcut' / derzeit nur mit 64bit Intel CPU)
-	#	 -	OTRcut.sh in synOTR.sh integriert
-	#	 	BUGFIXES:
-	#	 -	ist autocut aktiviert, funktioniert der AC3-Support nur in Verbindung mit Smartrendering (avcut)
-	#	 -	Support für ARMv5 deaktiviert (es wird nur ARMv7 unterstützt / wenn jemand die passenden Programme und Librarys zusammensucht, kann ich es gerne integrieren - mir fehlt die nötige Testplattform)
-	#	 
-	#	2.1 (AC3Beta)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	AC3-Support
-	#	 
-	#	2.1 (Release)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	Korrektur der FPS-Berechnung (z.B: 29.97 bei englischsprachigen Sendern [NTSC-Format])
-	#	 
-	#	2.0 (RELEASE - entspricht weitgehend Version 1.5)
-	#	 -	kleinere Korrekturen
-	#	 
-	#	1.5 (RC)
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	eigene Version von ffmpeg/ffprobe für x86 und ARM (mediainfo entfernt)
-	#	 -	verbesserte AAC-Encodererkennung für Konvertierung (Sortierung nach Qualität)
-	#	 
-	#	1.4
-	#	 	BUGFIXES:
-	#	 -	OTRdecoder funktionierte nicht auf DS214play und DS415play (i386)
-	#	1.3
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -	ARM-Version von mp4box und Transcode integriert (Autocut und MP4-Konvertierung mit ARM-CPU's jetzt möglich)
-	#	 
-	#	1.2
-	#	 	IMPLEMENTIERUNGEN:
-	#	 - 	weitere Umbenennungsparameter (fps, Realdauer, Seitenverhältnis, Bildhöhe, Bildbreite, Scantype [i oder p], Audiocodec, Videocodec)
-	#	 - 	weitere Anpassung an der Sqlite-DB (Stringkorrektur ect.)
-	#	 - 	Support für ARMv7-CPU (DS215j, ect.)
-	#	 	BUGFIXES:
-	#	 - 	kleinere Korrekturen bei der Separierung der Umbenennungsfragmente
-	#	 - 	Korrektur für Ordner mit Leerzeichen
-	#	 
-	#	1.1
-	#	 	IMPLEMENTIERUNGEN:
-	#	 - 	Metadaten werden nun in die MP4-Dateien geschrieben (nur bei aktiviertem Autorename)
-	#	 - 	Routine zur Erstellung der sqlite3-DB geändert 
-	#	 - 	Anpassung für 64Bit Systeme (ab DSM 6.0) / Ergänzung einer internen 32bit Library für avisplit
-	#	 	BUGFIXES:
-	#	 - 	Errorhandling für OTR korrigiert
-	#	 - 	Fehler bei der datenbankbasierten Umbenennung meherer Dateien gleichzeitig
-	#	 
-	#	1.0
-	#	 	IMPLEMENTIERUNGEN:
-	#	 - 	Schalter für LOG's in Konfiguration.txt hinzugefügt inkl. neuem Startskript / Im Aufgabenplaner nur noch den Pfad zum Startskript eintragen (z.B. "/volume1/homes/admin/script/synOTR/synOTR-start.sh")	
-	#	 - 	Logging überarbeitet (Level hinzugefügt) / übersichtlicher gestaltet
-	#	 - 	bash erneuert (shellshock-sicherheitslücke behoben)
-	#	 - 	sofortige Umbenennung auch bei fehlenden Serien / wird bei Verfügbargeit nachgeholt (datenbankbasiert via SQLite-Datenbank)
-	#	 
-	#	0.7
-	#	 	BUGFIXES:
-	#	 - 	Errorlogging korrigiert
-	#	 - 	Updateabfrage aktualisiert
-	#	 
-	#	0.6	
-	#	 	BUGFIXES:
-	#	 - 	Fehler bei Modellen mit evensport-CPU behoben
-	#	 
-	#	0.5:
-	#	 	IMPLEMENTIERUNGEN:
-	#	 -  Benachrichtigung für fertige Aufgaben in DSM-Benachrichtigung
-	#	 - 	Benachrichtigung für fertige Aufgaben per kurzen Piep
-	#	 - 	Das Dateidatum wird auf das Ausstrahlungsdatum gesetzt, sofern Rename aktiv ist (bessere Sortiermöglichkeiten)
-	#	 - 	Serieninformationen werden von www.otr-serien.de importiert und die Dateien entsprechend umbenannt
-	#	 
-	#	0.4:
-	#	 	IMPLEMENTIERUNGEN:
-	#	 - 	Cutlisten werden jetzt nach Dateigröße und wenn nicht vorhanden, dann zusätzlich auch nach Dateinamen gesucht
-	#	 - 	Updateabfrage (DSM-Benachrichtigung funktioniert nur, wenn das Script als Benutzer "root" aufgerufen wird)
-	#	 	BUGFIXES:
-	#	 - 	Rename: Korrektur bei Sendernamen
 
 
 ###################################################################################
@@ -252,7 +9,7 @@
 	echo "    -----------------------------------"
 	echo -e
 	
-	CLIENTVERSION="4.0.7"   # [2018-07-30]
+	CLIENTVERSION="4.0.8"   # [2018-12-16]
 	DevChannel="Release"    # beta
     
 # ---------------------------------------------------------------------------------
@@ -433,12 +190,14 @@
 		mp4boxloglevel="-quiet"
 		CUTloglevel="-w"
 		cURLloglevel="-s"
+		wgetloglevel="-q"
 	elif [ $LOGlevel = "2" ] ; then
 		echo "Loglevel:                 erweitert"
 		ffloglevel="info"
 		mp4boxloglevel=""
 		CUTloglevel="-v"
 		cURLloglevel="-v"
+		wgetloglevel="-v"
 	else
 		ffloglevel="quiet"
 		mp4boxloglevel="-quiet"
@@ -647,7 +406,7 @@ echo -e ;
 		    fi
 	    fi
 		missSeries=0
-		wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT_TVDB" >/dev/null 2>&1
+		wget --timeout=30 --tries=2 $wgetloglevel -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT_TVDB" >/dev/null 2>&1
 	else
 		echo -e "Keine Serieninformationen auf theTVDB.com gefunden."
 	    if [ $LOGlevel = "2" ] ; then
@@ -984,7 +743,7 @@ if [ $OTRcutactiv = "on" ] ; then
 	else
 		echo "==> schneiden:"
 	
-		if [ ${RAMmax} -lt 490 ]; then
+		if [ ${RAMmax} -lt 500 ]; then
 			SMARTRENDERING="off"
 			echo "Für das framegenaue Schneiden wird mindestens 500 MB installierter RAM benötigt ($RAMmax MB installiert)."
 			echo "Smartrendering wird aufgrund fehlenden Arbeitsspeichers deaktivert"
@@ -1197,7 +956,7 @@ if [ $OTRcutactiv = "on" ] ; then
 		# In dieser Funktion wird die lokale Cutlist überprüft (Input von Stafan Weiss)
 		# Diese Methode greift, sobald die Variable '$OTRlocalcutlistdir' (in der Konfiguration.txt) gesetzt wurde:
 		# ---------------------------------------------------------------------
-		pushd $OTRlocalcutlistdir >> /dev/null
+		pushd "$OTRlocalcutlistdir" >> /dev/null
 		filmOhnePfad=`basename "$film"`
 		local_cutlists=$(ls *.cutlist 2>/dev/null)	    # Variable mit allen Cutlists in $PWD
 		filesize=$(ls -l "$film" | awk '{ print $5 }')  # Dateigröße des Filmes
@@ -1283,7 +1042,7 @@ if [ $OTRcutactiv = "on" ] ; then
 			cutlist_size=$(ls -l "$tmp/$CUTLIST" | awk '{ print $5 }')
 			if [ "$cutlist_size" -lt "100" ]; then
 				cutlist_okay=no
-				echo "Die Cutlist scheint beschädigt zu sein!"
+				echo "Die Cutlist scheint beschädigt zu sein"
 				if [ -f "$tmp/$CUTLIST" ]; then
                     rm -f "$tmp/$CUTLIST"
                 fi
@@ -1313,14 +1072,14 @@ if [ $OTRcutactiv = "on" ] ; then
 		fi
 
 		echo -n "Suche anhand des Dateinamens     ---> "
-		wget -U "synOTR/$CLIENTVERSION" --timeout=30 --tries=2 -q -O "$tmp/search.xml" "${server}getxml.php?name=$filename"
+		wget -U "synOTR/$CLIENTVERSION" --timeout=30 --tries=2 $wgetloglevel -O "$tmp/search.xml" "${server}getxml.php?name=$filename"
 
 		if [ $? -eq 0 ] && grep -q '<id>' "$tmp/search.xml"; then
 			echo -e "okay"
 		else
 			echo "Keine Cutlist anhand des Namens gefunden!"
     		echo -n "Suche anhand der Dateigröße      ---> "
-    		wget -U "synOTR/$CLIENTVERSION" --timeout=30 --tries=2 -q -O "$tmp/search.xml" "${server}getxml.php?ofsb=$filesize"
+    		wget -U "synOTR/$CLIENTVERSION" --timeout=30 --tries=2 $wgetloglevel -O "$tmp/search.xml" "${server}getxml.php?ofsb=$filesize"
 			
 			if [ $? -eq 0 ] && grep -q '<id>' "$tmp/search.xml"; then
 				echo -e "okay"
@@ -1330,7 +1089,7 @@ if [ $OTRcutactiv = "on" ] ; then
 				    # es werden Cutlists für andere Qualitäten gesucht. 
             		echo -n "Suche alternatives Cutlistformat ---> "
             		search=$(echo $filename | sed 's/.avi//g' | sed 's/.mpg//g' | sed 's/.HQ//g' | sed 's/.HD//g' | sed 's/.mp4//g' | sed 's/.ac3//g' | sed 's/DivFix++.//g' | sed 's/DivFix.//g' )
-            		wget -U "synOTR/$CLIENTVERSION" --timeout=30 --tries=2 -q -O "$tmp/search.xml" "${server}getxml.php?name=$search"
+            		wget -U "synOTR/$CLIENTVERSION" --timeout=30 --tries=2 $wgetloglevel -O "$tmp/search.xml" "${server}getxml.php?name=$search"
 				
         			if ([ $? -eq 0 ] && grep -q '<id>' "$tmp/search.xml") && ( grep -q '<withtime>1</withtime>' "$tmp/search.xml" ); then # Aufgrund der unterschiedlichen Frameraten, werde derzeit nur Cutlists mit Zeitangaben verwendet
         				useonlytimecuts=1
@@ -1453,15 +1212,18 @@ if [ $OTRcutactiv = "on" ] ; then
 		fi
 
 		if [ "$continue" == "0" ]; then
-		
-            if [ -z "$cutlistat_ID" ] || [ "$useonlytimecuts" == "1" ] ; then # auch alternative Cutlisten ohne Userangaben laden, da eine Bewertung schlecht objektiv möglich ist
+            if [ $(echo -n "$cutlistat_ID" | wc -c) -ne 64 ] || [ "$useonlytimecuts" == "1" ] ; then # auch alternative Cutlisten ohne Userangaben laden, da eine Bewertung schlecht objektiv möglich ist
                 server_tmp="${server}"
+                if [ $(echo -n "$cutlistat_ID" | wc -c) -ne 64 ]; then
+                    echo "ACHTUNG: deine Cutlist-ID ($cutlistat_ID) ist ungültig!"
+                fi
             else
                 server_tmp="${server}${cutlistat_ID}/"
             fi
-            
+
 			echo -n "Lade $CUTLIST (ID: $id) --> "
-			wget --timeout=30 --tries=2 -q -O "$tmp/$CUTLIST" "${server_tmp}getfile.php?id=$id"
+
+			wget --timeout=30 --tries=2 $wgetloglevel -O "$tmp/$CUTLIST" "${server_tmp}getfile.php?id=$id"
 
 			if [ $? -eq 0 ] && AC_test_cutlist && [ -f "$tmp/$CUTLIST" ]; then
 				echo -e "okay"
@@ -1783,7 +1545,7 @@ if [ $OTRcutactiv = "on" ] ; then
 		echo "---- ENDE ----" ; echo -e
 		sleep 1
 		}
-
+	
 		AC_split ()
 		{
 		# Hier wird nun das Video an das Cut-Programm übergeben:
