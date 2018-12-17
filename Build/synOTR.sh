@@ -1,7 +1,6 @@
 #!/bin/sh
 # /usr/syno/synoman/webman/3rdparty/synOTR/synOTR.sh
 
-
 ###################################################################################
 
     echo "    -----------------------------------"
@@ -9,9 +8,9 @@
     echo "    -----------------------------------"
     echo -e
 
-    CLIENTVERSION="4.0.8"   # [2018-12-16]
+    CLIENTVERSION="4.0.8"   # [2018-12-17]
     DevChannel="Release"    # beta
-    
+
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
 #           (alle Werte können durch setzen in der Konifiguration.txt             |
@@ -30,7 +29,7 @@
     MP4BOX_DELAY=""             # in Millisekunden / Feinabstimmung für den Audio-Video-Sync / Positive Werte verzögern den Ton; negative Werte 'holen den Ton nach vorn' 
     niceness=15                 # Die Priorität liegt im Bereich von -20 bis +19 (in ganzzahligen Schritten), wobei -20 die höchste Priorität (=meiste Rechenleistung) und 19 die niedrigste Priorität (=geringste Rechenleistung) ist. Die Standardpriorität ist 0. AUF NEGATIVE WERTE SOLLTE UNBEDINGT VERZICHTET WERDEN!
     reindex=1                   # Standard 1 - einamlige Reindexierung des Zielordners nach dem ersten Programmlauf des Tages
-    needindex=0	                # wird bei einem fertigen Film auf 1 gesetzt um den Zielordnerindex für die VideoStation neu zuindexieren
+    needindex=0                 # wird bei einem fertigen Film auf 1 gesetzt um den Zielordnerindex für die VideoStation neu zuindexieren
     DEBUGINFO="on"              # ich bin dankbar, wenn der Wert auf 'on' gestellt bleibt - deaktivieren sofern keine anonyme Systeminfo an den Entwickler gesendet werden darf (Installationstrigger beinhaltet folgende anonymen Geräteinfos: DSM-Build / Prüfsumme der MAC-Adresse als Hardware-ID [anonyme Zahlenfolge um Installationen zu zählen] / Architektur / Geräte-Typ) 
     WaitOfCutlist="on"          # mit dem weiterverarbeiten eines Filmes wird so lange gewartet, bis eine Cutlist verfügbar ist
     useallcutlistformat=0       # Cutlits für alternative Formate berücksichtigen
@@ -39,7 +38,7 @@
     TVDB_APIKEY=""              # eigenen API-Key für theTVDB.com verwenden
     today=`date +%d | sed -e 's/^0*//'` # Datum (Tag) ohne führende Null (lässt sich sonst nicht als Berechnungsgrundlage nutzen)
     regInt='^[0-9]+$'           # Vorlage: Regex check Integer
-    
+
 # an welchen User/Gruppe soll die DSM-Benachrichtigung gesendet werden :
 # ---------------------------------------------------------------------
     synOTR_user=`whoami`; echo "synOTR-User:              $synOTR_user"
@@ -176,9 +175,9 @@
 # spezielle Programmpfade / sonstige Variablen anpassen :
 # ---------------------------------------------------------------------
     # (oder andere gewünschte Version / nicht benötigte ggfs. auskommentieren)
-    #	ffmpeg="${APPDIR}/app/bin/ffmpeg_fdk/ffmpeg"	
-    #	ffmpeg="${APPDIR}/app/bin/ffmpeg"
-    #	ffmpeg=`which ffmpeg`	# erstes ffmpeg in PATH
+    #   ffmpeg="${APPDIR}/app/bin/ffmpeg_fdk/ffmpeg"
+    #   ffmpeg="${APPDIR}/app/bin/ffmpeg"
+    #   ffmpeg=`which ffmpeg`   # erstes ffmpeg in PATH
     echo "ffmpeg-Version:           $ffmpeg"
 
 # Konfiguration für LogLevel:
@@ -221,7 +220,7 @@
     if [ -d "$WORKDIR" ] ; then
         WORKDIR="${WORKDIR%/}/"
     fi
-    
+
     if [ $endgueltigloeschen = "on" ] ; then
         echo "Endgültiges Löschen ist aktiviert!"
     else
@@ -232,7 +231,7 @@
             echo "Löschverzeichnis wurde erstellt [$OTRkeydeldir]"
         fi
     fi
-    
+
     if [ -z "$WORKDIR" ] ; then
         WORKDIR="${DESTDIR}"
         useWORKDIR="no"
@@ -243,27 +242,27 @@
     else
         useWORKDIR="yes"
     fi
-        
+
     if [ -d "$OTRkeydir" ] ; then
         echo "Quellverzeichnis:         $OTRkeydir"
     else
         echo "kein gültiges Quellverzeichnis gefunden!"
     fi
-    
+
     if [ -d "$DESTDIR" ] ; then
         echo "Zielverzeichnis:          $DESTDIR"
     else
         mkdir -p "$DESTDIR"
         echo "Zielverzeichnis [$DESTDIR] wurde erstellt"
     fi
-    
+
     if [ -d "$WORKDIR" ]; then
         echo "Arbeitsverzeichnis:       $WORKDIR"
     else
         mkdir -p "$WORKDIR"
         echo "Arbeitsverzeichnis [$WORKDIR] wurde erstellt."
     fi
-    
+
     if [ $OTRcutactiv = "off" ] ; then
         DECODIR="$WORKDIR"
         echo "Decodierverzeichnis:      $DECODIR"
@@ -276,7 +275,7 @@
             echo "Decodierverzeichnis [$DECODIR] wurde erstellt"
         fi
     fi
-    
+
 #################################################################################################
 #        _______________________________________________________________________________        #
 #       |                                                                               |       #
@@ -294,7 +293,7 @@ MovieDB_query()
 
     echo -e
     echo "MovieDB_query ==> nicht implementiert …"
-    
+
 }
 
 
@@ -370,13 +369,12 @@ echo -e ;
     restore_ENV	# für curl unter ARMv7
     TVDB_FilmID=`curl $cURLloglevel -X GET --header 'Accept: application/json' --header "Accept-Language: $TVDBlang" --header "Authorization: Bearer $TVDB_TOKEN" "https://api.thetvdb.com/search/series?name=$serieTitleQuery" ` #| jq '.data[].id' | sed "s/\"//g"  | sed -n '1{p;q}' ` #| awk '{print $1}' `             #TVDB_FilmID=`echo "$TVDB_FilmID" | jq '.data[].id' | sed "s/\"//g" ` # ` #| tr -d '"' `
     synOTR_ENV
-    
+
     if echo "$TVDB_FilmID" | egrep -q "Connection timed out"; then
         echo "Serverfehler (Zeitüberschreitung)"
     fi
     }
-    
-    
+
     TVDB_episodequery() 
     {
     TVDB_SerieName=` echo "$TVDB_FilmID" | jq '.data[].seriesName' | sed "s/\"//g"  | sed -n '1{p;q}' | sed "s/://g ; s/\?//g ; s/\*//g" `	# nur das erste Ergebnis wählen
@@ -510,11 +508,11 @@ elif [ -z "$serieninfo" ] ; then
 elif [[ "$OTRID" =~ $regInt ]]; then    # Ist die OTR-Id eine echte Zahl?
     if jq -e . >/dev/null 2>&1 <<<"$serieninfo"; then   # prüfen, ob korrektes JSON-Format verarbeitet werden kann (https://stackoverflow.com/questions/46954692/check-if-string-is-a-valid-json-with-jq)
         echo -e "gefunden:"
-        #	Zeichenkorrektur:
-    #	serieninfo=`echo $serieninfo | sed "s/<!DOCTYPE html>//g" | sed 's/\\\u00e4/ä/g' | sed 's/\\\u00f6/ö/g' | sed 's/\\\u00c4/Ä/g' | sed 's/\\\u00d6/Ö/g' | sed 's/\\\u00fC/ü/g' | sed 's/\\\u00dC/Ü/g' | sed 's/\\\u00dF/ß/g' `
-    #	serieninfo=`echo $serieninfo | sed "s/<!DOCTYPE html>//g" | sed -f ${APPDIR}/includes/decode.sed `
-    #	OTRID=`echo "$serieninfo" | awk -F, '{print $1}' | awk -F: '{print $2}' | sed "s/\"//g"`
-    
+        #   Zeichenkorrektur:
+        #   serieninfo=`echo $serieninfo | sed "s/<!DOCTYPE html>//g" | sed 's/\\\u00e4/ä/g' | sed 's/\\\u00f6/ö/g' | sed 's/\\\u00c4/Ä/g' | sed 's/\\\u00d6/Ö/g' | sed 's/\\\u00fC/ü/g' | sed 's/\\\u00dC/Ü/g' | sed 's/\\\u00dF/ß/g' `
+        #   serieninfo=`echo $serieninfo | sed "s/<!DOCTYPE html>//g" | sed -f ${APPDIR}/includes/decode.sed `
+        #   OTRID=`echo "$serieninfo" | awk -F, '{print $1}' | awk -F: '{print $2}' | sed "s/\"//g"`
+
         missSeries=0	# Trigger für fehlende Serieninformation in SQLite-DB
         serietitle=`echo "$serieninfo" | jq -r '.Serie' | sed "s/://g" `
         season=`echo "$serieninfo" | awk -F, '{print $3}' | awk -F: '{print $2}' | sed "s/\"//g"`
@@ -573,7 +571,7 @@ OTRdecoder()
                         muxingLOG=$(nice -n $niceness $ffmpeg -threads 2 -loglevel $ffloglevel  -i "${DECODIR}/${videosourcetitle}.avi" -i "$i"  -map 0:0 -map 1:0 -c:a copy -async 1 -c:v copy -sn -y "${DECODIR}/${videosourcetitle}.ac3tmp.avi" 2>&1)
 
                         if [ -f "${DECODIR}/${videosourcetitle}.ac3tmp.avi" ]; then
-                            #	------- Original löschen / umbenennen:
+                            # Original löschen / umbenennen:
                             if [ $endgueltigloeschen = "on" ] ; then
                                 rm "$i"
                                 rm "${DECODIR}/${videosourcetitle}.avi"
@@ -606,18 +604,18 @@ OTRdecoder()
 filetest=`find "${OTRkeydir}" -maxdepth 1 -name "*.otrkey" -mmin +"$timediff" -type f`
 
 if [ $decoderactiv = "on" ] && [ ! -z "$filetest" ] ; then
-    echo -e ;  
+    echo -e ;
     echo "==> decodieren:"
     OTRkeydir="${OTRkeydir%/}/"
     
     IFS=$'\012'	 # entspricht einem $'\n' Newline
     for i in $(find "${OTRkeydir}" -maxdepth 1 -name "*.otrkey" -mmin +"$timediff" -type f)
-        do	
+        do
             IFS=$OLDIFS
             echo -e
             filename=`basename "$i"`
             decofilename=${filename%.*}
-            echo "    DECODIERE:       ---> $filename"	
+            echo "    DECODIERE:       ---> $filename"
             echo -n "                          "; date
 
             if [ $machinetyp = "x86_64" ]; then
@@ -708,7 +706,7 @@ OTRautocut()
 # Diese Funktion schneidet die Filme anhand einer lokalen Cutlist, oder                 #
 # einer automatisch auf cutlist.at gefundenen Cutlist                                   #
 #                                                                                       #
-#  -----------------------------------------------------------------------------------  #
+#                                                                                       #
 #                                                                                       #
 # Die meisten Cut-Funktionen stammen ursprünglich von:                                  #
 #   Author:             Daniel Siegmanski                                               #
@@ -736,20 +734,20 @@ if [ $OTRcutactiv = "on" ] ; then
         SMARTRENDERING="off"
         echo "Smartrendierung (framegenaues Schneiden) nicht möglich, da das Programm \"avcut\" fehlt."
     fi
-    
+
     if [ ! -f "$avisplitpath" ] && [ "$SMARTRENDERING" != "on" ]  ; then
         echo "avisplit wurde nicht gefunden - Schneiden wird übersprungen!"; echo "Installiere Transcode via iPKG/oPKG"; echo -e
         break
     else
         echo "==> schneiden:"
-    
+
         if [ ${RAMmax} -lt 490 ]; then
             SMARTRENDERING="off"
             echo "Für das framegenaue Schneiden wird mindestens 500 MB installierter RAM benötigt ($RAMmax MB installiert)."
             echo "Smartrendering wird aufgrund fehlenden Arbeitsspeichers deaktivert"
             echo "Es wird mit der herkömmlichen Methode (avisplit) geschnitten."; echo -e
         fi
-        
+
         tmp="${APPDIR}/app/tmp"
         server="http://cutlist.at/"
 
@@ -808,9 +806,9 @@ if [ $OTRcutactiv = "on" ] ; then
         # Diese Funktion definiert den Cutlist- und Dateinamen
         # und üperprüft um welches Dateiformat es sich handelt:
         # ---------------------------------------------------------------------
-        film="$i"                   #Der komplette Filmname und gegebenfalls der Pfad
+        film="$i"                   # Der komplette Filmname und gegebenfalls der Pfad
         film_ohne_anfang="$i"
-#       CUTLIST=`basename "$film"`	#Filmname ohne Pfad
+#       CUTLIST=`basename "$film"`  # Filmname ohne Pfad
 #       filmname=$CUTLIST
 #       filmname=`basename "$film"`
         AC_nameLOG="Überprüfe um welches Aufnahmeformat es sich handelt --> "
@@ -868,11 +866,6 @@ if [ $OTRcutactiv = "on" ] ; then
 #           outputfile="${WORKDIR}$film_ohne_ende.mpg-cut.avi"
         fi
 
-
-
-
-
-
         if [ $LOGlevel = "2" ] ; then
             echo "$AC_nameLOG"
         fi
@@ -912,8 +905,6 @@ if [ $OTRcutactiv = "on" ] ; then
             if [ "$vorhanden" == "yes" ]; then	#Wenn eine passende Cutlist vorhanden ist
                 goodCount=$(( goodCount + 1 ))
                 namelocal[$arraylocal]="$f"
-                #echo $f
-                #echo ${namelocal[$arrylocal]}
                 arraylocal=$(( arraylocal + 1 ))
                 continue=0
             else
@@ -1025,7 +1016,6 @@ if [ $OTRcutactiv = "on" ] ; then
             echo -e "false"
             echo "Es wurde zwar eine lokale Cutlist gefunden, aber leider wurde ein Fehler festgestellt"
             continue=1
-            # rm -f "${DECODIR}/_LOGsynOTR/cutlist_${CUTLIST}.tx"
         fi
         }
 
@@ -1365,7 +1355,7 @@ if [ $OTRcutactiv = "on" ] ; then
             sqlite3 ${APPDIR}/app/etc/synOTR.sqlite "$sSQL"
         fi
 #   fi
-#exit
+
         }
 
         AC_time1 ()
@@ -1432,37 +1422,37 @@ if [ $OTRcutactiv = "on" ] ; then
             while [ $cut_anzahl -gt 0 ]; do
                 #Die Sekunde in der der Cut startet
                 time_seconds_start=$(cat "$tmp/$CUTLIST" | grep "Start=" | cut -d= -f2 | head -n$head1 | tail -n1 | cut -d"." -f1 | /usr/bin/tr -d "\r")
-                ss=$time_seconds_start      # Setze die Skunden auf $time_seconds_start
-                mm=0                        # Setze die Minuten auf 0
-                hh=0                        # Setze die Stunden auf 0
-                while [ $ss -ge "60" ]; do  # Wenn die Sekunden >= 60 sind
-                    mm=$(( mm +  1))        # Zaehle Minuten um 1 hoch
-                    ss=$(( ss - 60))        # Zaehle Sekunden um 60 runter
-                    while [ $mm -ge "60" ]; do # Wenn die Minuten >= 60 sind
-                        hh=$(( hh +  1 ))   # Zaehle Stunden um 1 hoch
-                        mm=$(( mm - 60 ))   # Zaehle Minuten um 60 runter
+                ss=$time_seconds_start          # Setze die Skunden auf $time_seconds_start
+                mm=0                            # Setze die Minuten auf 0
+                hh=0                            # Setze die Stunden auf 0
+                while [ $ss -ge "60" ]; do      # Wenn die Sekunden >= 60 sind
+                    mm=$(( mm +  1))            # Zaehle Minuten um 1 hoch
+                    ss=$(( ss - 60))            # Zaehle Sekunden um 60 runter
+                    while [ $mm -ge "60" ]; do  # Wenn die Minuten >= 60 sind
+                        hh=$(( hh +  1 ))       # Zaehle Stunden um 1 hoch
+                        mm=$(( mm - 60 ))       # Zaehle Minuten um 60 runter
                     done
                 done
-                time2_start=$hh:$mm:$ss     # Bringe die Zeit ins richtige Format
+                time2_start=$hh:$mm:$ss         # Bringe die Zeit ins richtige Format
                 echo "Startcut=	$time2_start"
-                time="${time}${time2_start}-" # Auflistung aller Zeiten
+                time="${time}${time2_start}-"   # Auflistung aller Zeiten
                 #Sekunden wie lange der Cut dauert
                 time_seconds_ende=$(cat "$tmp/$CUTLIST" | grep "Duration=" | cut -d= -f2 | head -n$head1 | tail -n1 | cut -d"." -f1 | /usr/bin/tr -d "\r")
                 time_seconds_ende=$time_seconds_ende+$time_seconds_start	#Die Sekunde in der der Cut endet
-                ss=$time_seconds_ende       # Setze die Sekunden auf $time_seconds_ende
-                mm=0 #Setze die Minuten auf 0
-                hh=0 #Setze die Stunden auf 0
-                while [ $ss -ge "60" ]; do  # Wenn die Sekunden >= 60 sind
-                    mm=$(( mm +  1 ))       # Zaehle Minuten um 1 hoch
-                    ss=$(( ss - 60 ))       # Zaehle Sekunden um 60 runter
-                    while [ $mm -ge "60" ]; do # Wenn die Minuten >= 60 sind
-                        hh=$(( hh +  1 ))   # Zaehle Stunden um 1 hoch
-                        mm=$(( mm - 60 ))   # Zaehle Minuten um 60 runter
+                ss=$time_seconds_ende           # Setze die Sekunden auf $time_seconds_ende
+                mm=0                            # Setze die Minuten auf 0
+                hh=0                            # Setze die Stunden auf 0
+                while [ $ss -ge "60" ]; do      # Wenn die Sekunden >= 60 sind
+                    mm=$(( mm +  1 ))           # Zaehle Minuten um 1 hoch
+                    ss=$(( ss - 60 ))           # Zaehle Sekunden um 60 runter
+                    while [ $mm -ge "60" ]; do  # Wenn die Minuten >= 60 sind
+                        hh=$(( hh +  1 ))       # Zaehle Stunden um 1 hoch
+                        mm=$(( mm - 60 ))       # Zaehle Minuten um 60 runter
                     done
                 done
-                time2_ende=$hh:$mm:$ss      # Bringe die Zeit ins richtige Format
+                time2_ende=$hh:$mm:$ss          # Bringe die Zeit ins richtige Format
                 echo "Endcut=		$time2_ende"
-                time="${time}${time2_ende},"	#Auflistung alles Zeiten
+                time="${time}${time2_ende},"    # Auflistung alles Zeiten
                 head1=$(( head1 + 1 ))
                 cut_anzahl=$(( cut_anzahl - 1 ))
             done
@@ -1470,15 +1460,15 @@ if [ $OTRcutactiv = "on" ] ; then
             head1=1
             echo "Es müssen $cut_anzahl Cuts umgerechnet werden"
             while [ $cut_anzahl -gt 0 ]; do
-                #Der Frame bei dem der Cut beginnt
+                # Der Frame bei dem der Cut beginnt
                 startframe=$(cat "$tmp/$CUTLIST" | grep "StartFrame=" | cut -d= -f2 | head -n$head1 | tail -n1 | /usr/bin/tr -d "\r")
                 echo "Startframe=	$startframe"
-                time="${time}$startframe-"	#Auflistung der Cuts
-                #Die Frames wie lange der Cut dauert
+                time="${time}$startframe-"      # Auflistung der Cuts
+                # Die Frames wie lange der Cut dauert
                 stopframe=$(cat "$tmp/$CUTLIST" | grep "DurationFrames=" | cut -d= -f2 | head -n$head1 | tail -n1 | /usr/bin/tr -d "\r")
-                stopframe=$(( stopframe + startframe))	#Der Frame bei dem der Cut endet
+                stopframe=$(( stopframe + startframe))  # Der Frame bei dem der Cut endet
                 echo "Endframe=	$stopframe"
-                time="${time}$stopframe,"	#Auflistung der Cuts
+                time="${time}$stopframe,"       # Auflistung der Cuts
                 head1=$(( head1 + 1 ))
                 cut_anzahl=$(( cut_anzahl - 1 ))
             done
@@ -1492,7 +1482,7 @@ if [ $OTRcutactiv = "on" ] ; then
         # Hier wird nun die Zeit ins richtige Format für avcut umgerechnet
         # ---------------------------------------------------------------------
         time="0 "
-        framediff=$(echo | gawk '{print 1/'${fps}'}')	# Zeitdifferenz für genau 1 Frame, da avcut mit Zeitwerten arbeitet
+        framediff=$(echo | gawk '{print 1/'${fps}'}')   # Zeitdifferenz für genau 1 Frame, da avcut mit Zeitwerten arbeitet
         if [ $LOGlevel = "2" ] ; then
             echo "Zeitdifferenz für genau 1 Frame für die manuelle Cutlistkorrektur für avcut: $framediff"
             echo "FrameversatzAnfangCut: $FrameversatzAnfangCut"
@@ -1540,7 +1530,7 @@ if [ $OTRcutactiv = "on" ] ; then
             done
         fi
 
-        time="${time}- "	# Rest des Films verwerfen
+        time="${time}- "    # Rest des Films verwerfen
         echo "---- ENDE ----" ; echo -e
         sleep 1
         }
@@ -1553,7 +1543,7 @@ if [ $OTRcutactiv = "on" ] ; then
         if [ "$SMARTRENDERING" = "on" ]; then
             echo "> Übergebe die Cuts an avcut"
 
-            # für ARMv7 unterstützt avcut noch nicht die Operanten -i & -o ==> Abhilfe: avcut-0.4 für ARMv7 kompilieren
+            # für ARMv7 unterstützt avcut noch nicht die Operanten -i & -o ==> Abhilfe: avcut-0.4 für ARMv7 kompilieren (ohne Nachteil)
             if [ $machinetyp = "x86_64" ] || [ $machinetyp = "i686" ]; then
                 AVCUTLOG=$(time nice -n $niceness $avcut -p "${APPDIR}/includes/avcut_otr.profile" -i "$film" -o "$outputfile" $time  2>&1)  # Befehl ausführen
             else 
@@ -1648,7 +1638,7 @@ if [ $OTRcutactiv = "on" ] ; then
                 vorhanden=no
                 useonlytimecuts=""      # aus alternativen Cutlists (für anderes Format) sollen nur Zeit-Cuts verwendet werden
                 SMARTRENDERINGold=$SMARTRENDERING # bei nicht genügend RAM wird temporär Smartrendering deaktiviert und die ursprüngliche Einstellung hier gespeichert
-                
+
                 if [ "$SMARTRENDERING" != "on" ]; then # avisplit kann keine mp4-Videos verarbeiten
                     if echo "$filename" | grep -q ".mp4"; then		
                         echo "$filename [.mp4-Datei] kann mit avisplit / avimerge nicht geschnitten werden und wird in Zielordner verschoben. Aktiviere alternativ Smartrendering in den Einstellungen."
@@ -1656,7 +1646,7 @@ if [ $OTRcutactiv = "on" ] ; then
                         continue		# nächste Datei
                     fi
                 fi
-                
+
                 echo -e ; echo "    SCHNEIDE:        ---> $filename"
                 echo -n "                          "; date; echo -e
 
@@ -1664,7 +1654,7 @@ if [ $OTRcutactiv = "on" ] ; then
                 AC_test
                 AC_del_tmp
                 AC_name
-                
+
                 if [ "$SMARTRENDERING" = "on" ]; then # Ist genügend RAM zum Schneiden für diese Aufnahme vorhanden?
                     PXheight=`echo "$AC_ffprobeInfo" | jq '.streams[0].height' `
                     if [ "$PXheight" -ge 700 ] && [ ${RAMmax} -ge 1000 ]; then
@@ -1695,12 +1685,12 @@ if [ $OTRcutactiv = "on" ] ; then
 
                 # Es gibt zwei Methoden, um auf lokal vorhandene Cutlist zu testen
                 # sollen AC3-Remuxte Filme mit eigener Cutlist geschnitten werden, ist vorzugsweise die Methode 2 zu wählen, 
-                # d.h. die Variable "OTRlocalcutlistdir" in den Einstellungen nicht zu setzen
+                # d.h. die Variable "OTRlocalcutlistdir" in den Einstellungen nicht zu setzen (weil sich die Filmgröße geändert hat)
                 echo -n "Suche nach einer lokalen Cutlist ---> "
                 if [ -d "$OTRlocalcutlistdir" ]; then
                     # Methode 1:
-                    # 	hier werden nur Cutlist verwendet wo Filmgröße und Name übereinstimmen
-                    #	Die Variable OTRlocalcutlistdir mit dem Quellordner der Cutlist muss gesetzt sein
+                    #   hier werden nur Cutlist verwendet wo Filmgröße und Name übereinstimmen
+                    #   Die Variable OTRlocalcutlistdir mit dem Quellordner der Cutlist muss gesetzt sein
                     AC_getlocalcutlist_withCheck
                 else
                     # Methode 2:
@@ -1810,11 +1800,11 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             title=${title%.*}
             fileinfo=$($ffmpeg -i "$i" 2>&1)	
             ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
-            
+
             # Errormeldung vor jason ab DSM 6.2 (wird hier abgeschnitten): ERROR: 
             # ld.so: object 'openhook.so' from LD_PRELOAD cannot be preloaded (cannot open shared object file): ignored. { …
             ffprobeInfo="{ ${ffprobeInfo#*\{}"  
-            
+
             # ------- AUDIOCODEC:
             audiocodec=`echo "$ffprobeInfo" | jq '.streams[1].codec_name' | sed "s/\"//g" `
             # Workaround, sofern "codec_name" nicht mit von ffprobe ausgegeben wird:
@@ -1874,7 +1864,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                 #       - Native AAC encoder hat die 2.beste Qualität, ist aber nicht in DSM enthalten  |
                 #       - libfaac ist in DSM-ffmpeg enthalten, hat aber die schlechteste Qualität       |
                 #----------------------------------------------------------------------------------------
-                
+
                 echo -e; echo " > Konvertiere Audiospur:"
                 encoders=`$ffmpeg -loglevel $ffloglevel -encoders 2>&1`     # Auflistung der installierten ffmpeg-Encoder
 
@@ -1882,8 +1872,8 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     echo "Erkannter Encoder:        fdk-aac [1.Wahl]"
                     if [ $normalizeAudio = "on" ] ; then
                         #	------- Audio normalisieren:
-                    	volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
-                    	echo "Lautstärkeanhebung um:    $volumeinfo dB"
+                        volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
+                        echo "Lautstärkeanhebung um:    $volumeinfo dB"
                         convertLOG=$(nice -n $niceness $ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
                     else
                         convertLOG=$(nice -n $niceness $ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
@@ -1892,8 +1882,8 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     echo "Erkannter Encoder:        nativ (ffmpeg > 3.0) [2.Wahl]"
                     if [ $normalizeAudio = "on_" ] ; then
                         #	------- Audio normalisieren:
-                    	volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
-                    	echo "Lautstärkeanhebung um:    $volumeinfo dB"
+                        volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
+                        echo "Lautstärkeanhebung um:    $volumeinfo dB"
                         convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -c:a aac -strict -2 -b:a "${OTRaacqal%k}k" -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
                     else
                         convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -c:a aac -strict -2 -b:a "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
@@ -1905,8 +1895,8 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     fi
                     if [ $normalizeAudio = "on" ] ; then
                         #	------- Audio normalisieren:
-                    	volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
-                    	echo "Lautstärkeanhebung um:    $volumeinfo dB"
+                        volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
+                        echo "Lautstärkeanhebung um:    $volumeinfo dB"
                         convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -acodec libfaac -ab "${OTRaacqal%k}k"  -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
                     else
                         convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -acodec libfaac -ab "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
@@ -1993,8 +1983,6 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
         done
     elif [ $OTRavi2mp4active = "off" ] ; then
         echo -e ; echo -e ; echo "==> in MP4 konvertieren ist deaktiviert"
-#   else
-#       echo "==> Variable für OTRavi2mp4active falsch gesetzt ==> Wert >OTRavi2mp4active< in den Einstellungen überprüfen!"
 fi
 IFS=$OLDIFS
 sleep 1
@@ -2053,7 +2041,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
         #	------------------ technische Filmdaten via ffmpeg und ffprobe auslesen:
         fileinfo=$(ffmpeg -i "$i" 2>&1)
         ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
-            
+
             # Errormeldung vor jason ab DSM 6.2 (wird hier abgeschnitten): ERROR: 
             # ld.so: object 'openhook.so' from LD_PRELOAD cannot be preloaded (cannot open shared object file): ignored. { …
             ffprobeInfo="{ ${ffprobeInfo#*\{}"  
@@ -2116,14 +2104,14 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
                 fi
             fi
         else # auf otr-serien.de sind auch Episoden verzeichnet, die als solche nicht durch den Dateinamen identifizierbar sind
-            echo -e ; echo -n "Check otr-serien.de  ---> "	
+            echo -e ; echo -n "Check otr-serien.de  ---> "
             OTRserien_query
-        fi	
-        
+        fi
+
         echo "Staffel-Nr.:              $season"
         echo "Episoden-Nr.:             $episode"
-        echo "Episodentitel:            $episodetitle"	
-        echo "Beschreibung:             $description"	
+        echo "Episodentitel:            $episodetitle"
+        echo "Beschreibung:             $description"
 
         if [ $missSeries = "0" ] ; then
             title="$serietitle"
@@ -2280,7 +2268,6 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
 
                 if [ ! -z "$rowid" ] ; then
                     echo -n "aktualisiere Datensatz $rowid"
-                #    sSQL="UPDATE raw SET file_original='$filename', file_rename='$NewNameMask', miss_series='$missSeries', format='$format', titel='$titleMask', datum='$YYYY-$Mo-$DD', zeit='$HH:$Min:00', dauer='$duration', sender='$Channel', otrid='$OTRID', serie_titel='$serietitleMask', serie_season='$season', serie_episode='$episode', serie_episodentitel='$episodetitleMask', serie_episodebeschreibung='$descriptionMask',  lastcheckday=$today, checkcount=0, fps='$fps', realdauer='$realduration', scantype='$scantype', pix_height='$height', pix_width='$width', aspect_ratio='$aspect_ratio', v_codec='$v_codec', a_codec='$a_codec' WHERE rowid=$rowid"
                     sSQL="UPDATE raw SET file_rename='$NewNameMask', miss_series='$missSeries', format='$format', titel='$titleMask', datum='$YYYY-$Mo-$DD', zeit='$HH:$Min:00', dauer='$duration', sender='$Channel', otrid='$OTRID', serie_titel='$serietitleMask', serie_season='$season', serie_episode='$episode', serie_episodentitel='$episodetitleMask', serie_episodebeschreibung='$descriptionMask',  lastcheckday=$today, checkcount=0, fps='$fps', realdauer='$realduration', scantype='$scantype', pix_height='$height', pix_width='$width', aspect_ratio='$aspect_ratio', v_codec='$v_codec', a_codec='$a_codec' WHERE rowid=$rowid"
                 else
                     echo -n "füge neuen Datensatz ein"
@@ -2330,13 +2317,11 @@ OTRopenrename()
 IFS=$'\n';              #   ==>	den 'Internal Field Separator' so verändern, dass Felder nur noch durch Zeilenumbrüche (und nicht [zusätzlich] durch Leerzeichen) getrennt werden.
 NewName=$NameSyntax     #   Muster aus Konfiguration laden	
 if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
-#if [ $OTRserieninfo = "on" ] && [ $firstrunonday == "1" ] ; then
     echo -e ; echo -e
     echo "==> OTRopenrename via SQLite [Umbenennungssyntax: $NameSyntax]"
     echo "                             [Umbenennungssyntax Serientitel: $NameSyntaxSerientitel]:"
-    #echo -e
     echo "    undefinierte Serien suchen:"
-    
+
     sSQL="SELECT rowid,file_rename,file_original,checkcount,format,titel,datum,zeit,dauer,sender,fps,realdauer,scantype,pix_height,pix_width,aspect_ratio,v_codec,a_codec  FROM raw WHERE miss_series=1 AND NOT lastcheckday=$today AND checkcount<8" 	
 
     sqlerg=`sqlite3 -separator $'\t' ${APPDIR}/app/etc/synOTR.sqlite "$sSQL"`
@@ -2417,29 +2402,6 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
 #           elif [ ! -z "$serieninfo" ] ; then      # ist nicht zuverlässig < 2018-06-14
             elif [[ "$OTRID" =~ $regInt ]]; then    # Ist die OTR-Id eine echte Zahl?
                 if jq -e . >/dev/null 2>&1 <<<"$serieninfo"; then   # prüfen, ob korrektes JSON-Format verarbeitet werden kann (https://stackoverflow.com/questions/46954692/check-if-string-is-a-valid-json-with-jq)
-
-                    #	Zeichenkorrektur:
-                        #serieninfo=`echo $serieninfo | sed "s/<!DOCTYPE html>//g" | sed 's/\\\u00e4/ä/g' | sed 's/\\\u00f6/ö/g' | sed 's/\\\u00c4/Ä/g' | sed 's/\\\u00d6/Ö/g' | sed 's/\\\u00fC/ü/g' | sed 's/\\\u00dC/Ü/g' | sed 's/\\\u00dF/ß/g' | sed 's/\ & / und /g' | sed 's/\&/ und /g'`
-                    #serieninfo=`echo $serieninfo | sed "s/<!DOCTYPE html>//g" | sed -f ${APPDIR}/includes/decode.sed `
-
-#echo -e; echo "OTR-Serien-Rückgabe:"; echo "$serieninfo"; echo -e
-
-                    #OTRID=`echo "$serieninfo" | awk -F, '{print $1}' | awk -F: '{print $2}' | sed "s/\"//g"`
-                    
-                    # if [ ! -z "$OTRID" ] ; then # [[ `echo "$eingabe" | grep -E ^[[:digit:]]+$` ]] # < 2018-06-14
-                    # re='^[0-9]+$'
-                    # if ! [[ $yournumber =~ $re ]] ; then
-#                    if [[ "$OTRID" =~ $regInt ]]; then  # Ist die OTR-Id eine echte Zahl?
-#                       echo -e "Serverantwort konnte nicht verarbeitet werden (keine OTRID erkannt)"
-#                       echo "                  $serieninfo"
-#                       sSQLupdate="UPDATE raw SET lastcheckday=$today, checkcount=$(($checkcount+1)) WHERE rowid=$id"
-#                       if [ $LOGlevel = "2" ] ; then
-#                            echo "  ==> SQLupdate: $sSQLupdate"
-#                       fi
-#                       sqlite3 ${APPDIR}/app/etc/synOTR.sqlite "$sSQLupdate"
-#                       continue
-#                   fi
-                    
                     echo -e "gefunden:"
                     echo "OTRID:            $OTRID"
                     serietitle=`echo "$serieninfo" | jq -r '.Serie' | sed "s/://g" `        # jq ist ein Kommandozeilen-JSON-Parser
@@ -2454,13 +2416,13 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                     echo "episodetitle:     $episodetitle"	
                     description=`echo "$serieninfo" | jq -r '.Folgenbeschreibung' | sed "s/:/ -/g" `
                     echo "description:      $description"
-                    
+
                     if [ ! -z "$NameSyntaxSerientitel" ] ; then # nur, wenn Serientitel angepasst / gesetzt wurde
                         title="$NameSyntaxSerientitel"
                     else
                         title="$serietitle.S${season}.E${episode} $episodetitle"	# optimiert für VideoStation
                     fi
-    
+
                     #	------------------ Neuer Name:
                     NewName=`echo $NewName | sed "s/§tit/${title}/g"`
                     title="$serietitle - S${season}E${episode} $episodetitle"	# Titel für DSM-Benachrichtigung generieren
@@ -2494,7 +2456,6 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
 
                     NewName="$NewName.$fileextension"
                     echo -e; echo " Neuer Dateiname:         $NewName" ; echo -e
-
                     echo "  ==> umbenennen:"
 
                     if [ -f "${DESTDIR}/$NewName" ]; then       # Prüfen, ob Zielname bereits vorhanden ist
@@ -2504,7 +2465,7 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                         if [ $LOGlevel = "2" ] ; then
                             echo "  sSQLupdate= $sSQLupdate"
                         fi
-                    else	
+                    else
                         mv -i "${DESTDIR}/$file_rename" "${DESTDIR}/$NewName"
 
                         #	Tags schreiben (MP4 only):
@@ -2529,7 +2490,7 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                         else
                             touch -t $YY$Mo$DD$HH$Min "${DESTDIR}/$NewName"             # Dateidatum auf Ausstrahlungsdatum setzen	
                         fi
-    
+
                         echo "   L==> umbenannt von"; echo "        $filename"; echo "      zu"; echo "         $NewName"
                         echo -e; echo " ------------------------->"; echo -n "	Datenbank schreiben ==> "
                         # Hochkommas für SQL-String maskieren (SQLite3 einfache Hochkommas maskieren durch hinzufügen eines weiteren):
@@ -2651,7 +2612,7 @@ UPDATE()
     sqlinstNewTable="CREATE TABLE IF NOT EXISTS \"tvdb\" (\"timestamp\" timestamp NOT NULL  DEFAULT (CURRENT_TIMESTAMP) ,\"APIKEY\" varchar(500) ,\"TOKEN\" varchar(2000) ,\"day_created\" int(3) ); "
     sqliteinfo=$(sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "$sqlinstNewTable")
     echo "    $sqliteinfo"
-    
+
     sqlerg=$(sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "SELECT rowid FROM tvdb WHERE rowid=1")
     if [ "$sqlerg" == "" ] ; then # prüfen, ob der Datensatz vorhanden ist, ggfls. einfügen
         if [ "$TVDB_APIKEY" == "" ] ; then
@@ -2661,7 +2622,7 @@ UPDATE()
         sSQL="INSERT INTO tvdb ( APIKEY, timestamp, day_created) VALUES  ( '$TVDB_APIKEY', datetime('now','localtime'), $(($today-1)) )"
         sqliteinfo=$(sqlite3 ${APPDIR}/app/etc/synOTR.sqlite "$sSQL")
     fi
-    
+
     # Prüfen (und ggf. einfügen) der Spalten OTRtitle und OTRcomment:
     sqlerg=`sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "SELECT * FROM sqlite_master WHERE TYPE='table' AND tbl_name = 'raw' AND SQL LIKE '%OTRtitle%' "` 
     
@@ -2678,11 +2639,11 @@ UPDATE()
         echo "    > Spalte (cutlist_ID) wird hinzugefügt"
         sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "ALTER TABLE raw ADD COLUMN \"cutlist_ID\" VARCHAR "
     fi
-    
+
     IFS=$OLDIFS
     sleep 1
     }
-    
+
 CREATEDB
 
 # Installationstrigger beinhaltet folgende anonymen Geräteinfos:
@@ -2780,7 +2741,7 @@ if [ $useWORKDIR == "yes" ] && [ ! -z "$filetest" ]; then
                         echo "    L=> verschiebe ${filename}"
                         # füge Datei dem Index der Videostation hinzu:
                         synoindex -a "${DESTDIR}//${filename}"
-                        
+
                         if [ $dsmtextnotify = "on" ] ; then
                             sleep 1
                             synodsmnotify $MessageTo "synOTR" "[$filename] ist fertig"
