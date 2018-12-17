@@ -484,7 +484,7 @@ serieninfo=$(wget --timeout=60 --tries=2 -q -O - "http://www.otr-serien.de/myapi
 
 if [ $LOGlevel = "2" ] ; then
     echo "  http://www.otr-serien.de/myapi/reverseotrkeycheck.php?otrkey=$originalfilename&who=synOTR" ; echo -e
-    echo "Rückgabewert von otr-serien.de ==>"; echo "	$serieninfo" ; echo -e # Erfolglosmeldung Serieninfo: <!DOCTYPE html> Keine Serien zuordnung vorhanden	
+    echo "Rückgabewert von otr-serien.de ==>"; echo "	$serieninfo" ; echo -e # Erfolglosmeldung Serieninfo: <!DOCTYPE html> Keine Serien zuordnung vorhanden
 fi
 
 serieninfo="{ ${serieninfo#*\{}" # 2018-02-13 Rückgabe von otr-serien.de wurde scheinbar geändert (vorgelagerte Infos vor jason-Container > werden jetzt abgeschnitten)
@@ -576,7 +576,7 @@ OTRdecoder()
                                 rm "$i"
                                 rm "${DECODIR}/${videosourcetitle}.avi"
                             else
-                                mv "$i" "$OTRkeydeldir"	
+                                mv "$i" "$OTRkeydeldir"
                                 mv "${DECODIR}/${videosourcetitle}.avi" "${OTRkeydeldir}/${videosourcetitle}.mp3.avi"
                             fi
                             mv "${DECODIR}/${videosourcetitle}.ac3tmp.avi" "${DECODIR}/${videosourcetitle}.avi"
@@ -638,7 +638,7 @@ if [ $decoderactiv = "on" ] && [ ! -z "$filetest" ] ; then
                     if [ $endgueltigloeschen = "on" ] ; then
                         rm "$i"
                     else
-                        mv "$i" "$OTRkeydeldir"	
+                        mv "$i" "$OTRkeydeldir"
                     fi
                     
                     ffprobeSourceInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "${DECODIR}/$decofilename" 2>&1)
@@ -1325,7 +1325,7 @@ if [ $OTRcutactiv = "on" ] ; then
 
 # ToDo: entweder auf Titel beschränken, oder RegEx nicht auf Ende ($) beschränken! > gesamte Prüfung auskommentiert / vorhandene Daten werden eh priorisiert
 #   if ! echo "$filename" | grep -q "S[0-9][0-9]E[0-9][0-9]$" ; then # nur weiter, wenn im Dateinamen keine Infos gefunden wurden
-        SuggestedMovieName=""	
+        SuggestedMovieName=""
         usercomment=""
         CL_serieninfofound=0
         SuggestedMovieName=`cat "$tmp/$CUTLIST" | grep "SuggestedMovieName=" | sed "s/SuggestedMovieName\=//g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}[ _][0-9]\{2\}[\-][0-9]\{2\}/Datum_Zeit/g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}/Datum/g;s/_/ /g" | /usr/bin/tr -d "\r" ` #| awk -F. '{print $1}'` # Datum, Zeit im OTR-Format und Unterstriche werden entfernt
@@ -1579,7 +1579,7 @@ if [ $OTRcutactiv = "on" ] ; then
                 fi
                 wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                 needindex=1
-            fi	
+            fi
 
             if [ $endgueltigloeschen = "on" ] ; then
                 if [ -f "$film" ]; then
@@ -1640,7 +1640,7 @@ if [ $OTRcutactiv = "on" ] ; then
                 SMARTRENDERINGold=$SMARTRENDERING # bei nicht genügend RAM wird temporär Smartrendering deaktiviert und die ursprüngliche Einstellung hier gespeichert
 
                 if [ "$SMARTRENDERING" != "on" ]; then # avisplit kann keine mp4-Videos verarbeiten
-                    if echo "$filename" | grep -q ".mp4"; then		
+                    if echo "$filename" | grep -q ".mp4"; then
                         echo "$filename [.mp4-Datei] kann mit avisplit / avimerge nicht geschnitten werden und wird in Zielordner verschoben. Aktiviere alternativ Smartrendering in den Einstellungen."
                         mv "$i" "$WORKDIR"
                         continue		# nächste Datei
@@ -1798,7 +1798,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             echo -n "                          "; date; echo -e
 
             title=${title%.*}
-            fileinfo=$($ffmpeg -i "$i" 2>&1)	
+            fileinfo=$($ffmpeg -i "$i" 2>&1)
             ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
 
             # Errormeldung vor jason ab DSM 6.2 (wird hier abgeschnitten): ERROR: 
@@ -1828,7 +1828,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             audiofile="${WORKDIR}$title.$audiocodec"
             echo "Audiocodec:               $audiocodec"
 
-            #	------- VIDEOCODEC:	
+            #	------- VIDEOCODEC:
             videocodec=`echo "$fileinfo" | grep "Video:" | $bsy awk '{print $4}'` 
             if [ $videocodec = "mpeg4" ] ; then
                     videocodec="divx"
@@ -1912,7 +1912,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     echo "$convertLOG"
                 fi
 
-                rm "$audiofile"	
+                rm "$audiofile"
                 audiofile="$audiofile.m4a"
             fi
 
@@ -2020,7 +2020,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
         sourcename="$filename"
         echo -e ; 
         echo "    UMBENENNEN:      ---> $filename:" 
-        echo -n "                          "; date; echo -e	
+        echo -n "                          "; date; echo -e
 
         fileextension="${filename##*.}"
         filename=`echo $filename | sed 's/HQ-cut/mpg.HQ/g ; s/HD-cut/mpg.HD/g ; s/mpg.HD.avi-cut/mpg.HD/g ; s/-cut/.mpg/g'` # Korrektur für geschnittene Files
@@ -2036,7 +2036,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
         serie_episodeDB=`echo "$sqlerg" | awk -F'\t' '{print $5}' `
 
         echo "    [Original:            $originalfilename]"; echo -e 
-        echo "Fileextension:            $fileextension"	
+        echo "Fileextension:            $fileextension"
 
         #	------------------ technische Filmdaten via ffmpeg und ffprobe auslesen:
         fileinfo=$(ffmpeg -i "$i" 2>&1)
@@ -2122,7 +2122,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
                 #	ersetze alle UE am Anfang der Zeile                         s/^UE/Ü/g
                 #   > ersetzt durch: \< (= Anfang jedes Wortes)                 s/\<UE/Ü/g
         fi
-        echo "Titel:                    $title"	
+        echo "Titel:                    $title"
         #	------------------ Jahr:
         YY=$(echo "$filename" | awk -F '.' '{print $1}' | awk -F '_' '{print $NF}')
         echo "YY:                       $YY"
@@ -2229,11 +2229,11 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
         echo -e; echo "Neuer Dateiname:          $NewName" ; echo -e
 
         if [ $OTRrenameactiv = "on" ] ; then
-            echo "==> umbenennen:"	
+            echo "==> umbenennen:"
             if [ -f "${WORKDIR}${NewName}" ]; then      # Prüfen, ob Zielname bereits vorhanden ist
                 echo "Die Datei $NewName ist bereits vorhanden und $filename wird nicht umbenannt."
                 touch -t $YY$Mo$DD$HH$Min "$i"          # Dateidatum auf Ausstrahlungsdatum setzen
-            else	
+            else
                 mv -i "$i" "${WORKDIR}${NewName}"
 
                 #	Tags schreiben (MP4 only):
@@ -2247,14 +2247,14 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
                     #  --description 
                     #  --artwork
                     #  --genre 
-                    AtomicParsleyLOG=$(nice -n $niceness AtomicParsley "${WORKDIR}${NewName}" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)	
+                    AtomicParsleyLOG=$(nice -n $niceness AtomicParsley "${WORKDIR}${NewName}" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)
                     if [ $LOGlevel = "2" ] ; then
                         echo "  AtomicParsleyLOG= $AtomicParsleyLOG"
                     fi
                     echo -e "   ==> fertig"
                     touch -t $YY$Mo$DD$HH$Min "${WORKDIR}${NewName}"            # Dateidatum auf Ausstrahlungsdatum setzen
                 else
-                    touch -t $YY$Mo$DD$HH$Min "${WORKDIR}${NewName}"            # Dateidatum auf Ausstrahlungsdatum setzen	
+                    touch -t $YY$Mo$DD$HH$Min "${WORKDIR}${NewName}"            # Dateidatum auf Ausstrahlungsdatum setzen
                 fi
                 echo "    L==> umbenannt von"; echo "         $filename"; echo "       zu"; echo "         $NewName"
 
@@ -2315,20 +2315,20 @@ OTRopenrename()
 #########################################################################################
 
 IFS=$'\n';              #   ==>	den 'Internal Field Separator' so verändern, dass Felder nur noch durch Zeilenumbrüche (und nicht [zusätzlich] durch Leerzeichen) getrennt werden.
-NewName=$NameSyntax     #   Muster aus Konfiguration laden	
+NewName=$NameSyntax     #   Muster aus Konfiguration laden
 if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
     echo -e ; echo -e
     echo "==> OTRopenrename via SQLite [Umbenennungssyntax: $NameSyntax]"
     echo "                             [Umbenennungssyntax Serientitel: $NameSyntaxSerientitel]:"
     echo "    undefinierte Serien suchen:"
 
-    sSQL="SELECT rowid,file_rename,file_original,checkcount,format,titel,datum,zeit,dauer,sender,fps,realdauer,scantype,pix_height,pix_width,aspect_ratio,v_codec,a_codec  FROM raw WHERE miss_series=1 AND NOT lastcheckday=$today AND checkcount<8" 	
+    sSQL="SELECT rowid,file_rename,file_original,checkcount,format,titel,datum,zeit,dauer,sender,fps,realdauer,scantype,pix_height,pix_width,aspect_ratio,v_codec,a_codec  FROM raw WHERE miss_series=1 AND NOT lastcheckday=$today AND checkcount<8" 
 
     sqlerg=`sqlite3 -separator $'\t' ${APPDIR}/app/etc/synOTR.sqlite "$sSQL"`
-    IFS=$'\012'	
-    for entry in $sqlerg; do	
+    IFS=$'\012'
+    for entry in $sqlerg; do
         IFS=$OLDIFS
-        NewName=$NameSyntax     # Muster aus Konfiguration laden / vorherigen Schleifendurchlauf zurücksetzen	
+        NewName=$NameSyntax     # Muster aus Konfiguration laden / vorherigen Schleifendurchlauf zurücksetzen
         # Datensatzfelder separieren:
         id=`echo "$entry" | awk -F'\t' '{print $1}' `
         file_rename=`echo "$entry" | awk -F'\t' '{print $2}' `
@@ -2405,15 +2405,15 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                     echo -e "gefunden:"
                     echo "OTRID:            $OTRID"
                     serietitle=`echo "$serieninfo" | jq -r '.Serie' | sed "s/://g" `        # jq ist ein Kommandozeilen-JSON-Parser
-                    echo "serietitle:       $serietitle"	
+                    echo "serietitle:       $serietitle"
                     season=`echo "$serieninfo" | awk -F, '{print $3}' | awk -F: '{print $2}' | sed "s/\"//g"`
                     season="$(printf '%02d' "$season")"                     # 2stellig mit führender Null
-                    echo "season:           $season"	
+                    echo "season:           $season"
                     episode=`echo "$serieninfo" | awk -F, '{print $4}' | awk -F: '{print $2}' | sed "s/\"//g"`
                     episode="$(printf '%02d' "$episode")"                   # 2stellig mit führender Null
-                    echo "episode:          $episode"	
+                    echo "episode:          $episode"
                     episodetitle=`echo "$serieninfo" | jq -r '.Folgenname' | sed "s/://g" | sed "s/\?//g" `
-                    echo "episodetitle:     $episodetitle"	
+                    echo "episodetitle:     $episodetitle"
                     description=`echo "$serieninfo" | jq -r '.Folgenbeschreibung' | sed "s/:/ -/g" `
                     echo "description:      $description"
 
@@ -2480,7 +2480,7 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                             #  --description 
                             #  --artwork
                             #  --genre 
-                            AtomicParsleyLOG=$(nice -n $niceness AtomicParsley "${DESTDIR}/$NewName" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)	
+                            AtomicParsleyLOG=$(nice -n $niceness AtomicParsley "${DESTDIR}/$NewName" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)
                             if [ $LOGlevel = "2" ] ; then
                                 echo "  AtomicParsleyLOG= $AtomicParsleyLOG"
                             fi
@@ -2488,7 +2488,7 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                             
                             touch -t $YY$Mo$DD$HH$Min "${DESTDIR}/$NewName"             # Dateidatum auf Ausstrahlungsdatum setzen
                         else
-                            touch -t $YY$Mo$DD$HH$Min "${DESTDIR}/$NewName"             # Dateidatum auf Ausstrahlungsdatum setzen	
+                            touch -t $YY$Mo$DD$HH$Min "${DESTDIR}/$NewName"             # Dateidatum auf Ausstrahlungsdatum setzen
                         fi
 
                         echo "   L==> umbenannt von"; echo "        $filename"; echo "      zu"; echo "         $NewName"
@@ -2650,7 +2650,7 @@ CREATEDB
 # DSM-Build / Prüfsumme der MAC-Adresse als Hardware-ID [anonyme Zahlenfolge 
 # um Installationen zu zählen] / Architektur / Geräte-Typ / synOTR-Version) 
 # ---------------------------------------------------------------------
-    if [ $DEBUGINFO = "on" ] ; then	
+    if [ $DEBUGINFO = "on" ] ; then
         restore_ENV
         curl --max-time 60 -i -X POST -d '{"requests":["?idsite=11&url=http://'${synotrdomain}'/synOTR/installwatch.php&dimension1='${machinetyp}'&dimension2='${dsmbuild}'&dimension3='${sysID}_${device}'&dimension4='${device}'&dimension5='${CLIENTVERSION}'&rec=1&uid='${sysID}_${device}'&action_name=synOTR Shell-run/'${sysID}_${device}_${dsmbuild}_${machinetyp}_idx${idx}_synOTR${CLIENTVERSION}-${DevChannel}'&ua=curl/7.9.8 (i686-pc-linux-gnu)&new_visit=1"]}' http://$synotrdomain/piwik/piwik.php &>/dev/null 	#  http://developer.piwik.org/api-reference/tracking-api	# curl an dieser Stelle, da nach Einbindung der Librarys auf ARM eine Inkompatibilität vorhanden ist. ==> Alternative: Library-Path sichern und an späterer Stelle temporär rückspielen
         synOTR_ENV
