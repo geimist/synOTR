@@ -2,7 +2,7 @@ Release Notes
 
 4.0.8 (RELEASE)
  	BUGFIXES:
- -  OTRdecoder für Intel 64bit auf "Dynamisch gelinkt, 64 Bit" gewechselt (Dateien über 4GB liesen sich nicht decodieren)
+ -  OTRdecoder für Intel 64bit auf "Dynamisch gelinkt, 64 Bit" gewechselt (Dateien über 4GB ließen sich nicht decodieren)
  -  Grenzwert für Smartrendering von 500 MB auf 490 MB gesenkt
  -  Prüfung auf korrekte Cutlist.at-ID (mit ungültiger ID konnten keine Cutlisten heruntergeladen werden)
 
