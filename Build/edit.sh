@@ -28,6 +28,7 @@ if [[ "$page" == "edit-save" ]]; then
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "dsmtextnotify" "$dsmtextnotify"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "MessageTo" "$MessageTo"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "dsmbeepnotify" "$dsmbeepnotify"
+	"$set_var" "$dir/app/etc/Konfiguration.txt" "PBTOKEN" "$PBTOKEN"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGlevel" "$LOGlevel"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "endgueltigloeschen" "$endgueltigloeschen"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "reindex" "$reindex"
@@ -86,6 +87,7 @@ if [[ "$page" == "edit-import-query" ]] || [[ "$page" == "edit-import" ]]; then
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "dsmtextnotify" "$dsmtextnotify"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "MessageTo" "$MessageTo"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "dsmbeepnotify" "$dsmbeepnotify"
+	            "$set_var" "$dir/app/etc/Konfiguration.txt" "PBTOKEN" "$PBTOKEN"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGlevel" "$LOGlevel"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "endgueltigloeschen" "$endgueltigloeschen"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "reindex" "$reindex"
@@ -742,6 +744,22 @@ if [[ "$page" == "edit" ]]; then
 			<span>User, an den die Benachrichtigungen gesendet werden.
 		    <br>Auf diese Art kann man sich in Verbindung mit dem Paket "Notification Forwarder" über synOTR-Ereignisse z.B. über einen Pushdienst benachrichtigen lassen.
 		    <br>Bleibt der Wert leer, so wird die Gruppe "administrators" benachrichtigt.
+		</span></a></p>'
+	# PushBullet-Token
+	echo '
+		<p>
+		<label>PushBullet-Token</label>'
+		if [ -n "$PBTOKEN" ]; then
+			echo '<input type="text" name="PBTOKEN" value="'$PBTOKEN'" />'
+		else
+			echo '<input type="text" name="PBTOKEN" value="" />'
+		fi
+	echo '
+		<a class="helpbox" href="#HELP">
+			<img src="images/icon_information_mini@geimist.svg" height="25" width="25"/>
+			<span>Dein persönlicher PushBullet-Token.
+		    <br>Benachrichtigungen werden an den entsprechenden Account gesendet.
+		    <br>Bei Nichtgebrauch leer lassen.
 		</span></a></p>'
 	# dsmbeepnotify
 	echo '
