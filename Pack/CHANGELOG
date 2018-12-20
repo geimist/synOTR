@@ -2,6 +2,7 @@ Release Notes
 
 4.0.9 (RELEASE)
  	IMPLEMENTIERUNGEN:
+ -  PushBullet integriert. Dazu muss lediglich der persönliche Token in der Konfiguration hinterlegt werden
  -  
  	BUGFIXES:
  -  
