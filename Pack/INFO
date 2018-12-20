@@ -1,6 +1,6 @@
 package="synOTR"
 displayname="synOTR"
-version="4.0.8"
+version="4.0.8.1"
 thirdparty="yes"
 description="SynOTR liefert einen Workflow für TV-Aufnahmen von onlineTVrecorder (OTR) auf Synology NAS. synOTR übernimmt *decodieren *AC3-muxing (BETA) *schneiden *MP4-Konvertierung und *umbenennung (inkl. Serieninformationen von www.thetvdb.com und www.otr-serien.de). onlineTVrecorder (OTR) ist der freie Videorecorder im Internet, der rund um die Uhr fast alle Sendungen von rund 100 TV-Sender aus Deutschland, USA, UK und anderen Lädern aufnimmt."
 maintainer="geimist"
