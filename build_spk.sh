@@ -48,35 +48,41 @@ if [ -d "./${project}" ] ; then
     cd ${project}
     git pull
     versions=`git tag`
+    branches=`git branch -a`
     cd ${APPDIR}
 else
     git clone https://geimist.eu:30443/geimist/${project}.git
+    cd ${project}
+    versions=`git tag`
+    branches=`git branch -a`
+    cd ${APPDIR}
 fi
-
-
-build_version=`cat "${APPDIR}/${project}/Pack/INFO" | grep version | awk -F '"' '{print $2}'`
 
 # welche Version soll gebaut werden:
 if [ -z $1 ]; then
-     echo "git checkout zu master-branch"
+    echo "git checkout zu master-branch"
     cd ${project}
     git checkout master
     cd ${APPDIR}
+    #    build_version=`cat "${APPDIR}/${project}/Pack/INFO" | grep version | awk -F '"' '{print $2}'`
+    build_version=`get_key_value "${APPDIR}/${project}/Pack/INFO" version`
     set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
 else
-    if echo "$versions" | egrep -q "$1"; then
+    if echo "$versions" | egrep -q "$1" || echo "$branches" | egrep -q "$1"; then
         echo "git checkout zu $1"
         cd ${project}
         git checkout "$1"
-        set_spk_version="$1"
+        set_spk_version="v${1}"
         cd ${APPDIR}
+        build_version=`get_key_value "${APPDIR}/${project}/Pack/INFO" version`
     else
         echo "ACHTUNG: Die gewünschte Version wurde im Repository nicht gefunden!"
         echo "Der master-branch wird verwendet!"
         cd ${project}
         git checkout master
         cd ${APPDIR}
-        set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
+        build_version=`get_key_value "${APPDIR}/${project}/Pack/INFO" version`
+        set_spk_version="latest_v${build_version}_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
     fi
 fi
 
