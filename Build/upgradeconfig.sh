@@ -28,6 +28,9 @@
     	if ! cat ./$CONFIG | grep -q "dsmbeepnotify" ; then
     	    echo "dsmbeepnotify=\"on\"" >> ./$CONFIG
         fi
+    	if ! cat ./$CONFIG | grep -q "PBTOKEN" ; then
+    	    echo "PBTOKEN=\"\"" >> ./$CONFIG
+        fi
     	if ! cat ./$CONFIG | grep -q "LOGlevel" ; then
     	    echo "LOGlevel=\"1\"" >> ./$CONFIG
         fi
