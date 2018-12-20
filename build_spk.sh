@@ -59,7 +59,7 @@ else
 fi
 
 # welche Version soll gebaut werden:
-if [ -z $1 ]; then
+if [ -z $1 ]; then # wurde keine gewünschte Version angegeben:
     echo "git checkout zu master-branch"
     cd ${project}
     git checkout master
@@ -68,14 +68,14 @@ if [ -z $1 ]; then
     build_version=`get_key_value "${APPDIR}/${project}/Pack/INFO" version`
     set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
 else
-    if echo "$versions" | egrep -q "$1" || echo "$branches" | egrep -q "$1"; then
+    if echo "$versions" | egrep -q "$1" || echo "$branches" | egrep -q "$1"; then # wurde eine gewünschte Version angegeben:
         echo "git checkout zu $1"
         cd ${project}
         git checkout "$1"
         set_spk_version="v${1}"
         cd ${APPDIR}
         build_version=`get_key_value "${APPDIR}/${project}/Pack/INFO" version`
-    else
+    else # ist die gewünschte Version nicht vorhanden:
         echo "ACHTUNG: Die gewünschte Version wurde im Repository nicht gefunden!"
         echo "Der master-branch wird verwendet!"
         cd ${project}
