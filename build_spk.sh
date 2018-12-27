@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # ToDo:
-# -  das Clonen sollte problemlos funktionieren, allerdings funktioniert das Pullen noch nicht korrekt, sofern zwischenzeitlich lokale Änderungen vorgenommen wurden
+# - das Clonen sollte problemlos funktionieren, allerdings funktioniert das Pullen noch nicht 
+#	korrekt, sofern zwischenzeitlich lokale Änderungen vorgenommen wurden
 
 #----------------------------------------------------------------------------------------
 # Scriptaufruf:
