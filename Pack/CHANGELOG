@@ -3,7 +3,7 @@ Release Notes
 4.0.9 (RELEASE)
  	IMPLEMENTIERUNGEN:
  -  PushBullet integriert. Dazu muss lediglich der persönliche Token in der Konfiguration hinterlegt werden
- -  Die max. Anzahl von LOGs kann nun begrenzt werden (dadurch werden auch alle leeren LOGs gelöscht)
+ -  Die max. Anzahl von LOGs kann nun begrenzt werden. Dadurch werden zu erst alle leeren Logs und anschließend die überzähligen gelöscht
  -  
  	BUGFIXES:
  -  
