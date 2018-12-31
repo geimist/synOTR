@@ -2865,6 +2865,47 @@ if [ -f "/usr/syno/bin/synoindex" ] && [ $firstrunonday == "1" ] && [ $reindex =
 fi
 }
 
+
+PURGELOG()
+{
+#########################################################################################
+# Diese Funktion löscht zu erst alle leeren Logs und anschließend die überzähligen      #
+#########################################################################################
+
+if [ -z $LOGmax ]; then
+    return
+fi
+
+logdir="${DECODIR}/_LOGsynOTR/"
+
+# leere Logs löschen:
+for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' `                   # Auflistung aller LOG-Dateien
+    do
+        stringcount=`cat "${logdir}$i" | tail -n7 | head -n4 | wc -c`       # Wie viel Zeichen sind in den Zeilen 3-7 von unten enthalten?
+        if [ $stringcount -le 15 ]; then
+            rm "${logdir}$i"
+        
+#           if [ $endgueltigloeschen = "on" ] ; then                        # ggf. den Löschordner nutzen? / nicht aktiviert
+#               rm "$i"
+#            else
+#               mv "$i" "$OTRkeydeldir"
+#            fi
+        fi
+    done
+
+# alte Logs löschen:
+logfilecount=`ls -t "${logdir}" | egrep -o '^synOTR.*.log' | wc -l `        # Gesamtanzahl der LOG-Dateien
+count2del=`expr $logfilecount - $LOGmax `                                   # wie viele Dateien sind überzählig
+
+if [ $count2del -ge 0 ]; then
+    for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' | head -n${count2del} `
+        do
+            rm "${logdir}$i"
+        done
+fi
+}
+
+
 #        _______________________________________________________________________________
 #       |                                                                               |
 #       |                           AUFRUF DER FUNKTIONEN                               |
@@ -2883,6 +2924,7 @@ fi
     OTRopenrename
     MOVE2DESTDIR
     FRESHUPMEDIAINDEX
+    PURGELOG
 
 
     echo -e; echo -e
