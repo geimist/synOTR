@@ -611,14 +611,14 @@ if [[ "$page" == "edit" ]]; then
 	</p>
     </details>'
 
-	# -> Abschnitt .avi's in native MP4's (MAC OS tauglich) umwandeln
+	# -> Abschnitt .avi's in native MP4's umwandeln
 			
 	echo '<fieldset>
 	<hr style="border-style: dashed; size: 1px;">
 	<br />
 	<details><p>
     <summary>
-        <span class="detailsitem">AVI-Filme in native MP4-Filme (macOS tauglich) umwandeln</span>
+        <span class="detailsitem">AVI-Filme in native MP4-Filme umwandeln</span>
     </summary></p>
     <p>'
 		
