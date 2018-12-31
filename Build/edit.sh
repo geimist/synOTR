@@ -29,7 +29,8 @@ if [[ "$page" == "edit-save" ]]; then
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "MessageTo" "$MessageTo"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "dsmbeepnotify" "$dsmbeepnotify"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "PBTOKEN" "$PBTOKEN"
-	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGlevel" "$LOGlevel"
+	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGlevel" "$LOGlevel"LOGmax
+	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGmax" "$LOGmax"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "endgueltigloeschen" "$endgueltigloeschen"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "reindex" "$reindex"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "cutlistat_ID" "$cutlistat_ID"
@@ -89,6 +90,7 @@ if [[ "$page" == "edit-import-query" ]] || [[ "$page" == "edit-import" ]]; then
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "dsmbeepnotify" "$dsmbeepnotify"
 	            "$set_var" "$dir/app/etc/Konfiguration.txt" "PBTOKEN" "$PBTOKEN"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGlevel" "$LOGlevel"
+            	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGmax" "$LOGmax"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "endgueltigloeschen" "$endgueltigloeschen"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "reindex" "$reindex"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "cutlistat_ID" "$cutlistat_ID"
@@ -810,6 +812,22 @@ if [[ "$page" == "edit" ]]; then
 			<span>0  => es wird keine Log-Datei erstellt<br>1 => normales Log (standard)<br>2 => erweitertes Log
 		<br>Die Logs befinden sich im Dekodierverzeichnis/_LOGsynOTR/</span></a>
 		</p>'
+	# LOGmax
+	echo '
+		<p>
+		<label>max. Anzahl LOGfiles</label>'
+		if [ -n "$LOGmax" ]; then
+			echo '<input type="text" name="LOGmax" value="'$LOGmax'" />'
+		else
+			echo '<input type="text" name="LOGmax" value="" />'
+		fi
+	echo '
+		<a class="helpbox" href="#HELP">
+			<img src="images/icon_information_mini@geimist.svg" height="25" width="25"/>
+			<span>LOG-Files können automatisch gelöscht werden, indem hier die maximal gewünschte Anzahl angegeben wird.
+		    <br>Sobald hier ein Wert vergeben wird, werden grundsätzlich alle leeren LOGs gelöscht.
+		    <br>(Die Anzahl bezieht sich also nur auf LOGs mit Einträgen)
+		</span></a></p>'
 	# reindex
 	echo '
 		<p>
