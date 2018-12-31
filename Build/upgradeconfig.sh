@@ -34,6 +34,9 @@
     	if ! cat ./$CONFIG | grep -q "LOGlevel" ; then
     	    echo "LOGlevel=\"1\"" >> ./$CONFIG
         fi
+    	if ! cat ./$CONFIG | grep -q "LOGmax" ; then
+    	    echo "LOGmax=\"1\"" >> ./$CONFIG
+        fi
     	if ! cat ./$CONFIG | grep -q "reindex" ; then
     	    echo "reindex=\"1\"" >> ./$CONFIG
         fi
