@@ -9,7 +9,7 @@
     echo -e
 
     CLIENTVERSION=`get_key_value /var/packages/synOTR/INFO version`
-    DevChannel="Release"        # beta [2018-12-31]
+    DevChannel="Release"        # beta [2019-01-03]
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
@@ -2881,28 +2881,58 @@ logdir="${DECODIR}/_LOGsynOTR/"
 # leere Logs löschen:
 for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' `                   # Auflistung aller LOG-Dateien
     do
-        stringcount=`cat "${logdir}$i" | tail -n7 | head -n4 | wc -c`       # Wie viel Zeichen sind in den Zeilen 3-7 von unten enthalten?
-        if [ $stringcount -le 15 ]; then
-            rm "${logdir}$i"
-        
-#           if [ $endgueltigloeschen = "on" ] ; then                        # ggf. den Löschordner nutzen? / nicht aktiviert
-#               rm "$i"
-#            else
-#               mv "$i" "$OTRkeydeldir"
-#            fi
+        if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ]; then
+        #    mv "${logdir}$i" "${logdir}_deleteEMPTY/"
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
         fi
     done
 
-# alte Logs löschen:
-logfilecount=`ls -t "${logdir}" | egrep -o '^synOTR.*.log' | wc -l `        # Gesamtanzahl der LOG-Dateien
-count2del=`expr $logfilecount - $LOGmax `                                   # wie viele Dateien sind überzählig
-
+# überzählige Logs löschen:
+count2del=$( expr $( ls -t "${logdir}" | egrep -o '^synOTR.*.log' | wc -l ) - $LOGmax ) # wie viele Dateien sind überzählig
 if [ $count2del -ge 0 ]; then
     for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' | head -n${count2del} `
         do
-            rm "${logdir}$i"
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
         done
 fi
+
+# überzählige searches löschen:
+count2del=$( expr $(ls -t "${logdir}" | egrep -o '^search.*.xml' | wc -l) - $LOGmax )
+if [ ${count2del} -ge 0 ]; then
+    echo "mehr als $LOGmax vorhanden "
+    for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml' | head -n${count2del} `
+        do
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
+        done
+fi
+
+# überzählige cutlists löschen:
+count2del=$( expr $(ls -t "${logdir}" | egrep -o '.*.cutlist$' | wc -l) - $LOGmax )
+if [ ${count2del} -ge 0 ]; then
+    echo "mehr als $LOGmax vorhanden "
+#    for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml' | head -n${count2del} `
+    for i in `ls -tr "${logdir}" | egrep -o '.*.cutlist$' | head -n${count2del} `
+        do
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
+        done
+fi
+
 }
 
 
