@@ -2882,7 +2882,6 @@ logdir="${DECODIR}/_LOGsynOTR/"
 for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' `                   # Auflistung aller LOG-Dateien
     do
         if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ]; then
-        #    mv "${logdir}$i" "${logdir}_deleteEMPTY/"
             if [ $endgueltigloeschen = "on" ] ; then
                 rm "${logdir}$i"
             else
@@ -2907,7 +2906,6 @@ fi
 # überzählige searches löschen:
 count2del=$( expr $(ls -t "${logdir}" | egrep -o '^search.*.xml' | wc -l) - $LOGmax )
 if [ ${count2del} -ge 0 ]; then
-    echo "mehr als $LOGmax vorhanden "
     for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml' | head -n${count2del} `
         do
             if [ $endgueltigloeschen = "on" ] ; then
@@ -2921,8 +2919,6 @@ fi
 # überzählige cutlists löschen:
 count2del=$( expr $(ls -t "${logdir}" | egrep -o '.*.cutlist$' | wc -l) - $LOGmax )
 if [ ${count2del} -ge 0 ]; then
-    echo "mehr als $LOGmax vorhanden "
-#    for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml' | head -n${count2del} `
     for i in `ls -tr "${logdir}" | egrep -o '.*.cutlist$' | head -n${count2del} `
         do
             if [ $endgueltigloeschen = "on" ] ; then
