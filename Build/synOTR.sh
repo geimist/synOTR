@@ -1916,7 +1916,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     fi
                 elif $(echo "$encoders" | grep -q "AAC (Advanced Audio Coding)" ) ; then        # Native FFmpeg AAC encoder
                     echo "Erkannter Encoder:        nativ (ffmpeg > 3.0) [2.Wahl]"
-                    if [ $normalizeAudio = "on_" ] ; then
+                    if [ $normalizeAudio = "on" ] ; then
                         #	------- Audio normalisieren:
                         volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
                         echo "Lautstärkeanhebung um:    $volumeinfo dB"
