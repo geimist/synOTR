@@ -9,7 +9,7 @@
     echo -e
 
     CLIENTVERSION=`get_key_value /var/packages/synOTR/INFO version`
-    DevChannel="Release"        # beta [2019-01-03]
+    DevChannel="Release"        # beta [2019-01-07]
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
@@ -2879,7 +2879,7 @@ fi
 logdir="${DECODIR}/_LOGsynOTR/"
 
 # leere Logs löschen:
-for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' `                   # Auflistung aller LOG-Dateien
+for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' `                   # Auflistung aller LOG-Dateien
     do
         if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ]; then
             if [ $endgueltigloeschen = "on" ] ; then
@@ -2891,9 +2891,9 @@ for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' `                   # Au
     done
 
 # überzählige Logs löschen:
-count2del=$( expr $( ls -t "${logdir}" | egrep -o '^synOTR.*.log' | wc -l ) - $LOGmax ) # wie viele Dateien sind überzählig
+count2del=$( expr $( ls -t "${logdir}" | egrep -o '^synOTR.*.log$' | wc -l ) - $LOGmax ) # wie viele Dateien sind überzählig
 if [ $count2del -ge 0 ]; then
-    for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log' | head -n${count2del} `
+    for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' | head -n${count2del} `
         do
             if [ $endgueltigloeschen = "on" ] ; then
                 rm "${logdir}$i"
@@ -2904,9 +2904,9 @@ if [ $count2del -ge 0 ]; then
 fi
 
 # überzählige searches löschen:
-count2del=$( expr $(ls -t "${logdir}" | egrep -o '^search.*.xml' | wc -l) - $LOGmax )
+count2del=$( expr $(ls -t "${logdir}" | egrep -o '^search.*.xml$' | wc -l) - $LOGmax )
 if [ ${count2del} -ge 0 ]; then
-    for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml' | head -n${count2del} `
+    for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml$' | head -n${count2del} `
         do
             if [ $endgueltigloeschen = "on" ] ; then
                 rm "${logdir}$i"
