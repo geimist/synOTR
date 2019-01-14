@@ -2881,7 +2881,7 @@ logdir="${DECODIR}/_LOGsynOTR/"
 # leere Logs löschen:
 for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' `                   # Auflistung aller LOG-Dateien
     do
-        if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ]; then
+        if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ] && cat "${logdir}$i" | grep -q "synOTR ENDE" ; then
             if [ $endgueltigloeschen = "on" ] ; then
                 rm "${logdir}$i"
             else
