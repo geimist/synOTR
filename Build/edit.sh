@@ -29,7 +29,7 @@ if [[ "$page" == "edit-save" ]]; then
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "MessageTo" "$MessageTo"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "dsmbeepnotify" "$dsmbeepnotify"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "PBTOKEN" "$PBTOKEN"
-	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGlevel" "$LOGlevel"LOGmax
+	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGlevel" "$LOGlevel"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "LOGmax" "$LOGmax"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "endgueltigloeschen" "$endgueltigloeschen"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "reindex" "$reindex"
