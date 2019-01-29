@@ -43,6 +43,8 @@
     else
         WORKDIR="${WORKDIR%/}/"
     fi
+
+    umask 000   # damit Files auch von anderen Usern bearbeitet werden können / http://openbook.rheinwerk-verlag.de/shell_programmierung/shell_011_003.htm
 	
 # LOGlevel=0  => Logging inaktiv / 1 => normal / 2 => erweitert
     if [ $LOGlevel = "0" ] ; then
