@@ -101,8 +101,8 @@ fi
 
 gitpull
 
-    build_version=`cat "${APPDIR}/${project}/Pack/INFO" | grep version | awk -F '"' '{print $2}'`
-#    set_spk_version=$build_version
+    build_version=$(get_key_value "${APPDIR}/${project}/Pack/INFO" version )
+
 
 echo " - INFO: Es wird foldende Version geladen und gebaut: $set_spk_version - BUILD-Version (INFO-File): $build_version"
 
