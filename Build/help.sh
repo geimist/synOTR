@@ -16,7 +16,8 @@ echo '
     <li>Um synOTR regelmäßig laufen zu lassen (was sich empfiehlt), erstelle als
       nächstes <br>einen automatisierten Programmaufruf.
       <div class="tab"><br>
-      Dazu hast du 2 Möglichkeiten:<br>verwende den <a href="index.cgi?page=timer" style="'$synotrred';">Zeitplaner</a> für einen programmierten synOTR-Start.</p><hr>
+      Dazu hast du 2 Möglichkeiten:<br>verwende den <a href="index.cgi?page=timer" style="'$synotrred';">Zeitplaner</a> für einen programmierten synOTR-Start.
+      <br><br>Hierbei ist zu beachten, dass der DSM-Sicherheitsbereater den Zusätzlichen Croneintrag (da für DSM unbekannt) bemängelt!</p><hr>
       <p>Oder, erstelle alternativ im Aufgabenplaner einen neuen Task mit diesem
       Programmpfad<br>(zu empfehlen, sofern du kürzere Intervalle als "stündlich" benötigst):</p>
     <p style="margin-left: 40px;"><code>/usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh</code></p>

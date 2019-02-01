@@ -85,17 +85,11 @@ func_main_LastLog () {
 # Dateistatus auslesen:
 # ---------------------------------------------------------------------
     # .otrkey-Files:
-    count_otrkey=0
-    for i in $(find "$OTRkeydir" -maxdepth 1 -name "*.otrkey" -type f)
-    	do
-    		count_otrkey=$(( count_otrkey + 1 ))
-    	done
+    count_otrkey=$( ls -t "${OTRkeydir}" | egrep -o '.*.otrkey$' | wc -l ) # wie viele Dateien 
+
     # wait of cutlist:
-    count_waitofcutlist=0
-    for i in $(find "$DECODIR" -maxdepth 1 -name "*.avi" -o -name "*.mp4" -type f)
-    	do
-    		count_waitofcutlist=$(( count_waitofcutlist + 1 ))
-    	done
+    count_waitofcutlist=$( expr $( ls -t "${DECODIR}" | egrep -o '.*.avi$' | wc -l ) + $( ls -t "${DECODIR}" | egrep -o '.*.mp4$' | wc -l ) ) # wie viele Dateien 
+    
 
 # manueller synOTR-Start:
 # ---------------------------------------------------------------------

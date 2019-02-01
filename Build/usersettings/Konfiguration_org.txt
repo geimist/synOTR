@@ -49,8 +49,10 @@ MP4BOX_DELAY="100"
 #--------------------------------------------------------------------
 dsmtextnotify="on"
 MessageTo="admin"
+PBTOKEN=""
 dsmbeepnotify="on"
 LOGlevel="1"
+LOGmax=""
 reindex=1
 
 #--------------------------------------------------------------------

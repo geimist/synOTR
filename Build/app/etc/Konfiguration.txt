@@ -51,6 +51,7 @@ dsmtextnotify="on"
 MessageTo="admin"
 dsmbeepnotify="on"
 LOGlevel="1"
+LOGmax=""
 reindex=1
 
 #--------------------------------------------------------------------

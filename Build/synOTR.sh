@@ -8,8 +8,8 @@
     echo "    -----------------------------------"
     echo -e
 
-    CLIENTVERSION="4.0.8"   # [2018-12-17]
-    DevChannel="Release"    # beta
+    CLIENTVERSION=`get_key_value /var/packages/synOTR/INFO version`
+    DevChannel="Release"        # beta [2019-01-07]
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
@@ -684,6 +684,18 @@ if [ $decoderactiv = "on" ] && [ ! -z "$filetest" ] ; then
                         sleep 1
                         echo 2 > /dev/ttyS1 #short beep
                         sleep 1
+                    fi
+                    if [ ! -z $PBTOKEN ] ; then
+                        PB_LOG=`curl $cURLloglevel --header "Access-Token:${PBTOKEN}" https://api.pushbullet.com/v2/pushes -d type=note -d title="synOTR" -d body="Film [$filename] ist fertig."`
+                        if [ $LOGlevel = "2" ] ; then
+                            echo "        PushBullet-LOG:"
+                            echo "$PB_LOG"
+                        elif echo "$PB_LOG" | grep -q "error"; then # für Loglevel 1 nur Errorausgabe
+                            echo -n "        PushBullet-Error: "
+                            echo "$PB_LOG" | jq -r '.error_code'
+                        fi
+                    else
+                        echo "        (PushBullet-TOKEN nicht gesetzt)"
                     fi
                     wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                     needindex=1
@@ -1577,6 +1589,18 @@ if [ $OTRcutactiv = "on" ] ; then
                 if [ $dsmbeepnotify = "on" ] ; then
                         echo 2 > /dev/ttyS1 #short beep
                 fi
+                if [ ! -z $PBTOKEN ] ; then
+                    PB_LOG=`curl $cURLloglevel --header "Access-Token:${PBTOKEN}" https://api.pushbullet.com/v2/pushes -d type=note -d title="synOTR" -d body="Film [$filedestname] ist fertig."`
+                    if [ $LOGlevel = "2" ] ; then
+                        echo "        PushBullet-LOG:"
+                        echo "$PB_LOG"
+                    elif echo "$PB_LOG" | grep -q "error"; then # für Loglevel 1 nur Errorausgabe
+                        echo -n "        PushBullet-Error: "
+                        echo "$PB_LOG" | jq -r '.error_code'
+                    fi
+                else
+                    echo "        (PushBullet-TOKEN nicht gesetzt)"
+                fi
                 wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                 needindex=1
             fi
@@ -1749,13 +1773,25 @@ if [ $OTRcutactiv = "on" ] ; then
                     if [ $dsmtextnotify = "on" ] ; then
                         title=${filename%.*}
                         sleep 1
-                        synodsmnotify $MessageTo "synOTR" "[$title] ist fertig"
+                        synodsmnotify $MessageTo "synOTR" "Film [$title] ist fertig"
                         sleep 1
                     fi
                     if [ $dsmbeepnotify = "on" ] ; then
                         sleep 1
                         echo 2 > /dev/ttyS1 #short beep
                         sleep 1
+                    fi
+                    if [ ! -z $PBTOKEN ] ; then
+                        PB_LOG=`curl $cURLloglevel --header "Access-Token:${PBTOKEN}" https://api.pushbullet.com/v2/pushes -d type=note -d title="synOTR" -d body="Film [$title] ist fertig."`
+                        if [ $LOGlevel = "2" ] ; then
+                            echo "        PushBullet-LOG:"
+                            echo "$PB_LOG"
+                        elif echo "$PB_LOG" | grep -q "error"; then # für Loglevel 1 nur Errorausgabe
+                            echo -n "        PushBullet-Error: "
+                            echo "$PB_LOG" | jq -r '.error_code'
+                        fi
+                    else
+                        echo "        (PushBullet-TOKEN nicht gesetzt)"
                     fi
                     wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                     needindex=1
@@ -1880,7 +1916,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     fi
                 elif $(echo "$encoders" | grep -q "AAC (Advanced Audio Coding)" ) ; then        # Native FFmpeg AAC encoder
                     echo "Erkannter Encoder:        nativ (ffmpeg > 3.0) [2.Wahl]"
-                    if [ $normalizeAudio = "on_" ] ; then
+                    if [ $normalizeAudio = "on" ] ; then
                         #	------- Audio normalisieren:
                         volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
                         echo "Lautstärkeanhebung um:    $volumeinfo dB"
@@ -1969,13 +2005,25 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                 synoindex -a "${pfad}${title}.mp4"
                 if [ $dsmtextnotify = "on" ] ; then
                     sleep 1
-                    synodsmnotify $MessageTo "synOTR" "[$title] ist fertig"
+                    synodsmnotify $MessageTo "synOTR" "Film [$title] ist fertig"
                     sleep 1
                 fi
                 if [ $dsmbeepnotify = "on" ] ; then
                     sleep 1
                     echo 2 > /dev/ttyS1 #short beep
                     sleep 1
+                fi
+                if [ ! -z $PBTOKEN ] ; then
+                    PB_LOG=`curl $cURLloglevel --header "Access-Token:${PBTOKEN}" https://api.pushbullet.com/v2/pushes -d type=note -d title="synOTR" -d body="Film [$title] ist fertig."`
+                    if [ $LOGlevel = "2" ] ; then
+                        echo "        PushBullet-LOG:"
+                        echo "$PB_LOG"
+                    elif echo "$PB_LOG" | grep -q "error"; then # für Loglevel 1 nur Errorausgabe
+                        echo -n "        PushBullet-Error: "
+                        echo "$PB_LOG" | jq -r '.error_code'
+                    fi
+                else
+                    echo "        (PushBullet-TOKEN nicht gesetzt)"
                 fi
                 wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                 needindex=1
@@ -2285,13 +2333,25 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
                     synoindex -a "${WORKDIR}${NewName}"
                     if [ $dsmtextnotify = "on" ] ; then
                         sleep 1
-                        synodsmnotify $MessageTo "synOTR" "[$title] ist fertig"
+                        synodsmnotify $MessageTo "synOTR" "Film [$title] ist fertig"
                         sleep 1
                     fi
                     if [ $dsmbeepnotify = "on" ] ; then
                         sleep 1
                         echo 2 > /dev/ttyS1 #short beep
                         sleep 1
+                    fi
+                    if [ ! -z $PBTOKEN ] ; then
+                        PB_LOG=`curl --header "Access-Token:${PBTOKEN}" https://api.pushbullet.com/v2/pushes -d type=note -d title="synOTR" -d body="Filme [$film] ist fertig."`
+                        if [ $LOGlevel = "2" ] ; then
+                            echo "PushBullet-LOG:"
+                            echo "$PB_LOG"
+                        elif echo "$PB_LOG" | grep -q "error"; then # für Loglevel 1 nur Errorausgabe
+                            echo -n "PushBullet-Error: "
+                            echo "$PB_LOG" | jq -r '.error_code'
+                        fi
+                    else
+                        echo "PushBullet-TOKEN nicht erkannt"
                     fi
                     wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                     needindex=1
@@ -2404,7 +2464,7 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                 if jq -e . >/dev/null 2>&1 <<<"$serieninfo"; then   # prüfen, ob korrektes JSON-Format verarbeitet werden kann (https://stackoverflow.com/questions/46954692/check-if-string-is-a-valid-json-with-jq)
                     echo -e "gefunden:"
                     echo "OTRID:            $OTRID"
-                    serietitle=`echo "$serieninfo" | jq -r '.Serie' | sed "s/://g" `        # jq ist ein Kommandozeilen-JSON-Parser
+                    serietitle=`echo "$serieninfo" | jq -r '.Serie' | sed "s/://g" `
                     echo "serietitle:       $serietitle"
                     season=`echo "$serieninfo" | awk -F, '{print $3}' | awk -F: '{print $2}' | sed "s/\"//g"`
                     season="$(printf '%02d' "$season")"                     # 2stellig mit führender Null
@@ -2513,7 +2573,7 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                         
                             if [ $dsmtextnotify = "on" ] ; then
                                 sleep 1
-                                synodsmnotify $MessageTo "synOTR" "[$title] ist fertig"
+                                synodsmnotify $MessageTo "synOTR" "Film [$title] ist fertig"
                                 sleep 1
                             fi
                             if [ $dsmbeepnotify = "on" ] ; then
@@ -2712,13 +2772,25 @@ if [ $useWORKDIR == "yes" ] && [ ! -z "$filetest" ]; then
                 
                 if [ $dsmtextnotify = "on" ] ; then
                     sleep 1
-                    synodsmnotify $MessageTo "synOTR" "[$filename] ist fertig"
+                    synodsmnotify $MessageTo "synOTR" "Film [$filename] ist fertig"
                     sleep 1
                 fi
                 if [ $dsmbeepnotify = "on" ] ; then
                     sleep 1
                     echo 2 > /dev/ttyS1 #short beep
                     sleep 1
+                fi
+                if [ ! -z $PBTOKEN ] ; then
+                    PB_LOG=`curl $cURLloglevel --header "Access-Token:${PBTOKEN}" https://api.pushbullet.com/v2/pushes -d type=note -d title="synOTR" -d body="Film [$filename] ist fertig."`
+                    if [ $LOGlevel = "2" ] ; then
+                        echo "        PushBullet-LOG:"
+                        echo "$PB_LOG"
+                    elif echo "$PB_LOG" | grep -q "error"; then # für Loglevel 1 nur Errorausgabe
+                        echo -n "        PushBullet-Error: "
+                        echo "$PB_LOG" | jq -r '.error_code'
+                    fi
+                else
+                    echo "        (PushBullet-TOKEN nicht gesetzt)"
                 fi
 
                 wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
@@ -2744,13 +2816,25 @@ if [ $useWORKDIR == "yes" ] && [ ! -z "$filetest" ]; then
 
                         if [ $dsmtextnotify = "on" ] ; then
                             sleep 1
-                            synodsmnotify $MessageTo "synOTR" "[$filename] ist fertig"
+                            synodsmnotify $MessageTo "synOTR" "Film [$filename] ist fertig"
                             sleep 1
                         fi
                         if [ $dsmbeepnotify = "on" ] ; then
                             sleep 1
                             echo 2 > /dev/ttyS1 #short beep
                             sleep 1
+                        fi
+                        if [ ! -z $PBTOKEN ] ; then
+                            PB_LOG=`curl $cURLloglevel --header "Access-Token:${PBTOKEN}" https://api.pushbullet.com/v2/pushes -d type=note -d title="synOTR" -d body="Film [$filename] ist fertig."`
+                            if [ $LOGlevel = "2" ] ; then
+                                echo "        PushBullet-LOG:"
+                                echo "$PB_LOG"
+                            elif echo "$PB_LOG" | grep -q "error"; then # für Loglevel 1 nur Errorausgabe
+                                echo -n "        PushBullet-Error: "
+                                echo "$PB_LOG" | jq -r '.error_code'
+                            fi
+                        else
+                            echo "        (PushBullet-TOKEN nicht gesetzt)"
                         fi
                         wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                         needindex=1
@@ -2781,6 +2865,73 @@ if [ -f "/usr/syno/bin/synoindex" ] && [ $firstrunonday == "1" ] && [ $reindex =
 fi
 }
 
+
+PURGELOG()
+{
+#########################################################################################
+# Diese Funktion löscht zu erst alle leeren Logs und anschließend die überzähligen      #
+#########################################################################################
+
+if [ -z $LOGmax ]; then
+    return
+fi
+
+logdir="${DECODIR}/_LOGsynOTR/"
+
+# leere Logs löschen:
+for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' `                   # Auflistung aller LOG-Dateien
+    do
+        if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ] && cat "${logdir}$i" | grep -q "synOTR ENDE" ; then
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
+        fi
+    done
+
+# überzählige Logs löschen:
+count2del=$( expr $( ls -t "${logdir}" | egrep -o '^synOTR.*.log$' | wc -l ) - $LOGmax ) # wie viele Dateien sind überzählig
+if [ $count2del -ge 0 ]; then
+    for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' | head -n${count2del} `
+        do
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
+        done
+fi
+
+# überzählige searches löschen:
+count2del=$( expr $(ls -t "${logdir}" | egrep -o '^search.*.xml$' | wc -l) - $LOGmax )
+if [ ${count2del} -ge 0 ]; then
+    for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml$' | head -n${count2del} `
+        do
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
+        done
+fi
+
+# überzählige cutlists löschen:
+count2del=$( expr $(ls -t "${logdir}" | egrep -o '.*.cutlist$' | wc -l) - $LOGmax )
+if [ ${count2del} -ge 0 ]; then
+    for i in `ls -tr "${logdir}" | egrep -o '.*.cutlist$' | head -n${count2del} `
+        do
+            if [ $endgueltigloeschen = "on" ] ; then
+                rm "${logdir}$i"
+            else
+                mv "${logdir}$i" "$OTRkeydeldir"
+            fi
+        done
+fi
+
+}
+
+
 #        _______________________________________________________________________________
 #       |                                                                               |
 #       |                           AUFRUF DER FUNKTIONEN                               |
@@ -2799,6 +2950,7 @@ fi
     OTRopenrename
     MOVE2DESTDIR
     FRESHUPMEDIAINDEX
+    PURGELOG
 
 
     echo -e; echo -e
