@@ -4,7 +4,6 @@ Release Notes
  	IMPLEMENTIERUNGEN:
  -  PushBullet integriert. Dazu muss lediglich der persönliche Token in der Konfiguration hinterlegt werden
  -  Die max. Anzahl von LOGs kann nun begrenzt werden. Dadurch werden zu erst alle leeren Logs und anschließend die überzähligen gelöscht
- -  
  	BUGFIXES:
  -  es wurde ein Fehler behoben, dass bei aktivem nativen aac-Encoder keine Normalisierung der Tonspur möglich war
  -  Detailänderungen in der GUI
