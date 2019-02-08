@@ -2882,6 +2882,7 @@ logdir="${DECODIR}/_LOGsynOTR/"
 for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' `                   # Auflistung aller LOG-Dateien
     do
         if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ] && cat "${logdir}$i" | grep -q "synOTR ENDE" ; then
+        #if [ $( cat "${LOGDIR}$i" | sed -n "/Funktionsaufrufe/,/synOCR ENDE/p" | wc -c ) -le 210 ] && cat "${LOGDIR}$i" | grep -q "synOCR ENDE" ; then
             if [ $endgueltigloeschen = "on" ] ; then
                 rm "${logdir}$i"
             else
