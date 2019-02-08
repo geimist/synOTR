@@ -1,5 +1,12 @@
 #!/bin/sh
+# /usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh
 # wechselt in synOTR-Verzeichnis und startet synOTR mit bzw. ohne LOG (je nach Konfiguration)
+
+# wurde das Skript von der GUI aufgerufen (Aufruf mit Parameter "GUI")?
+    callFrom=$1
+    if [ -z $callFrom ] ; then
+        callFrom=shell
+    fi
 
 # Arbeitsverzeichnis auslesen und hineinwechseln:
     APPDIR=$(cd $(dirname $0);pwd)
@@ -18,17 +25,26 @@
     synOTR_pid=`pidof synOTR.sh`
 
     if [ ! -z "$synOTR_pid" ] ; then
-        echo '<p class="center"><span style="color: #BD0010;"><b>synOTR läuft bereits!</b><br>(Prozess-ID: '$synOTR_pid')</span></p>'
-        echo '<br /><p class="center"><button name="page" value="status-kill-synotr" style="color: #BD0010;">(Beenden erzwingen?)</button></p><br />'
+        if [ $callFrom = GUI ] ; then
+            echo '<p class="center"><span style="color: #BD0010;"><b>synOTR läuft bereits!</b><br>(Prozess-ID: '$synOTR_pid')</span></p>'
+            echo '<br /><p class="center"><button name="page" value="status-kill-synotr" style="color: #BD0010;">(Beenden erzwingen?)</button></p><br />'
+        else
+            echo "synOTR läuft bereits! (Prozess-ID: ${$synOTR_pid})"
+        fi
         exit
     else
-        echo '<p class="title">synOTR wurde gestartet ...</p><br><br><br><br>
-	    <center><table id="system_msg" style="width: 40%;table-align: center;">
-            <tr>   
-                <th style="width: 20%;"><img class="imageStyle" alt="status_loading" src="images/status_loading.gif" style="float:left;"></th>   
-                <th style="width: 80%;"><p class="center"><span style="color: #424242;font-weight:normal;">Bitte warten, bis die Dateien<br>fertig abgearbeitet wurden.</span></p></th>
-            </tr>
-        </table></center>'   
+        if [ $callFrom = GUI ] ; then
+            echo '<p class="title">synOTR wurde gestartet ...</p><br><br><br><br>
+    	    <center><table id="system_msg" style="width: 40%;table-align: center;">
+                <tr>   
+                    <th style="width: 20%;"><img class="imageStyle" alt="status_loading" src="images/status_loading.gif" style="float:left;"></th>   
+                    <th style="width: 80%;"><p class="center"><span style="color: #424242;font-weight:normal;">Bitte warten, bis die Dateien<br>fertig abgearbeitet wurden.</span></p></th>
+                </tr>
+            </table></center>'
+        else
+            echo "synOTR wurde gestartet ..."
+            echo "Bitte warten, bis die Dateien fertig abgearbeitet wurden."
+        fi
     fi
 
 # Variablenkorrektur für ältere Konfiguration.txt und Slash anpassen:
@@ -37,9 +53,7 @@
     fi
 
     if [ -z $WORKDIR ] ; then
-#        WORKDIR="${destdir%/}/"
-        WORKDIR="${DESTDIR%/}/"
-#    	echo "Variable WORKDIR nicht gesetzt. Es wird im Ausgabeordner gearbeitet!"
+        WORKDIR="${DESTDIR%/}/"     # Variable WORKDIR nicht gesetzt. Es wird im Ausgabeordner gearbeitet!
     else
         WORKDIR="${WORKDIR%/}/"
     fi
@@ -53,9 +67,14 @@
     	DECODIR="${WORKDIR%/}/_decodiert"
     	
         if [ ! -d "$DESTDIR" ] || [ "$DESTDIR" = "/" ]; then
-            echo '
-           <p class="center"><span style="color: #BD0010;"><b>! ! ! Zielverzeichnis in der Konfiguration prüfen ! ! !</b><br>Programmlauf wird beendet.<br></span></p>'
-    		exit
+            if [ $callFrom = GUI ] ; then
+                echo '
+               <p class="center"><span style="color: #BD0010;"><b>! ! ! Zielverzeichnis in der Konfiguration prüfen ! ! !</b><br>Programmlauf wird beendet.<br></span></p>'
+        	else
+                echo "! ! ! Zielverzeichnis in der Konfiguration prüfen ! ! !"
+                echo "Programmlauf wird beendet."
+        	fi
+        	exit 1
     	fi
     	
         if [ $OTRcutactiv = "off" ] ; then
