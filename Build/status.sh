@@ -96,7 +96,7 @@ func_main_LastLog () {
 if [[ "$page" == "status-run-synotr" ]]; then
 	echo '
 	<div class="Content_1Col_full">'
-	    /usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh
+	    /usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh GUI
         func_main_LastLog
 #	echo $refreshtime
 	echo '<meta http-equiv="refresh" content="2; URL=index.cgi?page=status"></div>'
