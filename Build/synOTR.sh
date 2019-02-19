@@ -1732,7 +1732,7 @@ if [ $OTRcutactiv = "on" ] ; then
                     fi
                 fi
                 
-                if [ "$UseLocalCutlist" == "no" ] || [ "$vorhanden" == "no" ]; then AC_getcutlist ; fi
+                if [ "$UseLocalCutlist" == "no" ] && [ "$vorhanden" == "no" ]; then AC_getcutlist ; fi
                 if [ "$continue" == "0" ]; then AC_get_CutlistFormat ; fi
                 if [ "$continue" == "0" ]; then AC_get_fps ; fi
                 if [ "$continue" == "0" ]; then AC_cutlist_seriencheck ; fi
