@@ -2,8 +2,11 @@
 	".url": {
 		"SYNO.SDS.synOTR.Application": {
 			"type": "legacy",
-			"allUsers": true,
+			"allUsers": false,
 			"allowMultiInstance": false,
+			"grantPrivilege": "all",
+			"advanceGrantPrivilege" : true,
+			"configablePrivilege" : true,
 			"title": "synOTR",
 			"desc": "",
 			"icon": "images/synOTR_{0}.png",
