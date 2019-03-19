@@ -1,2 +1,4 @@
 s/Qüen/Queen/g
 s/qüen/queen/g
+s/Trü/True/g
+s/trü/true/g
