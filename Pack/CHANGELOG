@@ -4,7 +4,7 @@ Release Notes
  	IMPLEMENTIERUNGEN:
  -  Die Berechtigung zu synOTR kann in der Systemsteuerung/Berechtigung für einzelne User konfiguriert werden (bitte beachte, dass nur eine gemeinsame Konfiguration verwendet wird!).
  	BUGFIXES:
- -  es wurde ein Fehler behoben, weshalb aus dem Autorkommentar einer Cutlist keine Serieninformation abgeleitet werden konnte (der Parameter wurde scheinbar umbenannt).
+ -  es wurde ein Fehler behoben, aufgrund dessen aus dem Autorkommentar einer Cutlist keine Serieninformation abgeleitet werden konnte (der Parameter wurde scheinbar umbenannt).
 
 4.1.0 (RELEASE)
  	IMPLEMENTIERUNGEN:
