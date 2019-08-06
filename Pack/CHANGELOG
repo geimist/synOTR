@@ -2,7 +2,7 @@ Release Notes
 
 4.1.1 (RELEASE)
  	IMPLEMENTIERUNGEN:
- -  Die Berechtigung zu synOTR kann in der Systemsteuerung/Berechtigung für einzelne User konfiguriert werden (bitte beachte, dass nur eine gemeinsame Konfiguration verwendet wird!).
+ -  Die Berechtigung für das Paket synOTR kann in der DSM-Systemsteuerung > Berechtigung für einzelne User konfiguriert werden (bitte beachte, dass nur eine gemeinsame Konfiguration verwendet wird!).
  	BUGFIXES:
  -  es wurde ein Fehler behoben, aufgrund dessen aus dem Autorkommentar einer Cutlist keine Serieninformation abgeleitet werden konnte (der Parameter wurde scheinbar umbenannt).
 
