@@ -1341,7 +1341,7 @@ if [ $OTRcutactiv = "on" ] ; then
         usercomment=""
         CL_serieninfofound=0
         SuggestedMovieName=`cat "$tmp/$CUTLIST" | grep "SuggestedMovieName=" | sed "s/SuggestedMovieName\=//g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}[ _][0-9]\{2\}[\-][0-9]\{2\}/Datum_Zeit/g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}/Datum/g;s/_/ /g" | /usr/bin/tr -d "\r" ` #| awk -F. '{print $1}'` # Datum, Zeit im OTR-Format und Unterstriche werden entfernt
-        usercomment=`cat "$tmp/$CUTLIST" | grep "usercomment=" | sed "s/usercomment\=//g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}[ _][0-9]\{2\}[\-][0-9]\{2\}/Datum_Zeit/g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}/Datum/g;s/_/ /g" | /usr/bin/tr -d "\r" ` #| awk -F. '{print $1}'`
+        usercomment=`cat "$tmp/$CUTLIST" | grep "UserComment=" | sed "s/UserComment\=//g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}[ _][0-9]\{2\}[\-][0-9]\{2\}/Datum_Zeit/g;s/[0-9]\{2,4\}[.][0-9]\{1,2\}[.][0-9]\{1,2\}/Datum/g;s/_/ /g" | /usr/bin/tr -d "\r" ` #| awk -F. '{print $1}'`
 
         if echo "$SuggestedMovieName" | grep -q "[sST]\?[0-9]\{1,2\}[.\-xX]\?[eE]\?[0-9]\{1,2\}" ; then  # [[:space:]]  # S01E01 / S01.E01 / 01-01 / 01x01 / teilweise ohne führende Null
             #CL_serieninfo=$(parseRegex "$SuggestedMovieName" ".[sST]?[0-9]{1,2}[.\-xX]?[eE]?[0-9]{1,2}" | head -n1)    # head -n1: nur der erste Fund im String wird verwendet
