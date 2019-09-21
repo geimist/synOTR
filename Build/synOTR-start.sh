@@ -22,7 +22,7 @@
     #        echo "synOTR läuft bereits!"
     #        exit
     #    fi
-    synOTR_pid=`pidof synOTR.sh`
+    synOTR_pid=$( /bin/pidof synOTR.sh )
 
     if [ ! -z "$synOTR_pid" ] ; then
         if [ $callFrom = GUI ] ; then
