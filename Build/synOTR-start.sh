@@ -72,11 +72,11 @@
             if [ $callFrom = GUI ] ; then
                 echo '
                <p class="center"><span style="color: #BD0010;"><b>! ! ! Zielverzeichnis in der Konfiguration prüfen ! ! !</b><br>Programmlauf wird beendet.<br></span></p>'
-        	else
+            else
                 echo "! ! ! Zielverzeichnis in der Konfiguration prüfen ! ! !"
                 echo "Programmlauf wird beendet."
-        	fi
-        	exit 1
+            fi
+            exit 1
     	fi
     	
         if [ $OTRcutactiv = "off" ] ; then
