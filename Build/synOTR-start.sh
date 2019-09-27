@@ -2,10 +2,12 @@
 # /usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh
 # wechselt in synOTR-Verzeichnis und startet synOTR mit bzw. ohne LOG (je nach Konfiguration)
 
-# wurde das Skript von der GUI aufgerufen (Aufruf mit Parameter "GUI")?
+# wurde das Skript von der GUI aufgerufen (Aufruf mit Parameter "GUI" für )?
     callFrom=$1
     if [ -z $callFrom ] ; then
-        callFrom=shell
+        callFrom="shell"
+    else
+        callFrom="GUI"
     fi
 
 # Arbeitsverzeichnis auslesen und hineinwechseln:
@@ -29,7 +31,7 @@
             echo '<p class="center"><span style="color: #BD0010;"><b>synOTR läuft bereits!</b><br>(Prozess-ID: '$synOTR_pid')</span></p>'
             echo '<br /><p class="center"><button name="page" value="status-kill-synotr" style="color: #BD0010;">(Beenden erzwingen?)</button></p><br />'
         else
-            echo "synOTR läuft bereits! (Prozess-ID: ${$synOTR_pid})"
+            echo "synOTR läuft bereits! (Prozess-ID: $synOTR_pid)"
         fi
         exit
     else
