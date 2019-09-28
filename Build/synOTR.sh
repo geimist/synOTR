@@ -53,6 +53,7 @@
 # Arbeitsverzeichnis auslesen und hineinwechseln:
 # ---------------------------------------------------------------------
     OLDIFS=$IFS	                # ursprünglichen Fieldseparator sichern
+    UNIXTIME=$(date +%s)
     APPDIR=$(cd $(dirname $0);pwd)
     cd ${APPDIR}
 
@@ -283,6 +284,20 @@
 #       |_______________________________________________________________________________|       #
 #                                                                                               #
 #################################################################################################
+
+
+sec_to_time() {
+    local seconds=$1
+    local sign=""
+    if [[ ${seconds:0:1} == "-" ]]; then
+        seconds=${seconds:1}
+        sign="-"
+    fi
+    local hours=$(( seconds / 3600 ))
+    local minutes=$(( (seconds % 3600) / 60 ))
+    seconds=$(( seconds % 60 ))
+    printf "%s%02d:%02d:%02d" "$sign" $hours $minutes $seconds
+}
 
 
 MovieDB_query() 
@@ -2955,6 +2970,7 @@ fi
 
 
     echo -e; echo -e
+    echo "    Gesamtzeit: $(sec_to_time $(expr $(date +%s)-${UNIXTIME}) )" ; echo -e
     echo "    -----------------------------------"
     echo "    |       ==> synOTR ENDE <==       |"
     echo "    -----------------------------------"
