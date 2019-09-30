@@ -286,7 +286,14 @@
 #################################################################################################
 
 
-sec_to_time() {
+
+sec_to_time() 
+{
+#########################################################################################
+# diese Funktion wandelt einen Sekundenwert nach hh:mm                                  #
+# Aufruf: sec_to_time "string"                                                          #
+# https://blog.jkip.de/in-bash-sekunden-umrechnen-in-stunden-minuten-und-sekunden/      #
+#########################################################################################
     local seconds=$1
     local sign=""
     if [[ ${seconds:0:1} == "-" ]]; then
