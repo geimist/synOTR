@@ -9,7 +9,7 @@
     echo -e
 
     CLIENTVERSION=`get_key_value /var/packages/synOTR/INFO version`
-    DevChannel="Release"        # beta [2019-02-01]
+    DevChannel="Release"        # beta
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
