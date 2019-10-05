@@ -286,7 +286,6 @@
 #################################################################################################
 
 
-
 sec_to_time() 
 {
 #########################################################################################
@@ -1745,9 +1744,9 @@ if [ $OTRcutactiv = "on" ] ; then
                         echo "okey"
                         LOCAL_CUTLIST="${i}.cutlist"
                         AC_getlocalcutlist_withoutCheck
-                    elif [ -f "${OTRkeydir}/${filename}.cutlist" ]; then # die Cutlist muss sich im Downloadordner / Quellordner befinden und den gleichen Namen wie der Film haben (inkl. Dateiendung .avi / .mp4 vor .cutlist)
+                    elif [ -f "${OTRkeydir}${filename}.cutlist" ]; then # die Cutlist muss sich im Downloadordner / Quellordner befinden und den gleichen Namen wie der Film haben (inkl. Dateiendung .avi / .mp4 vor .cutlist)
                         echo "okey"
-                        LOCAL_CUTLIST="${OTRkeydir}/${filename}.cutlist"
+                        LOCAL_CUTLIST="${OTRkeydir}${filename}.cutlist"
                         AC_getlocalcutlist_withoutCheck
                     else
                         echo -e "Keine lokale Cutlist gefunden!"
@@ -2903,7 +2902,7 @@ logdir="${DECODIR}/_LOGsynOTR/"
 # leere Logs löschen:
 for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' `                   # Auflistung aller LOG-Dateien
     do
-        if [ $( cat "${logdir}$i" | tail -n7 | head -n4 | wc -c ) -le 15 ] && cat "${logdir}$i" | grep -q "synOTR ENDE" ; then
+        if [ $( cat "${logdir}$i" | tail -n9 | head -n4 | wc -c ) -le 15 ] && cat "${logdir}$i" | grep -q "synOTR ENDE" ; then
         #if [ $( cat "${LOGDIR}$i" | sed -n "/Funktionsaufrufe/,/synOCR ENDE/p" | wc -c ) -le 210 ] && cat "${LOGDIR}$i" | grep -q "synOCR ENDE" ; then
             if [ $endgueltigloeschen = "on" ] ; then
                 rm "${logdir}$i"
@@ -2975,11 +2974,10 @@ fi
     FRESHUPMEDIAINDEX
     PURGELOG
 
-
     echo -e; echo -e
-    echo "    Gesamtzeit: $(sec_to_time $(expr $(date +%s)-${UNIXTIME}) )" ; echo -e
     echo "    -----------------------------------"
     echo "    |       ==> synOTR ENDE <==       |"
     echo "    -----------------------------------"
+    echo -e; echo "    Gesamtzeit: $(sec_to_time $(expr $(date +%s)-${UNIXTIME}) )"
 
 exit
