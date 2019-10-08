@@ -2969,7 +2969,7 @@ fi
     OTRautocut
     OTRavi2mp4
     OTRrename
-    OTRopenrename
+#   OTRopenrename	# 2019-10 deaktivert, da otr-serien.de die Pflege neuer Serien eingestellt hat
     MOVE2DESTDIR
     FRESHUPMEDIAINDEX
     PURGELOG
