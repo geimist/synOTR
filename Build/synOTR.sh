@@ -9,7 +9,7 @@
     echo -e
 
     CLIENTVERSION=`get_key_value /var/packages/synOTR/INFO version`
-    DevChannel="Release"        # beta
+    DevChannel="Release"        # beta [2019-02-01]
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
@@ -123,6 +123,7 @@
     #	ffmpeg="${APPDIR}/app/bin/ffmpeg"
         ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
         avcut="${APPDIR}/app/bin/avcut64"
+        ionice="${APPDIR}/app/bin/ionice64"
     elif [ `echo $machinetyp | grep "armv7" ` ] ; then
         synOTR_LD_LIBRARY_PATH=${APPDIR}/app/libARMv7l:$LD_LIBRARY_PATH
         synOTR_PATH=$PATH:${APPDIR}/app/binARMv7l:/opt/bin
@@ -134,6 +135,7 @@
             echo "                          alternative avcut-Version ohne asm wird verwendet"
             avcut="${APPDIR}/app/binARMv7l/avcut_disable-asm"
         fi
+        ionice="${APPDIR}/app/binARMv7l/ionice"
     elif [ $machinetyp = "i686" ] ; then
         bsy="${APPDIR}/app/bin/busybox"
     #	ffmpeg="${APPDIR}/app/bin/ffmpeg"
@@ -141,6 +143,7 @@
         avcut="${APPDIR}/app/bin/avcut32"
         synOTR_LD_LIBRARY_PATH=$SAVED_LD_LIBRARY_PATH
         synOTR_PATH=$PATH:${APPDIR}/app/bin
+        ionice="${APPDIR}/app/bin/ionice32"
     elif [ $machinetyp = "x86_64" ] ; then
         bsy="${APPDIR}/app/bin/busybox"
     #   ffmpeg="${APPDIR}/app/bin/ffmpeg"
@@ -148,6 +151,7 @@
         avcut="${APPDIR}/app/bin/avcut64"
         synOTR_LD_LIBRARY_PATH=$SAVED_LD_LIBRARY_PATH
         synOTR_PATH=$PATH:${APPDIR}/app/bin
+        ionice="${APPDIR}/app/bin/ionice64"
     else
         message="Deine CPU-Plattform [${machinetyp}] wird leider von synOTR nicht unterstützt oder ist nicht bekannt …"
         echo "$message"
@@ -164,6 +168,10 @@
     }
 
     synOTR_ENV
+
+    # alle Kommandos und Kindprozesse des Skriptes mit niedrigst möglicher Priorität ausgeführen:
+    echo "Priorität anpassen:       $(renice -n 19 -p $$)"
+    echo "                          $(ionice -c 2 -n 7 -p $$)"
 
 # Info der Datenbank auslesen:
 # ---------------------------------------------------------------------
@@ -589,7 +597,7 @@ OTRdecoder()
                     muxerror=0  # nur für Log
                     if [ -f "${DECODIR}/${videosourcetitle}.avi" ]; then
                         echo -e; echo "MUXING:              ---> ${ac3filename}" #; echo -e
-                        muxingLOG=$(nice -n $niceness $ffmpeg -threads 2 -loglevel $ffloglevel  -i "${DECODIR}/${videosourcetitle}.avi" -i "$i"  -map 0:0 -map 1:0 -c:a copy -async 1 -c:v copy -sn -y "${DECODIR}/${videosourcetitle}.ac3tmp.avi" 2>&1)
+                        muxingLOG=$($ffmpeg -threads 2 -loglevel $ffloglevel  -i "${DECODIR}/${videosourcetitle}.avi" -i "$i"  -map 0:0 -map 1:0 -c:a copy -async 1 -c:v copy -sn -y "${DECODIR}/${videosourcetitle}.ac3tmp.avi" 2>&1)
 
                         if [ -f "${DECODIR}/${videosourcetitle}.ac3tmp.avi" ]; then
                             # Original löschen / umbenennen:
@@ -640,11 +648,11 @@ if [ $decoderactiv = "on" ] && [ ! -z "$filetest" ] ; then
             echo -n "                          "; date
 
             if [ $machinetyp = "x86_64" ]; then
-                otrdecoderLOG=$(nice -n $niceness otrdecoder64 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
+                otrdecoderLOG=$(otrdecoder64 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
             elif [ $machinetyp = "i686" ]; then
-                otrdecoderLOG=$(nice -n $niceness otrdecoder32 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
+                otrdecoderLOG=$(otrdecoder32 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
             elif [ `echo $machinetyp | grep "armv" ` ] ; then
-                otrdecoderLOG=$(nice -n $niceness otrpidecoder -d "$i" -O "${DECODIR}/${decofilename}" -e "$OTRuser" -p "$OTRpw"  2>&1)
+                otrdecoderLOG=$(otrpidecoder -d "$i" -O "${DECODIR}/${decofilename}" -e "$OTRuser" -p "$OTRpw"  2>&1)
             fi
 
             if [ $LOGlevel = "2" ] ; then
@@ -841,18 +849,14 @@ if [ $OTRcutactiv = "on" ] ; then
         # ---------------------------------------------------------------------
         film="$i"                   # Der komplette Filmname und gegebenfalls der Pfad
         film_ohne_anfang="$i"
-#       CUTLIST=`basename "$film"`  # Filmname ohne Pfad
-#       filmname=$CUTLIST
-#       filmname=`basename "$film"`
         AC_nameLOG="Überprüfe um welches Aufnahmeformat es sich handelt --> "
 
-
-
-#   film_ohne_anfang nur hier
-#   film_ohne_ende nur hier und in Rename auskommentiert
-#   filmname nur hier
-#   format nur hier im Sinn von Qualität
-
+    
+        # ToDo: Variablen streichen / vereinheitlichen:
+        #   film_ohne_anfang    > nur hier
+        #   film_ohne_ende      > nur hier und in Rename auskommentiert
+        #   filmname            > nur hier
+        #   format              > nur hier im Sinn von Qualität
 
 
         if echo "$film_ohne_anfang" | grep -q ".HQ."; then	#Wenn es sich um eine "HQ" Aufnahme handelt
@@ -872,7 +876,6 @@ if [ $OTRcutactiv = "on" ] ; then
             AC_nameLOG="${AC_nameLOG}avi"
         fi
 
-
         if echo "$film" | grep / >> /dev/null; then # Wenn der Dateiname einen Pfad enthält
             film_ohne_anfang=${film##*/}            # Filmname ohne Pfad
             if echo "$film_ohne_anfang" | grep -q ".HQ."; then	#Wenn es sich um eine "HQ" Aufnahme handelt
@@ -886,7 +889,6 @@ if [ $OTRcutactiv = "on" ] ; then
             #	format=avi
             fi
         fi
-
 
         if echo "$film_ohne_anfang" | grep -q ".HQ."; then
             outputfile="${WORKDIR}$film_ohne_ende.HQ-cut.avi"
@@ -913,8 +915,6 @@ if [ $OTRcutactiv = "on" ] ; then
         filesize=$(ls -l "$film" | awk '{ print $5 }') #Dateigröße des Filmes
         goodCount=0 #Passende Cutlists
         arraylocal=1 #Nummer des Arrays
-        #	vorhanden=no	## nehme erstmal an, es wurde keine Cutlist gefunden
-        #	continue=1
         for f in $local_cutlists; do
             echo -n "Überprüfe ob eine der gefundenen Cutlists zum Film passt --> "
             if [ -z $f ]; then
@@ -1082,9 +1082,6 @@ if [ $OTRcutactiv = "on" ] ; then
                 sed -n '/<\/'$1'>/p' "$tmp/search.xml" | sed -n ''$2'p' | sed 's/<'$1'>//' | sed 's/<\/'$1'>//g' | sed 's/^[ \t]*//'
             }
 
-#       inputfilename="$filename"   # < 2018-06-12
-#       filmdateiname=`basename $film` # < 2018-06-12
-
         continue=0
         filesize=$(ls -l "$film" | awk '{ print $5 }')
         filesizeMB=$(echo | gawk '{print '$filesize'/1000000}' | awk '{printf "%.2f\n", $1}')
@@ -1131,7 +1128,6 @@ if [ $OTRcutactiv = "on" ] ; then
             echo -e "                                 L==> Es wurde leider keine Cutlist gefunden!"
         else
             sed -i 's/<rating><\/rating>/<rating>0.00<\/rating>/g' "$tmp/search.xml"     # fehlendes rating durch 0.00 ersetzen / -i ändert die Quelldatei
-#           sed -i 's/	//g' "$tmp/search.xml"                                           # führende Tabs entfernen / brachte Parsing durcheinander - lag möglicherweise doch an Dos-Zeilenenden
             sed -i $'s/\r$//' "$tmp/search.xml"                                          # convert Dos to Unix
             
             cutlist_anzahl=$(grep --text -c '/cutlist' "$tmp/search.xml" | /usr/bin/tr -d "\r") 
@@ -1578,9 +1574,9 @@ if [ $OTRcutactiv = "on" ] ; then
 
             # für ARMv7 unterstützt avcut noch nicht die Operanten -i & -o ==> Abhilfe: avcut-0.4 für ARMv7 kompilieren (ohne Nachteil)
             if [ $machinetyp = "x86_64" ] || [ $machinetyp = "i686" ]; then
-                AVCUTLOG=$(time nice -n $niceness $avcut -p "${APPDIR}/includes/avcut_otr.profile" -i "$film" -o "$outputfile" $time  2>&1)  # Befehl ausführen
+                AVCUTLOG=$(time $avcut -p "${APPDIR}/includes/avcut_otr.profile" -i "$film" -o "$outputfile" $time  2>&1)  # Befehl ausführen
             else 
-                AVCUTLOG=$(time nice -n $niceness $avcut "$film" "$outputfile" $time  2>&1) # noch avcut v0.2 mit entsprechender Parameterangabe
+                AVCUTLOG=$(time $avcut "$film" "$outputfile" $time  2>&1) # noch avcut v0.2 mit entsprechender Parameterangabe
             fi
 
             echo -e; echo -n "Die Schnittpunkte befinden sich"
@@ -1592,7 +1588,7 @@ if [ $OTRcutactiv = "on" ] ; then
             fi
         else
             echo "> Übergebe die Cuts an avisplit/avimerge"
-            AVISPLITLOG=$(nice -n $niceness avisplit -i "$film" -o "$outputfile" -t $time -c 1>/dev/null) # Hier wird avisplit gestartet, avimerge wird on-the-fly über den Parameter -c gestartet
+            AVISPLITLOG=$(avisplit -i "$film" -o "$outputfile" -t $time -c 1>/dev/null) # Hier wird avisplit gestartet, avimerge wird on-the-fly über den Parameter -c gestartet
             if [ $LOGlevel = "2" ] ; then
                 echo "avisplit Command: avisplit -i $film -o $outputfile -t $time -c"
                 echo "avisplit-LOG: $AVISPLITLOG"
@@ -1909,7 +1905,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
 
             #	------- DEMUX:
             #	------- Audio extrahieren / konvertieren:
-            AUDIODEMUXINFO=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -i "$i" -c:a copy -vn "$audiofile"  2>&1)
+            AUDIODEMUXINFO=$($ffmpeg -loglevel $ffloglevel -i "$i" -c:a copy -vn "$audiofile"  2>&1)
             if [ $LOGlevel = "2" ] ; then	#aufgeblähtes LOG bei AC3-Audio …
                 echo "ffmpeg-AudioDemux LOG:    $AUDIODEMUXINFO"
             fi
@@ -1931,9 +1927,9 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                         #	------- Audio normalisieren:
                         volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
                         echo "Lautstärkeanhebung um:    $volumeinfo dB"
-                        convertLOG=$(nice -n $niceness $ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
+                        convertLOG=$($ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
                     else
-                        convertLOG=$(nice -n $niceness $ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
+                        convertLOG=$($ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
                     fi
                 elif $(echo "$encoders" | grep -q "AAC (Advanced Audio Coding)" ) ; then        # Native FFmpeg AAC encoder
                     echo "Erkannter Encoder:        nativ (ffmpeg > 3.0) [2.Wahl]"
@@ -1941,9 +1937,9 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                         #	------- Audio normalisieren:
                         volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
                         echo "Lautstärkeanhebung um:    $volumeinfo dB"
-                        convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -c:a aac -strict -2 -b:a "${OTRaacqal%k}k" -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
+                        convertLOG=$($ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -c:a aac -strict -2 -b:a "${OTRaacqal%k}k" -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
                     else
-                        convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -c:a aac -strict -2 -b:a "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
+                        convertLOG=$($ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -c:a aac -strict -2 -b:a "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
                     fi
                 elif $(echo "$encoders" | grep -q libfaac ) ; then      # libfaac > syno-ffmpeg
                     echo "Erkannter Encoder:        libfaac [3.Wahl]"
@@ -1954,9 +1950,9 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                         #	------- Audio normalisieren:
                         volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
                         echo "Lautstärkeanhebung um:    $volumeinfo dB"
-                        convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -acodec libfaac -ab "${OTRaacqal%k}k"  -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
+                        convertLOG=$($ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -acodec libfaac -ab "${OTRaacqal%k}k"  -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
                     else
-                        convertLOG=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -acodec libfaac -ab "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
+                        convertLOG=$($ffmpeg -loglevel $ffloglevel -threads 2 -i "$audiofile" -acodec libfaac -ab "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
                     fi
                 else
                     echo "  finde keinen ffmpeg-Audioencoder!"; echo "  Gebe den Pfad zu einer aac-kompatiblen ffmpeg-Version an."
@@ -1974,7 +1970,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             fi
 
             #	------- Video extrahieren:
-            VIDEODEMUXINFO=$(nice -n $niceness $ffmpeg -loglevel $ffloglevel -i "$i" -an -c:v copy "$videofile"  2>&1)
+            VIDEODEMUXINFO=$($ffmpeg -loglevel $ffloglevel -i "$i" -an -c:v copy "$videofile"  2>&1)
             if [ $LOGlevel = "2" ] ; then	#aufgeblähtes LOG bei AC3-Audio …
                 echo "ffmpeg-VideoDemux LOG:"
                 echo "$VIDEODEMUXINFO"
@@ -2001,9 +1997,9 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     echo "Audio-Video-Sync:         Audio wird um ${AUDIODELAY}ms verzögert"
                     videofiledelay="$videofile"
                 fi
-                nice -n $niceness mp4box $mp4boxloglevel -add "$videofiledelay" -add "$audiofiledelay" -fps $fps -tmp "$pfad" "${pfad}${title}.mp4"
+                mp4box $mp4boxloglevel -add "$videofiledelay" -add "$audiofiledelay" -fps $fps -tmp "$pfad" "${pfad}${title}.mp4"
             else
-                nice -n $niceness mp4box $mp4boxloglevel -add "$videofile" -add "$audiofile" -fps $fps -tmp "$pfad" "${pfad}${title}.mp4"
+                mp4box $mp4boxloglevel -add "$videofile" -add "$audiofile" -fps $fps -tmp "$pfad" "${pfad}${title}.mp4"
             fi
 
             #	------- Temp löschen:
@@ -2235,7 +2231,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
                 scantype="i"
             fi
         scantype=""	# deaktiviert
-#       echo "Scantype:         ${scantype}"
+        # echo "Scantype:         ${scantype}"
         #	------------------ Auflösung:
         height=`echo "$ffprobeInfo" | jq '.streams[0].height' `
         echo "Auflösung Höhe:           ${height}"
@@ -2316,7 +2312,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
                     #  --description 
                     #  --artwork
                     #  --genre 
-                    AtomicParsleyLOG=$(nice -n $niceness AtomicParsley "${WORKDIR}${NewName}" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)
+                    AtomicParsleyLOG=$(AtomicParsley "${WORKDIR}${NewName}" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)
                     if [ $LOGlevel = "2" ] ; then
                         echo "  AtomicParsleyLOG= $AtomicParsleyLOG"
                     fi
@@ -2480,7 +2476,6 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                     echo "    -> SQLupdate: $sSQLupdate"
                 fi
                 sqlite3 ${APPDIR}/app/etc/synOTR.sqlite "$sSQLupdate"
-#           elif [ ! -z "$serieninfo" ] ; then      # ist nicht zuverlässig < 2018-06-14
             elif [[ "$OTRID" =~ $regInt ]]; then    # Ist die OTR-Id eine echte Zahl?
                 if jq -e . >/dev/null 2>&1 <<<"$serieninfo"; then   # prüfen, ob korrektes JSON-Format verarbeitet werden kann (https://stackoverflow.com/questions/46954692/check-if-string-is-a-valid-json-with-jq)
                     echo -e "gefunden:"
@@ -2561,7 +2556,7 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                             #  --description 
                             #  --artwork
                             #  --genre 
-                            AtomicParsleyLOG=$(nice -n $niceness AtomicParsley "${DESTDIR}/$NewName" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)
+                            AtomicParsleyLOG=$(AtomicParsley "${DESTDIR}/$NewName" --overWrite --TVNetwork "$Channel" --TVShowName "$serietitle" --TVEpisode "$episodetitle" --TVSeasonNum "$season" --TVEpisodeNum "$episode" --title "$title" 2>&1)
                             if [ $LOGlevel = "2" ] ; then
                                 echo "  AtomicParsleyLOG= $AtomicParsleyLOG"
                             fi
@@ -2627,7 +2622,6 @@ if [ $OTRrenameactiv = "on" ] && [ $firstrunonday == "1" ] ; then
                 sqlite3 ${APPDIR}/app/etc/synOTR.sqlite "$sSQLupdate"
             fi
             sleep 15 # Wartezeit in Sekunden, um die Serverlast auf otr-serien.de zu reduzieren
-            # date
         else
             echo "    -> nicht gefunden: $file_rename"
             echo "       L==> Datei liegt nicht mehr im Zielordner [$WORKDIR]"
@@ -2900,10 +2894,9 @@ fi
 logdir="${DECODIR}/_LOGsynOTR/"
 
 # leere Logs löschen:
-for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' `                   # Auflistung aller LOG-Dateien
+for i in $(ls -tr "${logdir}" | egrep -o '^synOTR.*.log$')                   # Auflistung aller LOG-Dateien
     do
         if [ $( cat "${logdir}$i" | tail -n9 | head -n4 | wc -c ) -le 15 ] && cat "${logdir}$i" | grep -q "synOTR ENDE" ; then
-        #if [ $( cat "${LOGDIR}$i" | sed -n "/Funktionsaufrufe/,/synOCR ENDE/p" | wc -c ) -le 210 ] && cat "${LOGDIR}$i" | grep -q "synOCR ENDE" ; then
             if [ $endgueltigloeschen = "on" ] ; then
                 rm "${logdir}$i"
             else
