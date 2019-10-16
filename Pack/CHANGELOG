@@ -3,7 +3,7 @@ Release Notes
 4.2.0 (RELEASE)
  	IMPLEMENTIERUNGEN:
  -  die I/O-Priorität wurde herabgesetzt (möglicherweise nur auf x86_64 / i386 und ARMv7 ungetestet)
- -  das nachträgliche Suchen von Serieninformationen auf otr-serien.de wurde deaktiviert, da die Informationen auf der Seite derzeit nicht mehr gepflegt werden
+ -  das nachträgliche Suchen von Serieninformationen auf otr-serien.de wurde deaktiviert, da die Informationspflege auf der Seite eingestellt wurde.
  	BUGFIXES:
  -  es wurde ein Fehler behoben, aufgrund dessen synOTR gestartet werden konnte, obwohl der vorhergehende Arbeitsablauf noch nicht abgeschlossen war
 
