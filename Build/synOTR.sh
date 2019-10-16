@@ -420,7 +420,7 @@ echo -e ;
             echo "Serverfehler (Zeitüberschreitung)"
         fi
         if jq -e . >/dev/null 2>&1 <<<"$episodeninfo"; then
-            episodetitle=` echo $episodeninfo | jq '.data[].episodeName' | sed "s/\"//g ; s/://g ; s/\?//g ; s/\*//g ; s/\?//g" ` # | tr -d '"' `
+            episodetitle=` echo $episodeninfo | jq '.data[].episodeName' | sed "s/\"//g ; s/://g ; s/\?//g ; s/\*//g ; s/\?//g ; s/\///g" ` # | tr -d '"' `
             description=` echo $episodeninfo | jq '.data[].overview' | sed "s/\"//g" ` # | tr -d '"' `
         else
             echo "Serverantwort konnte nicht verarbeitet werden (kein kompatibles JSON)"
@@ -548,7 +548,7 @@ elif [[ "$OTRID" =~ $regInt ]]; then    # Ist die OTR-Id eine echte Zahl?
         season="$(printf '%02d' "$season")"     # 2stellig mit führender Null
         episode=`echo "$serieninfo" | awk -F, '{print $4}' | awk -F: '{print $2}' | sed "s/\"//g"`
         episode="$(printf '%02d' "$episode")"	# 2stellig mit führender Null
-        episodetitle=`echo "$serieninfo" | jq -r '.Folgenname' | sed "s/://g" | sed "s/\?//g" | sed "s/\*//g" | sed "s/\?//g" `
+        episodetitle=`echo "$serieninfo" | jq -r '.Folgenname' | sed "s/\"//g ; s/://g ; s/\?//g ; s/\*//g ; s/\?//g ; s/\///g" `
         description=`echo "$serieninfo" | jq -r '.Folgenbeschreibung' | sed "s/:/ -/g" `
         wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT_OTRSERIEN" >/dev/null 2>&1
     else
