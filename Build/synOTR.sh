@@ -131,7 +131,6 @@
         ffmpeg="${APPDIR}/app/binARMv7l/ffmpeg"
         avcut="${APPDIR}/app/binARMv7l/avcut"
         if [[ `uname -a | grep "armadaxp" ` ]] ; then
-        #if [ $device = "ds214" ] || [ $device = "ds414" ] ; then
             echo "                          alternative avcut-Version ohne asm wird verwendet"
             avcut="${APPDIR}/app/binARMv7l/avcut_disable-asm"
         fi
@@ -169,7 +168,7 @@
 
     synOTR_ENV
 
-    # alle Kommandos und Kindprozesse des Skriptes mit niedrigst möglicher Priorität ausgeführen:
+# alle Kommandos und Kindprozesse des Skriptes mit niedrigst möglicher Priorität ausgeführen:
     echo "Priorität anpassen:       $(renice -n 19 -p $$)"
     echo "                          $($ionice -c 2 -n 7 -p $$)"
 
