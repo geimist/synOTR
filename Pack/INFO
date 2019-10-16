@@ -1,6 +1,6 @@
 package="synOTR"
 displayname="synOTR"
-version="4.1.1.2"
+version="4.2.0"
 thirdparty="yes"
 description="SynOTR provides a workflow for TV recordings from onlineTVrecorder (OTR / https://onlinetvrecorder.com) for Synology NAS. synOTR performs *decoding *AC3-muxing (BETA) *cutting *MP4 conversion and *renaming (including Series information from www.thetvdb.com and www.otr-serien.de). onlineTVrecorder (OTR) is the free video recorder on the Internet that records almost all broadcasts from around 100 TV stations in Germany, USA, UK and other countries around the clock."
 description_enu="SynOTR provides a workflow for TV recordings from onlineTVrecorder (OTR / https://onlinetvrecorder.com) for Synology NAS. synOTR performs *decoding *AC3-muxing (BETA) *cutting *MP4 conversion and *renaming (including Series information from www.thetvdb.com and www.otr-serien.de). onlineTVrecorder (OTR) is the free video recorder on the Internet that records almost all broadcasts from around 100 TV stations in Germany, USA, UK and other countries around the clock."
