@@ -171,7 +171,7 @@
 
     # alle Kommandos und Kindprozesse des Skriptes mit niedrigst möglicher Priorität ausgeführen:
     echo "Priorität anpassen:       $(renice -n 19 -p $$)"
-    echo "                          $(ionice -c 2 -n 7 -p $$)"
+    echo "                          $($ionice -c 2 -n 7 -p $$)"
 
 # Info der Datenbank auslesen:
 # ---------------------------------------------------------------------
