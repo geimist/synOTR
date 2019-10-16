@@ -44,9 +44,9 @@
             an Daniel Dieth von otr-serien.de für das zur Verfügungstellen seiner Website und seine Unterstützung.
             Bitte unterstützt die Seite <a href="http://www.otr-serien.de" rel="external">www.otr-serien.de</a>.
             Über die Seite lässt es sich auch sehr einfach nach bestimmten
-            Episoden suchen. Ihr habt eine ausgestrahlte Serienepisode, die dort
+            Episoden suchen. <s>Ihr habt eine ausgestrahlte Serienepisode, die dort
             nicht automatisch erkannt wurde? Dann gebt doch bei der betroffenen
-            Episode eine Rückmeldung ab.<br>
+            Episode eine Rückmeldung ab.</s><br>
             <br>
             <img class="imageStyle"
                 alt="LOGO_thetvdb.com"
@@ -59,11 +59,11 @@
             Bitte unterstützt diesen kostenlosen Service, indem ihr nach
             Möglichkeit Informationen und Grafiken beitragt und ergänzt.<br>
             <br>
-            Sollten keine Serieninformationen zu einer Sendung gefunden worden
+            <s>Sollten keine Serieninformationen zu einer Sendung gefunden worden
             sein, so wird die Standardumbenennung verwendet und die Infos in
             einer Datenbank gesichert. Werden entsprechende Informationen auf
             otr-serien.de ergänzt, so wird nachträglich die Standardumbenennung
-            in die Serienumbenennung vorgenommen (Suchzeit derzeit 7 Tage).
+            in die Serienumbenennung vorgenommen (Suchzeit derzeit 7 Tage).</s>
             </div>
             </li>
           <li><span style="color:#0086E5;font-weight:bold; ">Konvertieren
