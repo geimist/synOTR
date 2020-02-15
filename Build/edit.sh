@@ -362,24 +362,24 @@ if [[ "$page" == "edit" ]]; then
 	# SMARTRENDERING
 	echo '
 		<p>
-		<label>Smartrendering</label>
+		<label>Art zu Schneiden</label>
 		<select name="SMARTRENDERING">'
 		if [[ "$SMARTRENDERING" == "off" ]]; then
-			echo '<option value="off" selected>aus</option>'
+			echo '<option value="off" selected>Cut an Keyframes</option>'
 		else
-			echo '<option value="off">aus</option>'
+			echo '<option value="off">Cut an Keyframes</option>'
 		fi
 		if [[ "$SMARTRENDERING" == "on" ]]; then
-			echo '<option value="on" selected>ein</option>'
+			echo '<option value="on" selected>Smartrendering</option>'
 		else
-			echo '<option value="on">ein</option>'
+			echo '<option value="on">Smartrendering</option>'
 		fi
 	echo '
 		</select>
 		<a class="helpbox" href="#HELP">
 			<img src="images/icon_information_mini@geimist.svg" height="25" width="25"/>
 			<span>Für das Schneiden an Keyframes wird avisplit/avimerge aus Transcode verwendet. Diese Art geht sehr schnell (fast wie das Kopieren der Dateien auf der Festplatte). Der Nachteil ist, dass die Schnittübergänge um mehrere Sekunden ungenau sind und nur avi-Quelldateien scheidbar sind.
-			<br><br>Für das framegenaue Schneiden wird das Programm avcut verwendet. Avcut schneidet im Gegensatz zu avisplit framegenau, allerdings ergeben sich daraus erhöhte Anforderungen an die CPU und RAM (min. installiert: 1GB für HD-Aufnahmen und 500MB für HQ-Aufnahmen). Framegenaue Schnitte sind zeitintensiv.
+			<br><br>Smartrendering: Für das framegenaue Schneiden wird das Programm avcut verwendet. Avcut schneidet im Gegensatz zu avisplit framegenau, allerdings ergeben sich daraus erhöhte Anforderungen an die CPU und RAM (min. installiert: 1GB für HD-Aufnahmen und 500MB für HQ-Aufnahmen). Framegenaue Schnitte sind zeitintensiv.
 			<br><br>ACHTUNG: mit avcut geschnittene Filme werden derzeit sehr asynchron. Die Option der Konvertierung zu MP4 löst das Problem!</span></a>
 		</p>'
 	# WaitOfCutlist
