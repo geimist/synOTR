@@ -470,7 +470,7 @@ if [[ "$page" == "edit" ]]; then
 	echo '
 		<a class="helpbox" href="#HELP">
 			<img src="images/icon_information_mini@geimist.svg" height="25" width="25"/>
-			<span>Frameversatz, um Cuts manuell zu justieren (positive Werte verschieben jeden Cut nach hinten, negative nach vorn)<br><br>=> dieser Wert verschiebt den <b>Beginn</b> der gewünschten Filmteile beim framegenauen Schneiden</span></a>
+			<span>Frameversatz, um Cuts manuell zu justieren (positive Werte verschieben jeden Cut nach hinten, negative nach vorn)<br><br>=> dieser Wert verschiebt den <b>Beginn</b> der gewünschten Filmteile beim framegenauen Schneiden<br><br>(greift nur in Verbindung mit Smartrendering)</span></a>
 		</p>'
 	# FrameversatzEndeCut
 	echo '
@@ -484,7 +484,7 @@ if [[ "$page" == "edit" ]]; then
 	echo '
 		<a class="helpbox" href="#HELP">
 			<img src="images/icon_information_mini@geimist.svg" height="25" width="25"/>
-			<span>Frameversatz, um Cuts manuell zu justieren (positive Werte verschieben jeden Cut nach hinten, negative nach vorn)<br><br>=> dieser Wert verschiebt das <b>Ende</b> der gewünschten Filmteile beim framegenauen Schneiden</span></a>
+			<span>Frameversatz, um Cuts manuell zu justieren (positive Werte verschieben jeden Cut nach hinten, negative nach vorn)<br><br>=> dieser Wert verschiebt das <b>Ende</b> der gewünschten Filmteile beim framegenauen Schneiden<br><br>(greift nur in Verbindung mit Smartrendering)</span></a>
 		</p>
 	    </fieldset>
 	</p>
