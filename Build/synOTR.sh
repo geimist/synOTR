@@ -293,6 +293,20 @@
 #################################################################################################
 
 
+set -eE -o functrace
+
+failure()
+{
+# this function show error line
+# --------------------------------------------------------------
+    # https://unix.stackexchange.com/questions/462156/how-do-i-find-the-line-number-in-bash-when-an-error-occured
+    local lineno=$1
+    local msg=$2
+    echo "Failed at $lineno: $msg"
+}
+trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
+
+
 sec_to_time() 
 {
 #########################################################################################
