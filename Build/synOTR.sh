@@ -293,7 +293,7 @@
 #################################################################################################
 
 
-set -eE -o functrace
+#set -eE -o functrace
 
 failure()
 {
@@ -304,7 +304,7 @@ failure()
     local msg=$2
     echo "Failed at $lineno: $msg"
 }
-trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
+#trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
 
 
 sec_to_time() 
