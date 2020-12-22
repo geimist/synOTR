@@ -8,7 +8,8 @@
     echo "    -----------------------------------"
     echo -e
 
-    CLIENTVERSION=`get_key_value /var/packages/synOTR/INFO version`
+    CLIENTVERSION=$(get_key_value /var/packages/synOTR/INFO version)
+    set -E -o functrace         # for function failure()
     DevChannel="Release"        # beta [2019-10-16]
 
 # ---------------------------------------------------------------------------------
@@ -293,8 +294,6 @@
 #################################################################################################
 
 
-#set -eE -o functrace
-
 failure()
 {
 # this function show error line
@@ -304,7 +303,7 @@ failure()
     local msg=$2
     echo "Failed at $lineno: $msg"
 }
-#trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
+trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
 
 
 sec_to_time() 
