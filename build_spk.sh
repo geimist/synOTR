@@ -11,8 +11,8 @@
 #----------------------------------------------------------------------------------------
 # Ordnerstruktur:
 #----------------------------------------------------------------------------------------
-# ./APP --> Arbeitsumgebung (erstellen/editieren/verschieben)
-# ./PKG  --> Archivordner zum Aufbau des SPK (Startscripte etc.)
+# ./APP / Build --> Arbeitsumgebung (erstellen/editieren/verschieben)
+# ./PKG / Pack  --> Archivordner zum Aufbau des SPK (Startscripte etc.)
 #
 
 set -euo pipefail
@@ -110,16 +110,16 @@ fi
 # Rechte anpassen
 	echo ""
 	echo " - INFO: Dateirechte anpassen ..."
-	for i in $(find "${build_tmp}/APP/" -type f)
+	for i in $(find "${build_tmp}/$APP/" -type f)
         do
-        #    echo "ändere APP: $i"
+        #    echo "ändere $APP: $i"
             chmod 755 "$i"
             chown root:root "$i"
         done
 	
-	for i in $(find "${build_tmp}/PKG/" -type f)
+	for i in $(find "${build_tmp}/$PKG/" -type f)
         do
-        #    echo "ändere PKG: $i"
+        #    echo "ändere $PKG: $i"
             chmod 755 "$i"
             chown root:root "$i"
         done
