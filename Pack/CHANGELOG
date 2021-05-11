@@ -1,5 +1,9 @@
 Release Notes 
 
+4.2.1 (2021-05-11)
+ 	IMPLEMENTIERUNGEN:
+ -  Decoder (x86_64) aktualisiert
+
 4.2.0 (RELEASE)
  	IMPLEMENTIERUNGEN:
  -  die I/O-Priorität wurde herabgesetzt (möglicherweise nur auf x86_64 / i386 und ARMv7 ungetestet)
