@@ -28,7 +28,7 @@ trap finish EXIT
 
 #######
 
-project="synOCR"
+project="synOTR"
 
 #######
 
