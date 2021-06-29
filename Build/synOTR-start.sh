@@ -4,8 +4,16 @@
 
 # wurde das Skript von der GUI aufgerufen (Aufruf mit Parameter "GUI" für )?
     callFrom=$1
-    if [ -z $callFrom ] ; then
-        callFrom="shell"
+    if [[ ! $callFrom = GUI ]] ; then
+        callFrom=shell
+
+        # set admin permission to user synOTR for DSM7 and above
+        if [ $(synogetkeyvalue /etc.defaults/VERSION majorversion) -ge 7 ]; then
+            if ! cat /etc/group | grep ^administrators | grep -q synOTR ; then
+                echo "added user synOTR to group administrators ..."
+                sed -i "/^administrators:/ s/$/,synOTR/" /etc/group
+            fi
+        fi
     else
         callFrom="GUI"
     fi
