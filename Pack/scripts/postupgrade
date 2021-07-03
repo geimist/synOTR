@@ -30,9 +30,9 @@ TIMESTAMP=$(date +%Y-%m-%d%t%H:%M:%S)
 # -------------------------------------------------------------------------------------
 
 if [ -d "${SYNOPKG_TEMP_UPGRADE_FOLDER}" ]; then
-    cp -rf ${SYNOPKG_TEMP_UPGRADE_FOLDER}/etc/* ${WEBGUI_FOLDER}/app/etc
+    cp -rf ${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc/* ${WEBGUI_FOLDER}/app/etc
     chmod -R 755 ${WEBGUI_FOLDER}/app/etc
-    echo ''${TIMESTAMP}' - Restore the SQLite database from '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/etc to '${WEBGUI_FOLDER}'/etc' >>/tmp/${SYNOPKG_PKGNAME}.history
+    echo ''${TIMESTAMP}' - Restore the configuration from '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc to '${WEBGUI_FOLDER}'/app/etc' >>/tmp/${SYNOPKG_PKGNAME}.history
 
     # Konfiguration um neue Variablen ergänzen
     echo ''${TIMESTAMP}' - Add new variables to configuration file (upgradeconfig.sh)' >>/tmp/${SYNOPKG_PKGNAME}.history
