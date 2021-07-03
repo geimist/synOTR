@@ -1,11 +1,43 @@
 #!/bin/sh
 
-machinetyp=`uname --machine`
-device=`uname -a | awk -F_ '{print $NF}' | sed "s/+/plus/g" `
+# Script Environment Variables
+# -------------------------------------------------------------------------------------
+# SYNOPKG_PKGNAME               =   Package identify which is defined in INFO
+# SYNOPKG_PKGVER                =   Package version which is defined in INFO
+# SYNOPKG_PKGDEST               =   Package destination path
+#                                   /volume[x]/@appstore/[Package Name]
+# SYNOPKG_TEMP_UPGRADE_FOLDER   =   Temporary upgrade folder
+#                                   /volume1/@tmp/synopkg.tmp/[Package Name]
+# -------------------------------------------------------------------------------------
+
+
+# Important Paths, soft links and variables
+# -------------------------------------------------------------------------------------
+# DSM WebGUI folder
+# /usr/syno/synoman/webman/3rdparty/[Package Name] -> /var/packages/[Package Name]/target
+WEBGUI_FOLDER="/usr/syno/synoman/webman/3rdparty/${SYNOPKG_PKGNAME}"
+
+# Soft link
+# /var/packages/[Package Name]/target -> /volume1/@appstore/[Package Name]
+PACKAGE_FOLDER="/var/packages/${SYNOPKG_PKGNAME}/target/ui"
+
+# Timestamp - Formatting the Timestamp to terminate log entries
+TIMESTAMP=$(date +%Y-%m-%d%t%H:%M:%S)
+# -------------------------------------------------------------------------------------
+
+
+# Action...
+# -------------------------------------------------------------------------------------
+
+# prüft die Kompatibilität
+machinetyp=$(uname --machine)
+device=$( uname -a | awk -F_ '{print $NF}' | sed "s/+/plus/g" )
 
 if [ $machinetyp = "x86_64" ] || [ $machinetyp = "i686" ] || [ `echo $machinetyp | grep "armv7" ` ] || [ `echo $machinetyp | grep "armv8" ` ]; then
     exit 0
 else
-	echo "Dein Gerät (${device}) mit der CPU-Architektur ${machinetyp} wird von synOTR nicht unterstützt (nur x86_64, i686, armv7)" > $SYNOPKG_TEMP_LOGFILE
-	exit 1
+    echo "Dein Gerät (${device}) mit der CPU-Architektur ${machinetyp} wird von synOTR nicht unterstützt (nur x86_64, i686, armv7)" > $SYNOPKG_TEMP_LOGFILE
+    exit 1
 fi
+
+exit 0
