@@ -33,19 +33,19 @@ if [ ! -d "${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc" ]; then
     mkdir -p -m 755 ${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc
 fi
 
-echo ''${TIMESTAMP}' - Start package update --> '${SYNOPKG_PKGNAME}' '${SYNOPKG_PKGVER}'' #>>/tmp/${SYNOPKG_PKGNAME}.history
-echo '------------------------------------------------------------------------------------------------------------------------------------------' #>>/tmp/${SYNOPKG_PKGNAME}.history
+echo ''${TIMESTAMP}' - Start package update --> '${SYNOPKG_PKGNAME}' '${SYNOPKG_PKGVER}'' >>/tmp/${SYNOPKG_PKGNAME}.history
+echo '------------------------------------------------------------------------------------------------------------------------------------------' >>/tmp/${SYNOPKG_PKGNAME}.history
 
 if [ -d "${WEBGUI_FOLDER}/app/etc" ]; then
     cp -rf ${WEBGUI_FOLDER}/app/etc/* ${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc
-    echo ''${TIMESTAMP}' - Backup the configuration from '${WEBGUI_FOLDER}'/app/etc to '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc' #>>/tmp/${SYNOPKG_PKGNAME}.history
+    echo ''${TIMESTAMP}' - Backup the configuration from '${WEBGUI_FOLDER}'/app/etc to '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc' >>/tmp/${SYNOPKG_PKGNAME}.history
 elif [ -d "${WEBGUI_FOLDER}" ]; then # Userdateien liegen erst ab V.3.9.2 im Verzeichnis /app/etc
     cp -f "${WEBGUI_FOLDER}/Konfiguration.txt" "${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc/Konfiguration.txt"
     cp -f "${WEBGUI_FOLDER}/app/synOTR.sqlite" "${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc/synOTR.sqlite"
-    echo ''${TIMESTAMP}' - Backup Konfiguration.txt from '${WEBGUI_FOLDER}' to '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc' #>>/tmp/${SYNOPKG_PKGNAME}.history
-    echo ''${TIMESTAMP}' - Backup synOTR.sqlite from '${WEBGUI_FOLDER}'/app/ to '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc' #>>/tmp/${SYNOPKG_PKGNAME}.history
+    echo ''${TIMESTAMP}' - Backup Konfiguration.txt from '${WEBGUI_FOLDER}' to '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc' >>/tmp/${SYNOPKG_PKGNAME}.history
+    echo ''${TIMESTAMP}' - Backup synOTR.sqlite from '${WEBGUI_FOLDER}'/app/ to '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc' >>/tmp/${SYNOPKG_PKGNAME}.history
 else
-    echo ''${TIMESTAMP}' - Backup of the configuration failed' #>>/tmp/${SYNOPKG_PKGNAME}.history
+    echo ''${TIMESTAMP}' - Backup of the configuration failed' >>/tmp/${SYNOPKG_PKGNAME}.history
 fi
 
 
