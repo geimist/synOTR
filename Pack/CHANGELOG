@@ -1,5 +1,9 @@
 Release Notes 
 
+4.2.99 BETA (2021-0x-xx)
+  	IMPLEMENTIERUNGEN:
+  -  DSM7-Portierung
+ 
 4.2.1 (2021-05-11)
  	IMPLEMENTIERUNGEN:
  -  OTR-Decoder (x86_64) aktualisiert
