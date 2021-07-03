@@ -1,21 +1,89 @@
 #!/bin/bash
+# /usr/syno/synoman/webman/3rdparty/synOTR/index.cgi
+
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
 
-# Zugangsberechtigungen des DSM überprüfen (Syno-Token)
-login=$(php -f /volume*/@appstore/synOTR/includes/token.php) || exit
-login_user=$(echo $login | sed "s/.*user: //;s/ admin:.*//") || exit
-login_admin=$(echo $login | sed -e 's/.*admin: //') || exit
-if [ -n "$login" ]; then
-	if [[ "$login" != "0" ]] && [[ "$login_user" != "0" ]]; then
-		access="yes"
-	fi
-fi
+# System initiieren                                                      
+# ---------------------------------------------------------------------
+    machinetyp=$(uname --machine)
+    if [ $machinetyp = "x86_64" ]; then
+        include_synowebapi=synowebapi_x86_64
+    elif [ $machinetyp = "i686" ]; then
+        include_synowebapi=synowebapi_i686
+    elif [ $machinetyp = "armv7" ]; then
+        include_synowebapi=synowebapi_armv7
+    fi
 
-# Script beenden wenn Zugang nicht gewährt
-if [ -z "$access" ]; then
-	exit
-else
-    # Benutzerordner initiieren
+    app_name="synOTR"
+    app_home=$(echo /volume*/@appstore/${app_name}/ui)
+    [ ! -d "${app_home}" ] && exit
+
+# Zurücksetzten möglicher Zugangsberechtigungen
+    unset syno_login syno_token syno_user user_exist is_admin is_privileged
+
+
+# DSM - SynoToken einlesen, überprüfen und an QUERY_STRING übergeben  
+# ---------------------------------------------------------------------
+# REQUEST_METHOD auf GET ändern, damit der SynoToken ausgewertet werden kann
+    [[ "${REQUEST_METHOD}" == "POST" ]] && REQUEST_METHOD="GET" && OLD_REQUEST_METHOD="POST"
+
+# Lokalisierung der login.cgi zum extrahieren des SynoToken
+    syno_login=$(/usr/syno/synoman/webman/login.cgi)
+
+# Auslesen des SynoToken aus der login.cgi
+    if echo ${syno_login} | grep -q SynoToken ; then
+        syno_token=$(echo "${syno_login}" | grep SynoToken | cut -d ":" -f2| cut -d '"' -f2)
+    else
+        exit
+    fi
+
+# Füge den SynoToken dem QUERY_STRING hinzu
+    [ -z ${QUERY_STRING} ] && QUERY_STRING="SynoToken=${syno_token}" || QUERY_STRING="${QUERY_STRING}&SynoToken=${syno_token}"
+
+# Prüfen, ob der SynoToken dem System übergeben wurde
+    [ -z "${syno_token}" ] && exit
+
+# REQUEST_METHOD wieder zurück auf POST setzen
+    [[ "${OLD_REQUEST_METHOD}" == "POST" ]] && REQUEST_METHOD="POST" && unset OLD_REQUEST_METHOD
+
+
+
+# DSM - Angemeldeten Benutzer einlesen und Berechtigung überprüfen       
+# ---------------------------------------------------------------------
+# Lokalisierung der authenticate.cgi zum extrahieren des angemeldeten Benutzers
+    syno_user=$(/usr/syno/synoman/webman/authenticate.cgi)
+
+# Prüfen, ob der Benutzer existiert
+    user_exist=$(grep -o "^${syno_user}:" /etc/passwd)
+    [ -n "${user_exist}" ] && user_exist="yes" || exit
+
+# Prüfen, ob der lokale Benutzer der Gruppe "administrators" angehört
+    if id -G "${syno_user}" | grep -q 101; then
+        is_admin="yes"
+    else
+        is_admin="no"
+    fi
+
+# Prüfen, ob der Benutzer über die nötige Authentifizierung auf App-Ebene verfügt
+    if [ -f "${app_home}/includes/$include_synowebapi" ] ; then
+        rar_data=$($app_home/includes/$include_synowebapi --exec api=SYNO.Core.Desktop.Initdata method=get version=1 runner="$syno_user" | jq '.data.AppPrivilege')
+        syno_privilege=$(echo "${rar_data}" | grep "SYNO.SDS.ThirdParty.App.${app_name}" | cut -d ":" -f2 | cut -d '"' -f2)
+        if echo "${syno_privilege}" | grep -q "true"; then
+            is_authenticated="yes"
+        else
+            is_authenticated="no"
+        fi
+    else
+        is_authenticated="no"
+        txtActivatePrivileg="<b>To enable app level authentication do...</b><br /><b>root@[local-machine]:~#</b> cp /usr/syno/bin/synowebapi /var/packages/${app_name}/target/ui/modules<br /><b>root@[local-machine]:~#</b> chown ${app_name}.${app_name} /var/packages/$MYPKG/target/ui/modules/synowebapi"
+    fi
+
+# Zugangsberechtigungen und Privilegien zum Schutz auf "readonly" setzen oder leeren
+    unset syno_login rar_data syno_privilege
+    readonly syno_token syno_user user_exist is_admin is_authenticated
+
+# ---------------------------------------------------------------------
+	# Benutzerordner initiieren
 	dir=$(echo /volume*/@appstore/synOTR) || exit
 	get_var=$(which get_key_value) || exit
 	set_var=$(which synosetkeyvalue) || exit
@@ -41,7 +109,6 @@ else
     # MAC-Adresse auslesen (um DEV-Seiten zu verstecken)
     read MAC </sys/class/net/eth0/address
 	sysID=`echo $MAC | cksum | awk '{print $1}'`; sysID="$(printf '%010d' $sysID)" #echo "Prüfsumme der MAC-Adresse als Hardware-ID: $sysID" 10-stellig
-fi
 
 
 if [ -z "$backifs" ]; then
@@ -130,10 +197,10 @@ else
 fi
 
 #    #if [[ "$customizedConfig" == "1" ]]; then # Flag "$customizedConfig" soll beim speichern der Einstellungen automatisch in der Config gesetzt werden. Erst dann wird der Timer angezeigt
-        if [[ "$mainpage" == "timer" ]]; then
+        if [[ "$mainpage" == "timer" ]] && [[ $(synogetkeyvalue /etc.defaults/VERSION majorversion) -lt 7 ]]; then
         	echo '
         	<li><a class="navitemselc" href="index.cgi?page=timer"><img class="svg" src="images/calendar_white@geimist.svg" height="25" width="25"/>Zeitplaner</a></li>'
-        else
+        elif [[ $(synogetkeyvalue /etc.defaults/VERSION majorversion) -lt 7 ]]; then
         	echo '
         	<li><a class="navitem" href="index.cgi?page=timer"><img class="svg" src="images/calendar_grey3@geimist.svg" height="25" width="25"/>Zeitplaner</a></li>'
         fi
