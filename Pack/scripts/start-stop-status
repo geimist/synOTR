@@ -35,25 +35,25 @@ MYID=$(id)
 case $1 in
     start)
         echo "Starting..."
-	echo ''${TIMESTAMP}' - Start as '${MYID}'' >/tmp/${SYNOPKG_PKGNAME}.start
-	exit 0
+        echo ''${TIMESTAMP}' - Start as '${MYID}'' >/tmp/${SYNOPKG_PKGNAME}.start
+        exit 0
       ;;
     stop)
         echo "Stopping..."
-	echo ''${TIMESTAMP}' - Stop as '${MYID}'' >/tmp/${SYNOPKG_PKGNAME}.stop
-	exit 0
-        ;;
+        echo ''${TIMESTAMP}' - Stop as '${MYID}'' >/tmp/${SYNOPKG_PKGNAME}.stop
+        exit 0
+      ;;
     status)
         [ ! -t 1 ] || echo ''${TIMESTAMP}' - Running as '${MYLOGIN}' with '${MYID}'...'
-	echo ''${TIMESTAMP}' - Running as '${MYLOGIN}' with '${MYID}'' >/tmp/${SYNOPKG_PKGNAME}.status
-	exit 0
-        ;;
+        echo ''${TIMESTAMP}' - Running as '${MYLOGIN}' with '${MYID}'' >/tmp/${SYNOPKG_PKGNAME}.status
+        exit 0
+      ;;
     login)
-	echo ''${TIMESTAMP}' - Running as '${MYLOGIN}' with '${MYID}'...'
-	exit 0
-        ;;
+        echo ''${TIMESTAMP}' - Running as '${MYLOGIN}' with '${MYID}'...'
+        exit 0
+      ;;
     *)
-	echo ''${TIMESTAMP}' - Usage '${MYLOGIN}' start | stop | status | login'
+        echo ''${TIMESTAMP}' - Usage '${MYLOGIN}' start | stop | status | login'
         exit 1
-        ;;
+      ;;
 esac
