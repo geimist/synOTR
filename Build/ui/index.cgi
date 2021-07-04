@@ -84,7 +84,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
 
 # ---------------------------------------------------------------------
 	# Benutzerordner initiieren
-	dir=$(echo /volume*/@appstore/synOTR) || exit
+	dir=$(echo /volume*/@appstore/synOTR/ui) || exit
 	get_var=$(which get_key_value) || exit
 	set_var=$(which synosetkeyvalue) || exit
 	usersettings="$dir/usersettings"
