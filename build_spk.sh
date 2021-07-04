@@ -106,23 +106,27 @@ if test -d "${build_tmp}/.helptoc"; then
 	echo " - INFO: Versteckter Ordner /.helptoc wurde lokalisiert und nach /helptoc umbenannt"
 	mv "${build_tmp}/.helptoc" "${build_tmp}/helptoc"
 fi
+ 
+# create empty dirs:
+    [ ! -d "${build_tmp}/$APP/cfg" ] && mkdir "${build_tmp}/$APP/cfg"
+    [ ! -d "${build_tmp}/$APP/log" ] && mkdir "${build_tmp}/$APP/log"
 
 # Rechte anpassen
 	echo ""
 	echo " - INFO: Dateirechte anpassen ..."
-	for i in $(find "${build_tmp}/$APP/" -type f)
-        do
-        #    echo "ändere $APP: $i"
-            chmod 755 "$i"
-            chown root:root "$i"
-        done
+#   for i in $(find "${build_tmp}/$APP/" -type f); do
+    for i in $(find "${build_tmp}/$APP/"); do
+    #   echo "ändere $APP: $i"
+        chmod 755 "$i"
+    #   chown root:root "$i"
+    done
 	
-	for i in $(find "${build_tmp}/$PKG/" -type f)
-        do
-        #    echo "ändere $PKG: $i"
-            chmod 755 "$i"
-            chown root:root "$i"
-        done
+#   for i in $(find "${build_tmp}/$PKG/" -type f); do
+    for i in $(find "${build_tmp}/$PKG/"); do
+    #   echo "ändere $PKG: $i"
+        chmod 755 "$i"
+    #   chown root:root "$i"
+    done
 
 # Packen und Ablegen der aktuellen Installation in den entsprechenden /Pack - Ordner
 echo ""
