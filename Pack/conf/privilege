@@ -3,5 +3,5 @@
 	    "run-as": "package"
     },
     "username": "synOTR",
-    "join-groupname": "administrators"
+    "join-groupname": "system"
 }
