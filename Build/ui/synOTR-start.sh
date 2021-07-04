@@ -16,6 +16,14 @@
         fi
     else
         callFrom="GUI"
+        if [ $(synogetkeyvalue /etc.defaults/VERSION majorversion) -ge 7 ]; then
+            if ! cat /etc/group | grep ^administrators | grep -q synOTR ; then
+                echo '<p class="center" style="color: #BD0010;">Führe zunächst als root das nachstehende Skript im DSM-Aufgabenplaner aus ...<br /><br /></p>
+                <code><span style="background-color:#cccccc;font-hight:1.1em;">/usr/syno/synoman/webman/3rdparty/synOCR/synOCR-start.sh</span></code>'
+                sleep 5
+                exit
+            fi
+        fi
     fi
 
 # Arbeitsverzeichnis auslesen und hineinwechseln:
