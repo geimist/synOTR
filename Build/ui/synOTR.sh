@@ -2918,7 +2918,7 @@ for i in $(ls -tr "${logdir}" | egrep -o '^synOTR.*.log$')                   # A
     done
 
 # überzählige Logs löschen:
-count2del=$( expr $( ls -t "${logdir}" | egrep -o '^synOTR.*.log$' | wc -l ) - $LOGmax ) # wie viele Dateien sind überzählig
+count2del=$(( $( ls -t "${logdir}" | egrep -o '^synOTR.*.log$' | wc -l ) - $LOGmax )) # wie viele Dateien sind überzählig
 if [ $count2del -ge 0 ]; then
     for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' | head -n${count2del} `
         do
@@ -2931,7 +2931,7 @@ if [ $count2del -ge 0 ]; then
 fi
 
 # überzählige searches löschen:
-count2del=$( expr $(ls -t "${logdir}" | egrep -o '^search.*.xml$' | wc -l) - $LOGmax )
+count2del=$(($(ls -t "${logdir}" | egrep -o '^search.*.xml$' | wc -l) - $LOGmax ))
 if [ ${count2del} -ge 0 ]; then
     for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml$' | head -n${count2del} `
         do
@@ -2944,7 +2944,7 @@ if [ ${count2del} -ge 0 ]; then
 fi
 
 # überzählige cutlists löschen:
-count2del=$( expr $(ls -t "${logdir}" | egrep -o '.*.cutlist$' | wc -l) - $LOGmax )
+count2del=$(($(ls -t "${logdir}" | egrep -o '.*.cutlist$' | wc -l) - $LOGmax ))
 if [ ${count2del} -ge 0 ]; then
     for i in `ls -tr "${logdir}" | egrep -o '.*.cutlist$' | head -n${count2del} `
         do
@@ -2983,6 +2983,6 @@ fi
     echo "    -----------------------------------"
     echo "    |       ==> synOTR ENDE <==       |"
     echo "    -----------------------------------"
-    echo -e; echo "    Gesamtzeit: $(sec_to_time $(expr $(date +%s)-${UNIXTIME}) )"
+    echo -e; echo "    Gesamtzeit: $(sec_to_time $(( $(date +%s)-${UNIXTIME})))"
 
 exit
