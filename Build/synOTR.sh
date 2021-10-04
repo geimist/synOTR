@@ -329,7 +329,7 @@ sec_to_time()
 MovieDB_query() 
 {
 #########################################################################################
-# Diese Funktion sucht auf theTVDB.com nach Serieninformationen                         #
+# Diese Funktion sucht auf MovieDB.com nach Filminformationen                         #
 #########################################################################################
 
     echo -e
