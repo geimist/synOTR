@@ -48,12 +48,6 @@ else
     echo ''${TIMESTAMP}' - Backup of the configuration failed' >>/tmp/${SYNOPKG_PKGNAME}.history
 fi
 
-# erstelle benötigte Symlinks:
-[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libcurl.so.3 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libcurl.so.4 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libcurl.so.3
-[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libidn2.so.0 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libidn2.so.0.1.4 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libidn2.so.0
-[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libpsl.so.5 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libpsl.so.5.1.1 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libpsl.so.5
-[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libunistring.so.0 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libunistring.so.0.1.2 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libunistring.so.0
-
 
 #if [ -d "/tmp/synOTR" ]; then
 #    rm -r /tmp/synOTR
