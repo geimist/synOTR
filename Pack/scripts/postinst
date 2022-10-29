@@ -22,6 +22,12 @@ WEBGUI_FOLDER="/usr/syno/synoman/webman/3rdparty/${SYNOPKG_PKGNAME}"
 # /var/packages/[Package Name]/target -> /volume1/@appstore/[Package Name]
 PACKAGE_FOLDER="/var/packages/${SYNOPKG_PKGNAME}/target/ui"
 
+# erstelle benötigte Symlinks:
+[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libcurl.so.3 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libcurl.so.4 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libcurl.so.3
+[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libidn2.so.0 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libidn2.so.0.1.4 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libidn2.so.0
+[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libpsl.so.5 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libpsl.so.5.1.1 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libpsl.so.5
+[ ! -h /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libunistring.so.0 ] && ln -s /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libunistring.so.0.1.2 /usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l/libunistring.so.0
+
 # Timestamp - Formatting the Timestamp to terminate log entries
 TIMESTAMP=$(date +%Y-%m-%d%t%H:%M:%S)
 # -------------------------------------------------------------------------------------
