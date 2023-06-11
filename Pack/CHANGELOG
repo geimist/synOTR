@@ -1,5 +1,9 @@
 Release Notes 
 
+4.2.2 (2023-06-11)
+ 	IMPLEMENTIERUNGEN:
+ -  OTR-Decoder (x86_64) für DSM7.2 ergänzt
+
 4.2.1 (2021-05-11)
  	IMPLEMENTIERUNGEN:
  -  OTR-Decoder (x86_64) aktualisiert
