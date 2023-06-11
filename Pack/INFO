@@ -1,6 +1,6 @@
 package="synOTR"
 displayname="synOTR"
-version="4.2.901"
+version="4.3.0"
 firmware="7.0"
 os_min_ver="7.0-4000"
 reloadui="yes"
