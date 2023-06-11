@@ -10,7 +10,7 @@
 
     CLIENTVERSION=$(get_key_value /var/packages/synOTR/INFO version)
     set -E -o functrace         # for function failure()
-    DevChannel="Release"        # beta [2019-10-16]
+    DevChannel="Release"        # beta [2023-06-11]
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
@@ -660,7 +660,12 @@ if [ $decoderactiv = "on" ] && [ ! -z "$filetest" ] ; then
             echo -n "                          "; date
 
             if [ $machinetyp = "x86_64" ]; then
-                otrdecoderLOG=$(otrdecoder64 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
+                if [ "$(synogetkeyvalue /etc.defaults/VERSION buildnumber)" -ge 60000 ]; then
+                    # verwende passenden Decoder ab DSM7.2:
+                    otrdecoderLOG=$(otrdecoder64_72 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
+                else
+                    otrdecoderLOG=$(otrdecoder64 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
+                fi
             elif [ $machinetyp = "i686" ]; then
                 otrdecoderLOG=$(otrdecoder32 -q -i "$i" -o "$DECODIR" -e "$OTRuser" -p "$OTRpw" 2>&1)
             elif [ `echo $machinetyp | grep "armv" ` ] ; then
