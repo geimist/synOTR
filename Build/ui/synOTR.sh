@@ -10,7 +10,7 @@
 
     CLIENTVERSION=$(get_key_value /var/packages/synOTR/INFO version)
     set -E -o functrace         # for function failure()
-    DevChannel="Release"        # beta [2023-06-11]
+    DevChannel="Release"        # [2023-08-18]
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
@@ -122,14 +122,17 @@
         synOTR_PATH=$PATH:${APPDIR}/app/bin
         bsy="${APPDIR}/app/bin/busybox"
     #	ffmpeg="${APPDIR}/app/bin/ffmpeg"
-        ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
+    #   ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
+        ffmpeg="/usr/local/bin/ffmpeg6" # ffmpeg 6 von synocommunity
         avcut="${APPDIR}/app/bin/avcut64"
         ionice="${APPDIR}/app/bin/ionice64"
     elif [ `echo $machinetyp | grep "armv7" ` ] ; then
         synOTR_LD_LIBRARY_PATH=${APPDIR}/app/libARMv7l:$LD_LIBRARY_PATH
         synOTR_PATH=$PATH:${APPDIR}/app/binARMv7l:/opt/bin
         bsy="${APPDIR}/app/binARMv7l/busybox"
-        ffmpeg="${APPDIR}/app/binARMv7l/ffmpeg"
+    #   ffmpeg="${APPDIR}/app/binARMv7l/ffmpeg"
+    #   ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
+        ffmpeg="/usr/local/bin/ffmpeg6" # ffmpeg 6 von synocommunity
         avcut="${APPDIR}/app/binARMv7l/avcut"
         if [[ `uname -a | grep "armadaxp" ` ]] ; then
             echo "                          alternative avcut-Version ohne asm wird verwendet"
@@ -139,7 +142,8 @@
     elif [ $machinetyp = "i686" ] ; then
         bsy="${APPDIR}/app/bin/busybox"
     #	ffmpeg="${APPDIR}/app/bin/ffmpeg"
-        ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
+    #   ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
+        ffmpeg="/usr/local/bin/ffmpeg6" # ffmpeg 6 von synocommunity
         avcut="${APPDIR}/app/bin/avcut32"
         synOTR_LD_LIBRARY_PATH=$SAVED_LD_LIBRARY_PATH
         synOTR_PATH=$PATH:${APPDIR}/app/bin
@@ -1868,9 +1872,10 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             echo -n "                          "; date; echo -e
 
             title=${title%.*}
-            fileinfo=$($ffmpeg -i "$i" 2>&1)
-            ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
+#           fileinfo=$($ffmpeg -i "$i" 2>&1)
+#           fileinfo=$($ffmpeg -i "$i" -f null - 2>&1)
 
+            ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
             # Errormeldung vor jason ab DSM 6.2 (wird hier abgeschnitten): ERROR: 
             # ld.so: object 'openhook.so' from LD_PRELOAD cannot be preloaded (cannot open shared object file): ignored. { …
             ffprobeInfo="{ ${ffprobeInfo#*\{}"  
@@ -1899,7 +1904,8 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             echo "Audiocodec:               $audiocodec"
 
             #	------- VIDEOCODEC:
-            videocodec=`echo "$fileinfo" | grep "Video:" | $bsy awk '{print $4}'` 
+            videocodec=$(echo "${ffprobeInfo}" | jq -r '.streams[0].codec_tag_string' | tr '[:upper:]' '[:lower:]' )   # | sed "s/\"//g"
+
             if [ $videocodec = "mpeg4" ] ; then
                     videocodec="divx"
                     vExt="tmp.m4v"; 
@@ -2121,7 +2127,6 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
         echo "Fileextension:            $fileextension"
 
         #	------------------ technische Filmdaten via ffmpeg und ffprobe auslesen:
-        fileinfo=$(ffmpeg -i "$i" 2>&1)
         ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
 
             # Errormeldung vor jason ab DSM 6.2 (wird hier abgeschnitten): ERROR: 
@@ -2129,7 +2134,6 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
             ffprobeInfo="{ ${ffprobeInfo#*\{}"  
 
         if [ $LOGlevel = "2" ] ; then
-            echo "Dateiinformation von ffmpeg ausgelesen:"; echo "$fileinfo"; echo -e
             echo "Dateiinformation von ffprobe ausgelesen:"; echo "$ffprobeInfo"; echo -e
         fi
 
