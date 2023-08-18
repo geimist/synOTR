@@ -122,17 +122,14 @@
         synOTR_PATH=$PATH:${APPDIR}/app/bin
         bsy="${APPDIR}/app/bin/busybox"
     #	ffmpeg="${APPDIR}/app/bin/ffmpeg"
-    #   ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
-        ffmpeg="/usr/local/bin/ffmpeg6" # ffmpeg 6 von synocommunity
+        ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
         avcut="${APPDIR}/app/bin/avcut64"
         ionice="${APPDIR}/app/bin/ionice64"
     elif [ `echo $machinetyp | grep "armv7" ` ] ; then
         synOTR_LD_LIBRARY_PATH=${APPDIR}/app/libARMv7l:$LD_LIBRARY_PATH
         synOTR_PATH=$PATH:${APPDIR}/app/binARMv7l:/opt/bin
         bsy="${APPDIR}/app/binARMv7l/busybox"
-    #   ffmpeg="${APPDIR}/app/binARMv7l/ffmpeg"
-    #   ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
-        ffmpeg="/usr/local/bin/ffmpeg6" # ffmpeg 6 von synocommunity
+        ffmpeg="${APPDIR}/app/binARMv7l/ffmpeg"
         avcut="${APPDIR}/app/binARMv7l/avcut"
         if [[ `uname -a | grep "armadaxp" ` ]] ; then
             echo "                          alternative avcut-Version ohne asm wird verwendet"
@@ -142,8 +139,7 @@
     elif [ $machinetyp = "i686" ] ; then
         bsy="${APPDIR}/app/bin/busybox"
     #	ffmpeg="${APPDIR}/app/bin/ffmpeg"
-    #   ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
-        ffmpeg="/usr/local/bin/ffmpeg6" # ffmpeg 6 von synocommunity
+        ffmpeg=`which ffmpeg` # mitgeliefertes ffmpeg läuft derzeit nicht korrekt
         avcut="${APPDIR}/app/bin/avcut32"
         synOTR_LD_LIBRARY_PATH=$SAVED_LD_LIBRARY_PATH
         synOTR_PATH=$PATH:${APPDIR}/app/bin
@@ -333,7 +329,7 @@ sec_to_time()
 MovieDB_query() 
 {
 #########################################################################################
-# Diese Funktion sucht auf theTVDB.com nach Serieninformationen                         #
+# Diese Funktion sucht auf MovieDB.com nach Filminformationen                         #
 #########################################################################################
 
     echo -e
@@ -1872,10 +1868,9 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             echo -n "                          "; date; echo -e
 
             title=${title%.*}
-#           fileinfo=$($ffmpeg -i "$i" 2>&1)
-#           fileinfo=$($ffmpeg -i "$i" -f null - 2>&1)
-
+            fileinfo=$($ffmpeg -i "$i" 2>&1)
             ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
+
             # Errormeldung vor jason ab DSM 6.2 (wird hier abgeschnitten): ERROR: 
             # ld.so: object 'openhook.so' from LD_PRELOAD cannot be preloaded (cannot open shared object file): ignored. { …
             ffprobeInfo="{ ${ffprobeInfo#*\{}"  
@@ -1904,8 +1899,7 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
             echo "Audiocodec:               $audiocodec"
 
             #	------- VIDEOCODEC:
-            videocodec=$(echo "${ffprobeInfo}" | jq -r '.streams[0].codec_tag_string' | tr '[:upper:]' '[:lower:]' )   # | sed "s/\"//g"
-
+            videocodec=`echo "$fileinfo" | grep "Video:" | $bsy awk '{print $4}'` 
             if [ $videocodec = "mpeg4" ] ; then
                     videocodec="divx"
                     vExt="tmp.m4v"; 
@@ -2127,6 +2121,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
         echo "Fileextension:            $fileextension"
 
         #	------------------ technische Filmdaten via ffmpeg und ffprobe auslesen:
+        fileinfo=$(ffmpeg -i "$i" 2>&1)
         ffprobeInfo=$(ffprobe -v quiet -print_format json -show_format -show_streams "$i" 2>&1)
 
             # Errormeldung vor jason ab DSM 6.2 (wird hier abgeschnitten): ERROR: 
@@ -2134,6 +2129,7 @@ for i in $(find "$WORKDIR" -maxdepth 1 -name "*TVOON*avi" -o -name "*TVOON*mp4" 
             ffprobeInfo="{ ${ffprobeInfo#*\{}"  
 
         if [ $LOGlevel = "2" ] ; then
+            echo "Dateiinformation von ffmpeg ausgelesen:"; echo "$fileinfo"; echo -e
             echo "Dateiinformation von ffprobe ausgelesen:"; echo "$ffprobeInfo"; echo -e
         fi
 
@@ -2927,7 +2923,7 @@ for i in $(ls -tr "${logdir}" | egrep -o '^synOTR.*.log$')                   # A
     done
 
 # überzählige Logs löschen:
-count2del=$(( $( ls -t "${logdir}" | egrep -o '^synOTR.*.log$' | wc -l ) - $LOGmax )) # wie viele Dateien sind überzählig
+count2del=$( expr $( ls -t "${logdir}" | egrep -o '^synOTR.*.log$' | wc -l ) - $LOGmax ) # wie viele Dateien sind überzählig
 if [ $count2del -ge 0 ]; then
     for i in `ls -tr "${logdir}" | egrep -o '^synOTR.*.log$' | head -n${count2del} `
         do
@@ -2940,7 +2936,7 @@ if [ $count2del -ge 0 ]; then
 fi
 
 # überzählige searches löschen:
-count2del=$(($(ls -t "${logdir}" | egrep -o '^search.*.xml$' | wc -l) - $LOGmax ))
+count2del=$( expr $(ls -t "${logdir}" | egrep -o '^search.*.xml$' | wc -l) - $LOGmax )
 if [ ${count2del} -ge 0 ]; then
     for i in `ls -tr "${logdir}" | egrep -o '^search.*.xml$' | head -n${count2del} `
         do
@@ -2953,7 +2949,7 @@ if [ ${count2del} -ge 0 ]; then
 fi
 
 # überzählige cutlists löschen:
-count2del=$(($(ls -t "${logdir}" | egrep -o '.*.cutlist$' | wc -l) - $LOGmax ))
+count2del=$( expr $(ls -t "${logdir}" | egrep -o '.*.cutlist$' | wc -l) - $LOGmax )
 if [ ${count2del} -ge 0 ]; then
     for i in `ls -tr "${logdir}" | egrep -o '.*.cutlist$' | head -n${count2del} `
         do
@@ -2992,6 +2988,6 @@ fi
     echo "    -----------------------------------"
     echo "    |       ==> synOTR ENDE <==       |"
     echo "    -----------------------------------"
-    echo -e; echo "    Gesamtzeit: $(sec_to_time $(( $(date +%s)-${UNIXTIME})))"
+    echo -e; echo "    Gesamtzeit: $(sec_to_time $(expr $(date +%s)-${UNIXTIME}) )"
 
 exit
