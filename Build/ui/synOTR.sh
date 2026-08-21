@@ -1948,9 +1948,16 @@ if [ $OTRavi2mp4active = "on" ] && [ ! -z "$filetest" ] ; then
                     echo "Erkannter Encoder:        fdk-aac [1.Wahl]"
                     if [ $normalizeAudio = "on" ] ; then
                         #	------- Audio normalisieren:
-                        volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g') 
+                        volumeinfo=$(ffmpeg -i "$audiofile"  -af "volumedetect" -f null - 2>&1 | awk '-F: ' '/max_volume/ { gsub(/ .*/, "", $2); print $2 }' | sed 's/-//g') # |grep max_volume | awk -F: '{ print $2 }' | sed 's/ dB//g' | sed 's/ -//g')
                         echo "Lautstärkeanhebung um:    $volumeinfo dB"
                         convertLOG=$($ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" -af "volume=$volumeinfo"dB "$audiofile.m4a" 2>&1)
+                        # TODO(convert_audio_parallel): lokale NAS-Integration – parallelisierte AAC-Konvertierung
+                        # Herkunft: Live-Installation @appstore/synOTR/ui/synOTR.sh (Stand 2025-09-23)
+                        # Skript war installationsspezifisch: /volume1/homes/admin/script/_funktionen/convert_audio_parallel.sh
+                        # Später: Hilfsfunktion ins Paket übernehmen (oder konfigurierbaren Pfad), dann aktivieren und oberen convertLOG ersetzen.
+                        # Siehe auch: NOTES.md → Abschnitt "convert_audio_parallel"
+                        # source /volume1/homes/admin/script/_funktionen/convert_audio_parallel.sh
+                        # convertLOG=$(convert_audio_parallel "$audiofile" "$audiofile.m4a" "-c:a libfdk_aac -b:a ${OTRaacqal%k}k -af volume=${volumeinfo}dB" 2>&1)
                     else
                         convertLOG=$($ffmpeg -threads 2 -loglevel $ffloglevel -i "$audiofile" -c:a libfdk_aac -b:a "${OTRaacqal%k}k" "$audiofile.m4a" 2>&1)
                     fi
