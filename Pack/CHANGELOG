@@ -3,6 +3,7 @@ Release Notes
 4.3.1 (2023-08-18)
  	BUGFIXES:
  -  Wechsel von DSM-ffmpeg zu 3rdParty-ffmpeg6 (zu installieren von hier: https://synocommunity.com/package/ffmpeg6)
+ -  DSM7-UI wird wieder als iFrame im DSM-Fenster eingebettet (statt neuem Browserfenster)
  
 4.3.0 (2023-06-11)
  	IMPLEMENTIERUNGEN:

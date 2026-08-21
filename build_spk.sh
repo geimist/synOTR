@@ -43,15 +43,15 @@ if ! [ -x "$(command -v git)" ]; then
 	fi
 fi
 
-if ! [ -x "$(command -v fakeroot)" ]; then
-	if [ "$(whoami)" != "root" ]; then
-		echo "WARNUNG: fakeroot ist nicht installiert und du bist auch nicht root!" >&2
-		exit 1
-	else
-		FAKEROOT=""
-	fi
-else
+# fakeroot is useful on Linux (uid 0 in the archive). On macOS it does not
+# remap owners through bsdtar and evals the command line – skip it there.
+FAKEROOT=""
+if [ "$(uname -s)" = Darwin ]; then
+	:
+elif [ -x "$(command -v fakeroot)" ]; then
 	FAKEROOT=$(command -v fakeroot)
+elif [ "$(whoami)" != "root" ]; then
+	echo "WARNUNG: fakeroot ist nicht installiert – SPK wird ohne root-Owner gebaut." >&2
 fi
 
 # ustar is what DSM expects; macOS bsdtar defaults to pax with xattr headers.

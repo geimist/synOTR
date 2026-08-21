@@ -1,0 +1,21 @@
+{
+    "defaults": {
+        "run-as": "package"
+    },
+    "username": "synOTR",
+    "join-groupname": "system",
+    "api-access": {
+        "SYNO.API.Info": {
+            "allowed": ["query"]
+        },
+        "SYNO.API.Auth": {
+            "allowed": ["token"]
+        },
+        "SYNO.Core.Desktop": {
+            "allowed": ["getSessionData"]
+        }
+    },
+    "privilege": {
+        "allow-csrf": true
+    }
+}

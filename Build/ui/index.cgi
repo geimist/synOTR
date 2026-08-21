@@ -67,7 +67,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
 # Prüfen, ob der Benutzer über die nötige Authentifizierung auf App-Ebene verfügt
     if [ -f "${app_home}/includes/$include_synowebapi" ] ; then
         rar_data=$($app_home/includes/$include_synowebapi --exec api=SYNO.Core.Desktop.Initdata method=get version=1 runner="$syno_user" | jq '.data.AppPrivilege')
-        syno_privilege=$(echo "${rar_data}" | grep "SYNO.SDS.ThirdParty.App.${app_name}" | cut -d ":" -f2 | cut -d '"' -f2)
+        syno_privilege=$(echo "${rar_data}" | grep "SYNO.SDS.${app_name}.Application" | cut -d ":" -f2 | cut -d '"' -f2)
         if echo "${syno_privilege}" | grep -q "true"; then
             is_authenticated="yes"
         else

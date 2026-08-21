@@ -3,5 +3,8 @@
 	    "run-as": "package"
     },
     "username": "synOTR",
-    "join-groupname": "system"
+    "join-groupname": "system",
+    "privilege": {
+        "allow-csrf": true
+    }
 }

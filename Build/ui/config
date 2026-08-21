@@ -1,20 +1,28 @@
 {
-    ".url": {
-        "SYNO.SDS.ThirdParty.App.synOTR": {
-            "type": "legacy",
+    "synOTR.js": {
+        "SYNO.SDS.synOTR.Application": {
+            "type": "app",
             "title": "synOTR",
+            "appWindow": "SYNO.SDS.synOTR.MainWindow",
             "desc": "synOTR",
-            "allUsers": false,
+            "icon": "images\/synOTR_{0}.png",
             "allowMultiInstance": false,
+            "allowStandalone": true,
+            "allowSharing": true,
+            "allUsers": false,
             "grantPrivilege": "all",
             "advanceGrantPrivilege": true,
             "configablePrivilege": true,
-            "icon": "images/synOTR_{0}.png",
-            "appWindow": "SYNO.SDS.ThirdParty.App.synOTR",
             "texts": "texts",
-            "width": 992,
-            "height": 560,
-            "url": "/webman/3rdparty/synOTR/index.cgi"
-        }
+            "depend": ["SYNO.SDS.synOTR.MainWindow"]
+        },
+        "SYNO.SDS.synOTR.MainWindow": {
+            "type": "lib",
+            "title": "synOTR",
+            "icon": "images\/synOTR_{0}.png",
+            "texts": "texts",
+            "depend": ["SYNO.SDS.synOTR.Utils"]
+        },
+        "SYNO.SDS.synOTR.Utils": []
     }
 }
