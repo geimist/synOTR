@@ -1,6 +1,6 @@
 Release Notes 
 
-4.9.99.1 (2026-08-28)
+4.9.99.2 (2026-08-28)
  	IMPLEMENTIERUNGEN:
  -  OTR v3: Python-CLI-Decoder (.otr2 und .otrkey) statt der alten Binaries
  -  Python-Umgebung (venv) mit cryptography, mutagen und apprise; DSM-Python 3.8 oder neuer, sofern Wheels passen

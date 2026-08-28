@@ -140,11 +140,6 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
     # Konfiguration laden:
     source "${dir}/app/etc/Konfiguration.txt"
 
-    # MAC-Adresse auslesen (um DEV-Seiten zu verstecken)
-    read -r MAC </sys/class/net/eth0/address
-	sysID=$(echo "$MAC" | cksum | awk '{print $1}'); sysID="$(printf '%010d' "$sysID")"
-
-
 if [ -z "$backifs" ]; then
 	backifs="$IFS"
 	readonly backifs

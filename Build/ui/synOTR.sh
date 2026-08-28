@@ -10,7 +10,6 @@
 
     CLIENTVERSION=$(get_key_value /var/packages/synOTR/INFO version)
     set -E -o functrace         # for function failure()
-    DevChannel="Release"        # [2023-08-18]
 
 # ---------------------------------------------------------------------------------
 #           GRUNDKONFIGRUATIONEN / INDIVIDUELLE ANPASSUNGEN / Standardwerte       |
@@ -22,16 +21,12 @@
     normalizeAudio="on"         # Audiospur normalisieren (nur in Verbindung mit avi2mp4)
     parallelAudioConvert="on"   # AAC-Konvertierung parallel (nproc-1 Jobs; nur avi2mp4 / MP3-Quellspur)
     OTRotr2audio="both"         # otr2-Tonspuren im fertigen MP4: both | aac | ac3
-    autoupdate="off"
-    forceupdate="off"           # Updateaufruf ohne Prüfung erzwingen
-    synotrdomain="geimist.eu"   # notwendig für Update, Konsitenzprüfung, DEV-Report und evtl. in Zukunft zum abfragen der API-Keys
     endgueltigloeschen="off"    # das endgültige Löschen der Quelldateien erst einmal grundsätzlich deaktivieren
     # Frameversatz, um Cuts manuell zu justieren (positive Werte verschieben den Cut nach hinten, negative nach vorn):
     FrameversatzAnfangCut=1     # = verschiebt den Beginn des gewünschten Filmteils beim framegenauen Schneiden
     FrameversatzEndeCut=1       # = verschiebt das Ende des gewünschten Filmteils beim framegenauen Schneiden
     AudioDelayMs=0              # Tonversatz in ms beim ffmpeg-Remux (positiv = Ton später); leer/unset fällt auf MP4BOX_DELAY zurück
     niceness=15                 # Die Priorität liegt im Bereich von -20 bis +19 (in ganzzahligen Schritten), wobei -20 die höchste Priorität (=meiste Rechenleistung) und 19 die niedrigste Priorität (=geringste Rechenleistung) ist. Die Standardpriorität ist 0. AUF NEGATIVE WERTE SOLLTE UNBEDINGT VERZICHTET WERDEN!
-    DEBUGINFO="on"              # ich bin dankbar, wenn der Wert auf 'on' gestellt bleibt - deaktivieren sofern keine anonyme Systeminfo an den Entwickler gesendet werden darf (Installationstrigger beinhaltet folgende anonymen Geräteinfos: DSM-Build / Prüfsumme der MAC-Adresse als Hardware-ID [anonyme Zahlenfolge um Installationen zu zählen] / Architektur / Geräte-Typ) 
     WaitOfCutlist="on"          # mit dem weiterverarbeiten eines Filmes wird so lange gewartet, bis eine Cutlist verfügbar ist
     useallcutlistformat=0       # Cutlits für alternative Formate berücksichtigen
     timediff=1                  # Abweichung der Dateiänderungszeit in Minuten um laufende FTP-Pushaufträge nicht zu decodieren
@@ -91,14 +86,6 @@
     else
         lastjob=1
     fi
-
-# Aufgabenindex:
-# ---------------------------------------------------------------------
-    if [ "$decoderactiv" = "on" ] ; then  idx1=1 ; else  idx1=0 ; fi
-    if [ "$OTRcutactiv" = "on" ] ; then  idx2=1 ; else  idx2=0 ; fi
-    if [ "$OTRavi2mp4active" = "on" ];  then  idx3=1 ; else  idx3=0 ; fi
-    if [ "$OTRrenameactiv" = "on" ];  then  idx4=1 ; else  idx4=0 ; fi
-    idx=${idx1}${idx2}${idx3}${idx4}
 
 # DSM 7 wie synOCR: i18n-Keys plus Freitext als 5. Argument.
 # Der Text erscheint nur, wenn der String {0} enthält (ExtJS-Platzhalter).
@@ -163,9 +150,7 @@ sys.exit(0 if a.notify(title="synOTR", body=body) else 1)
     echo "synOTR-Version:           $CLIENTVERSION"
     machinetyp=$(uname --machine); echo "Architektur:              $machinetyp"
     dsmbuild=$(uname -v | awk '{print $1}' | sed "s/#//g"); echo "DSM-Build:                $dsmbuild"
-    read -r MAC </sys/class/net/eth0/address
-    sysID=$(echo "$MAC" | cksum | awk '{print $1}'); sysID="$(printf '%010d' "$sysID")" #echo "Prüfsumme der MAC-Adresse als Hardware-ID: $sysID" 10-stellig
-    device=$(uname -a | awk -F_ '{print $NF}' | sed "s/+/plus/g" ); echo "Gerät:                    $device ($sysID)"	    #  | sed "s/ds//g"
+    device=$(uname -a | awk -F_ '{print $NF}' | sed "s/+/plus/g" ); echo "Gerät:                    $device"
     # HD-otrkey: immer avisplit. otr2: avcut 0.8 bzw. ffmpeg-Keyframe.
     echo -n "                          RAM installiert:    "; RAMmax=$(free -m | grep 'Mem:' | awk '{print $2}'); echo "$RAMmax MB"	    # verbauter RAM
     echo -n "                          RAM verwendet:      "; RAMused=$(free -m | grep 'Mem:' | awk '{print $3}');	echo "$RAMused MB"  # genutzter RAM
@@ -750,8 +735,6 @@ echo -e ;
             fi
         fi
         missSeries=0
-        # shellcheck disable=SC2086
-        wget --timeout=30 --tries=2 $wgetloglevel -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT_TVDB" >/dev/null 2>&1
     else
         echo -e "Keine Serieninformationen auf theTVDB.com gefunden."
         if [ "$LOGlevel" = "2" ] ; then
@@ -869,7 +852,6 @@ OTRdecoder()
                             fi
                             mv "${DECODIR}/${videosourcetitle}.ac3tmp.avi" "${DECODIR}/${videosourcetitle}.avi"
                             echo "                          L==> fertig"
-                            wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT_AC3" >/dev/null 2>&1
                         else
                             echo "                          L==> muxen fehlgeschlagen [Datei im Zielverzeichnis nicht gefunden …]"; echo -e
                             echo "muxingLOG: $muxingLOG"
@@ -991,7 +973,6 @@ if [ "$decoderactiv" = "on" ] && [ ! -z "$filetest" ] ; then
                         sleep 1
                     fi
                     synotr_apprise_notify "Film [$filename] ist fertig."
-                    wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                 fi
         done
 elif [ "$decoderactiv" = "off" ] ; then
@@ -1914,7 +1895,6 @@ if [ "$OTRcutactiv" = "on" ] ; then
                         echo 2 > /dev/ttyS1 #short beep
                 fi
                 synotr_apprise_notify "Film [$filedestname] ist fertig."
-                wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
             fi
             synotr_cut_archive_source "$film"
         else
@@ -2117,7 +2097,6 @@ if [ "$OTRcutactiv" = "on" ] ; then
                         sleep 1
                     fi
                     synotr_apprise_notify "Film [$title] ist fertig."
-                    wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                 fi
                 SMARTRENDERING=$SMARTRENDERINGold
         done
@@ -2184,7 +2163,6 @@ if [ -n "$filetest" ] && { [ "$OTRcutactiv" = "on" ] || [ "$OTRavi2mp4active" = 
                         sleep 1
                     fi
                     synotr_apprise_notify "Film [${title%.*}] ist fertig."
-                    wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                 fi
             else
                 echo "FEHLER: Konvertierung nach MP4 fehlgeschlagen."
@@ -2534,7 +2512,6 @@ for i in $(find "$WORKDIR" -maxdepth 1 \( -name "*TVOON*.avi" -o -name "*TVOON*.
                         sleep 1
                     fi
                     synotr_apprise_notify "Film [$title] ist fertig."
-                    wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
                 fi
             fi
         elif [ "$OTRrenameactiv" = "off" ] ; then
@@ -2550,7 +2527,7 @@ sleep 1
 UPDATE()
 {
 #########################################################################################
-# Diese Funktion sucht nach einer neuen Version und sorgt für die Dateiintegrität       #
+# SQLite-DB prüfen/anlegen und lokale Versionsdaten aktualisieren                       #
 #########################################################################################
 
     CREATEDB ()
@@ -2652,26 +2629,12 @@ UPDATE()
 
 CREATEDB
 
-# Installationstrigger beinhaltet folgende anonymen Geräteinfos:
-# DSM-Build / Prüfsumme der MAC-Adresse als Hardware-ID [anonyme Zahlenfolge 
-# um Installationen zu zählen] / Architektur / Geräte-Typ / synOTR-Version) 
-# ---------------------------------------------------------------------
-    if [ "$DEBUGINFO" = "on" ] ; then
-        restore_ENV
-        curl --max-time 60 -i -X POST -d '{"requests":["?idsite=11&url=http://'${synotrdomain}'/synOTR/installwatch.php&dimension1='${machinetyp}'&dimension2='${dsmbuild}'&dimension3='${sysID}_${device}'&dimension4='${device}'&dimension5='${CLIENTVERSION}'&rec=1&uid='${sysID}_${device}'&action_name=synOTR Shell-run/'${sysID}_${device}_${dsmbuild}_${machinetyp}_idx${idx}_synOTR${CLIENTVERSION}-${DevChannel}'&ua=curl/7.9.8 (i686-pc-linux-gnu)&new_visit=1"]}' http://$synotrdomain/piwik/piwik.php &>/dev/null 	#  http://developer.piwik.org/api-reference/tracking-api	# curl an dieser Stelle, da nach Einbindung der Librarys auf ARM eine Inkompatibilität vorhanden ist. ==> Alternative: Library-Path sichern und an späterer Stelle temporär rückspielen
-        synOTR_ENV
-    fi
-
-# Versionsdaten aus DB lesen:
-# Versionscheck wird für das Update (SPK) nicht mehr verwendet.
+# Versionsdaten lokal in der DB halten (kein Online-Check).
 # ---------------------------------------------------------------------
 sSQL="SELECT rowid,VERSIONcurrent,VERSIONserver,lastcheckday FROM checkversion WHERE rowid=1 "
 sqlerg=$(sqlite3 -separator $'\t' ${APPDIR}/app/etc/synOTR.sqlite "$sSQL")
 
 lastcheckday=$(echo "$sqlerg" | awk -F'\t' '{print $4}' )
-
-ONLINEVERSION=$(wget --timeout=30 --tries=2 -q -O - http://$synotrdomain/synOTR/VERSION2 | /usr/bin/tr -d "\r")
-ONLINEVERSION=$(echo "$ONLINEVERSION" | grep "$DevChannel" | awk -F" " '{print $1}')
 
 if [ "$lastcheckday" -ne $today ] || [ "$lastcheckday" == "" ] ; then
     sSQLupdate="UPDATE checkversion SET VERSIONcurrent='$CLIENTVERSION', VERSIONserver='SPK', lastcheckday=$today, timestamp=(datetime('now','localtime')) WHERE rowid=1"
@@ -2775,8 +2738,6 @@ if [ "$useWORKDIR" == "yes" ] && [ ! -z "$filetest" ]; then
                 sleep 1
             fi
             synotr_apprise_notify "Film [$synotr_target_filename] ist fertig."
-
-            wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
         done
 fi
 
