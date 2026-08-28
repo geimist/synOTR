@@ -30,21 +30,33 @@ TIMESTAMP=$(date +%Y-%m-%d%t%H:%M:%S)
 # -------------------------------------------------------------------------------------
 
 if [ -d "${SYNOPKG_TEMP_UPGRADE_FOLDER}" ]; then
-    cp -rf ${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc/* ${WEBGUI_FOLDER}/app/etc
-    chmod -R 755 ${WEBGUI_FOLDER}/app/etc
-    echo ''${TIMESTAMP}' - Restore the configuration from '${SYNOPKG_TEMP_UPGRADE_FOLDER}'/app/etc to '${WEBGUI_FOLDER}'/app/etc' >>/tmp/${SYNOPKG_PKGNAME}.history
-
-    # Konfiguration um neue Variablen ergänzen
-    echo ''${TIMESTAMP}' - Add new variables to configuration file (upgradeconfig.sh)' >>/tmp/${SYNOPKG_PKGNAME}.history
-    ${WEBGUI_FOLDER}/upgradeconfig.sh >>/tmp/${SYNOPKG_PKGNAME}.history
+    cp -rf "${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc/"* "${WEBGUI_FOLDER}/app/etc"
+    chmod -R 755 "${WEBGUI_FOLDER}/app/etc"
+    {
+        echo "${TIMESTAMP} - Restore the configuration from ${SYNOPKG_TEMP_UPGRADE_FOLDER}/app/etc to ${WEBGUI_FOLDER}/app/etc"
+        echo "${TIMESTAMP} - Add new variables to configuration file (upgradeconfig.sh)"
+    } >> "/tmp/${SYNOPKG_PKGNAME}.history"
+    "${WEBGUI_FOLDER}/upgradeconfig.sh" >> "/tmp/${SYNOPKG_PKGNAME}.history"
 else
-    echo ''${TIMESTAMP}' - Restore of SQLite database failed.' >>/tmp/synOCR.upgrade
-  # echo ''${TIMESTAMP}' - Failed to add new variables to configuration file (upgradeconfig.sh).' >>/tmp/${SYNOPKG_PKGNAME}.history
+    echo "${TIMESTAMP} - Restore of SQLite database failed." >> /tmp/synOCR.upgrade
 fi
 
-echo ''${TIMESTAMP}' - Package update completed.' >>/tmp/${SYNOPKG_PKGNAME}.history
-echo '------------------------------------------------------------------------------------------------------------------------------------------' >>/tmp/${SYNOPKG_PKGNAME}.history
-echo "" >>/tmp/${SYNOPKG_PKGNAME}.history
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+if [ -z "${PACKAGE_FOLDER}" ] || [ ! -d "${PACKAGE_FOLDER}" ]; then
+    PACKAGE_FOLDER="${SYNOPKG_PKGDEST}/ui"
+fi
+{
+    echo "${TIMESTAMP} - setup OTR decoder venv in ${PACKAGE_FOLDER}"
+} >> "/tmp/${SYNOPKG_PKGNAME}.history"
+if ! "${SCRIPT_DIR}/setup_decoder_venv.sh" "${PACKAGE_FOLDER}"; then
+    exit 1
+fi
+
+{
+    echo "${TIMESTAMP} - Package update completed."
+    echo '------------------------------------------------------------------------------------------------------------------------------------------'
+    echo ""
+} >> "/tmp/${SYNOPKG_PKGNAME}.history"
 
     # DSM6:
 #    if [ -d "/tmp/synOTR" ] && [ -d "/usr/syno/synoman/webman/3rdparty/synOTR" ]; then

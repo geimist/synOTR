@@ -1,0 +1,24 @@
+#!/bin/sh
+# Wrapper um den OTR-CLI-Decoder (Python). Pflicht-Flags fuer Skriptbetrieb.
+# Weitere Argumente (--email, --password, --quellordner, --zielordner, ...)
+# werden durchgereicht.
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+APP_DIR=$(cd "${SCRIPT_DIR}/.." && pwd)
+VENV_PY="${APP_DIR}/venv/bin/python3"
+DECODER="${APP_DIR}/decoder/otr_cli_decoder.py"
+
+if [ ! -x "${VENV_PY}" ]; then
+    echo "OTR-Decoder-Umgebung fehlt (${APP_DIR}/venv). Bitte synOTR neu installieren oder aktualisieren." >&2
+    exit 1
+fi
+if [ ! -f "${DECODER}" ]; then
+    echo "OTR-Decoder nicht gefunden: ${DECODER}" >&2
+    exit 1
+fi
+
+exec "${VENV_PY}" "${DECODER}" \
+    --no-update-check \
+    --kein-dialog \
+    --nicht-warten \
+    "$@"

@@ -1,2 +1,4 @@
 [app]
 app_name="synOTR"
+job_successful="{0}"
+error="{0}"

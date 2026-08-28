@@ -1,0 +1,11 @@
+# cryptography>=43: Blowfish unter hazmat.decrepit (Decoder findet alte und neue Pfade).
+# 48.0.0 droppt Python 3.8 → auf 3.8 die letzte 3.8-fähige Linie, sonst aktuelle Wheels.
+cryptography>=43,<48; python_version < "3.9"
+cryptography>=43; python_version >= "3.9"
+# mutagen: MP4-iTunes-Tags nach dem Umbenennen (statt AtomicParsley). py3-none-any-Wheel.
+# 1.48 droppt Python 3.8/3.9 → auf <3.10 die letzte 3.8-fähige Linie.
+mutagen>=1.47,<1.48; python_version < "3.10"
+mutagen>=1.47; python_version >= "3.10"
+# apprise: Push (Telegram, ntfy, Discord, …). 1.9.4 droppt Python 3.8.
+apprise>=1.9.0,<1.9.4; python_version < "3.9"
+apprise>=1.9.4; python_version >= "3.9"

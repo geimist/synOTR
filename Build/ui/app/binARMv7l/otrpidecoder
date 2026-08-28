@@ -1,4 +1,0 @@
-#!/bin/bash
-LIBDIR="/usr/syno/synoman/webman/3rdparty/synOTR/app/libARMv7l"
-export LD_LIBRARY_PATH="$LIBDIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-$LIBDIR/otrpidecoder "$@"

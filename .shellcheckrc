@@ -1,0 +1,5 @@
+# synOTR: DSM-Paketscripte (sh) + CGI (bash). Sourced GUI-Seiten und Includes
+# teilen Variablen mit index.cgi / synOTR.sh.
+external-sources=true
+source-path=Build/ui
+source-path=Build/ui/includes

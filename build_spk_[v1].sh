@@ -17,7 +17,7 @@
 
 project="synOTR"
 
-skriptuser=`whoami`
+skriptuser=$(whoami)
 if [ ${skriptuser} != "root" ]; then
     echo "Dieses Skript muss von Root ausgeführt werden!"
     exit 1
@@ -46,7 +46,7 @@ fi
 gitpull() 
 {
 
-gitpath=`which git`
+gitpath=$(which git)
 if [ -z ${gitpath} ]; then
     echo "Das Programm git konnte nicht gefunden werden."
     exit 1
@@ -61,18 +61,18 @@ fi
 if [ -d "./${project}" ] ; then
     cd ${project}
     git pull
-    versions=`git tag`
+    versions=$(git tag)
     cd ${APPDIR}
 else
     git clone https://geimist.eu:30443/geimist/${project}.git
     cd ${project}
     git pull
-    versions=`git tag`
+    versions=$(git tag)
     cd ${APPDIR}
 fi
 
 
-#build_version=`cat "${APPDIR}/${project}/Pack/INFO" | grep version | awk -F '"' '{print $2}'`
+#build_version=$(cat "${APPDIR}/${project}/Pack/INFO" | grep version | awk -F '"' '{print $2}')
 
 # welche Version soll gebaut werden:
 if [ -z $buildversion ]; then
@@ -80,7 +80,7 @@ if [ -z $buildversion ]; then
     cd ${project}
     git checkout master
     cd ${APPDIR}
-    set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
+    set_spk_version="latest_($(date +%Y)-$(date +%m)-$(date +%d)_$(date +%H)-$(date +%M))"
 else
     if echo "$versions" | egrep -q "$buildversion"; then
         echo "git checkout zu $buildversion"
@@ -94,7 +94,7 @@ else
         cd ${project}
         git checkout master
         cd ${APPDIR}
-        set_spk_version="latest_(`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`)"
+        set_spk_version="latest_($(date +%Y)-$(date +%m)-$(date +%d)_$(date +%H)-$(date +%M))"
     fi
 fi
 }

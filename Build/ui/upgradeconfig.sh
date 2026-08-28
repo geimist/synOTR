@@ -4,12 +4,12 @@
 
 # Arbeitsverzeichnis auslesen und hineinwechseln:
 # ---------------------------------------------------------------------
-	APPDIR=$(cd $(dirname $0);pwd)
-	cd ${APPDIR}
+	APPDIR=$(cd "$(dirname "$0")" || exit 1; pwd)
+	cd "${APPDIR}" || exit 1
 	
 	CONFIG=app/etc/Konfiguration.txt
 
-    lastrow=`cat ./$CONFIG | tail -n1`  # letzte Zeile eine Leerzeile?
+    lastrow=$(tail -n1 "./$CONFIG")  # letzte Zeile eine Leerzeile?
 #    [ ! "$lastrow" == "" ] && echo -e "\n" >> ./$CONFIG
 
     if [ ! -z "$lastrow" ]; then
@@ -28,17 +28,24 @@
     	if ! cat ./$CONFIG | grep -q "dsmbeepnotify" ; then
     	    echo "dsmbeepnotify=\"on\"" >> ./$CONFIG
         fi
-    	if ! cat ./$CONFIG | grep -q "PBTOKEN" ; then
-    	    echo "PBTOKEN=\"\"" >> ./$CONFIG
+    	if ! grep -q '^APPRISEURL=' ./$CONFIG ; then
+    	    _pbtoken=$(grep '^PBTOKEN=' ./$CONFIG | head -n1 | cut -d= -f2-)
+    	    _pbtoken=$(printf '%s' "$_pbtoken" | sed 's/^"//; s/"$//')
+    	    if [ -n "$_pbtoken" ]; then
+    	        case "$_pbtoken" in
+    	            *://*) echo "APPRISEURL=\"${_pbtoken}\"" >> ./$CONFIG ;;
+    	            *) echo "APPRISEURL=\"pbul://${_pbtoken}\"" >> ./$CONFIG ;;
+    	        esac
+    	    else
+    	        echo "APPRISEURL=\"\"" >> ./$CONFIG
+    	    fi
+    	    unset _pbtoken
         fi
     	if ! cat ./$CONFIG | grep -q "LOGlevel" ; then
     	    echo "LOGlevel=\"1\"" >> ./$CONFIG
         fi
     	if ! cat ./$CONFIG | grep -q "LOGmax" ; then
     	    echo "LOGmax=\"1\"" >> ./$CONFIG
-        fi
-    	if ! cat ./$CONFIG | grep -q "reindex" ; then
-    	    echo "reindex=\"1\"" >> ./$CONFIG
         fi
     	if ! cat ./$CONFIG | grep -q "WORKDIR" ; then
     	    echo "WORKDIR=\"/volume1/video/_synOTR/\"" >> ./$CONFIG
@@ -86,8 +93,16 @@
     	if ! cat ./$CONFIG | grep -q "normalizeAudio" ; then
     	    echo "normalizeAudio=\"on\"" >> ./$CONFIG
         fi
-    	if ! cat ./$CONFIG | grep -q "MP4BOX_DELAY" ; then
-    	    echo "MP4BOX_DELAY=\"100\"" >> ./$CONFIG
+    	if ! cat ./$CONFIG | grep -q "parallelAudioConvert" ; then
+    	    echo "parallelAudioConvert=\"on\"" >> ./$CONFIG
+        fi
+    	if ! cat ./$CONFIG | grep -q "AudioDelayMs" ; then
+    	    if grep -q '^MP4BOX_DELAY=' ./$CONFIG ; then
+    	        _mp4box_delay=$(grep '^MP4BOX_DELAY=' ./$CONFIG | head -n1 | cut -d= -f2-)
+    	        echo "AudioDelayMs=${_mp4box_delay}" >> ./$CONFIG
+    	    else
+    	        echo "AudioDelayMs=\"0\"" >> ./$CONFIG
+    	    fi
         fi
     
     # Umbenennen:
@@ -96,6 +111,9 @@
         fi
     	if ! cat ./$CONFIG | grep -q "TVDB_APIKEY" ; then
     	    echo "TVDB_APIKEY=\"\"" >> ./$CONFIG
+        fi
+    	if ! cat ./$CONFIG | grep -q "TVDB_PIN" ; then
+    	    echo "TVDB_PIN=\"\"" >> ./$CONFIG
         fi
     	if ! cat ./$CONFIG | grep -q "MOVIEDB_APIKEY" ; then
     	    echo "MOVIEDB_APIKEY=\"\"" >> ./$CONFIG

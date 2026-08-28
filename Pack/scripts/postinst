@@ -1,5 +1,5 @@
 #!/bin/sh
-
+# shellcheck disable=SC2034
 
 # Script Environment Variables
 # -------------------------------------------------------------------------------------
@@ -29,9 +29,14 @@ TIMESTAMP=$(date +%Y-%m-%d%t%H:%M:%S)
 # Action...
 # -------------------------------------------------------------------------------------
 
-# DSM6:
-# LOG="/var/packages/${SYNOPKG_PKGNAME}/log"
-# ln -s $SYNOPKG_PKGDEST /usr/syno/synoman/webman/3rdparty/synOTR
-# date +'%c installed' >> $LOG
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+if [ -z "${PACKAGE_FOLDER}" ] || [ ! -d "${PACKAGE_FOLDER}" ]; then
+    PACKAGE_FOLDER="${SYNOPKG_PKGDEST}/ui"
+fi
 
- exit 0
+echo "${TIMESTAMP} - setup OTR decoder venv in ${PACKAGE_FOLDER}" >> "/tmp/${SYNOPKG_PKGNAME}.history"
+if ! "${SCRIPT_DIR}/setup_decoder_venv.sh" "${PACKAGE_FOLDER}"; then
+    exit 1
+fi
+
+exit 0

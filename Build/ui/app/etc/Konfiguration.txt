@@ -8,7 +8,7 @@ OTRkeydeldir="/volume1/video/#recycle/"
 endgueltigloeschen="off"
 
 #--------------------------------------------------------------------
-#        .otrkey's decodieren:                                      |
+#        .otrkey / .otr2 decodieren:                                |
 #--------------------------------------------------------------------
 decoderactiv="on"
 OTRuser="mail@domain.de"
@@ -32,6 +32,7 @@ cutlistat_ID=""
 OTRrenameactiv="on"
 TVDBlang="de"
 TVDB_APIKEY=""
+TVDB_PIN=""
 MOVIEDB_APIKEY=""
 NameSyntax="§tit [§ylong-§mon-§day §hou-§min §cha §heightp §redurmin§ac01]"
 NameSyntaxSerientitel="§sertit.S§sta.E§epi §epitit"
@@ -42,17 +43,18 @@ NameSyntaxSerientitel="§sertit.S§sta.E§epi §epitit"
 OTRavi2mp4active="on"
 OTRaacqal="80k"
 normalizeAudio="on"
-MP4BOX_DELAY="100"
+parallelAudioConvert="on"
+AudioDelayMs="0"
 
 #--------------------------------------------------------------------
 #        DSM-Benachrichtigung und sonstige Einstellungen:           |
 #--------------------------------------------------------------------
 dsmtextnotify="on"
 MessageTo="admin"
+APPRISEURL=""
 dsmbeepnotify="on"
 LOGlevel="1"
 LOGmax=""
-reindex=1
 
 #--------------------------------------------------------------------
 #        durch Update ergänzte Einstellungen:                       |

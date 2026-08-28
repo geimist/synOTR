@@ -17,6 +17,7 @@
 #----------------------------------------------------------------------------------------
 # ./APP / Build --> Arbeitsumgebung (erstellen/editieren/verschieben)
 # ./PKG / Pack  --> Archivordner zum Aufbau des SPK (Startscripte etc.)
+# ./tools       --> Cross-Compile (avcut/MP4Box/mp4mux), nicht im SPK
 #
 
 # Avoid macOS AppleDouble files/xattrs in tar archives (._privilege, ._resource, .DS_Store, ...).
@@ -68,12 +69,12 @@ fi
 
 # Arbeitsverzeichnis auslesen und hineinwechseln:
 # ---------------------------------------------------------------------
-# shellcheck disable=SC2086
-APPDIR=$(cd "$(dirname $0)";pwd)
-cd "${APPDIR}"
+APPDIR=$(cd "$(dirname "$0")" || exit 1; pwd)
+cd "${APPDIR}" || exit 1
 
 build_tmp=$(mktemp -d -t tmp.XXXXXXXXXX)
 
+# shellcheck disable=SC2329
 function finish {
 	if [ "$buildversion" != local ]; then
 		git worktree remove --force "$build_tmp" 2>/dev/null || true
@@ -163,19 +164,26 @@ echo " - INFO: Das Archiv package.tgz wird erstellt..."
 
 $FAKEROOT tar "${TAR_CREATE_OPTS[@]}" -C "${build_tmp}/${APP}" \
 	--exclude='.DS_Store' --exclude='._*' \
+	--exclude='__pycache__' --exclude='*.pyc' \
 	-czf "${build_tmp}/${PKG}/package.tgz" .
 
-# Wechsel in den Ablageort von package.tgz bezüglich Aufbau des SPK's
-cd "${build_tmp}/${PKG}"
-
-# Erstellen des eigentlichen SPK's
+# DSM Package Center: ustar, kein "./"-Präfix, INFO als erster Eintrag.
+# "tar ./*" bzw. "tar ." erzeugt "./INFO" in beliebiger Reihenfolge → ungültiges Dateiformat.
+# Nur Installer-Dateien packen (keine Kompilier-Skripte unter tools/).
 echo ""
 echo " - INFO: Das SPK wird erstellt..."
 spk_name="${project}_${set_spk_version}.spk"
+spk_path="${build_tmp}/${spk_name}"
+spk_members=(INFO package.tgz scripts)
+for extra in conf WIZARD_UIFILES LICENSE CHANGELOG PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG; do
+	[ -e "${build_tmp}/${PKG}/${extra}" ] && spk_members+=("${extra}")
+done
 $FAKEROOT tar "${TAR_CREATE_OPTS[@]}" \
 	--exclude='.DS_Store' --exclude='._*' \
-	-cf "${spk_name}" *
-cp -f "${spk_name}" "${APPDIR}"
+	--exclude='scripts/build_*' --exclude='scripts/*.patch' \
+	-C "${build_tmp}/${PKG}" \
+	-cf "${spk_path}" "${spk_members[@]}"
+cp -f "${spk_path}" "${APPDIR}"
 
 echo ""
 echo "-----------------------------------------------------------------------------------"

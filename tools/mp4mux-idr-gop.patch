@@ -1,0 +1,205 @@
+diff --git a/Source/C++/Apps/Mp4Mux/Mp4Mux.cpp b/Source/C++/Apps/Mp4Mux/Mp4Mux.cpp
+index 8412e71..d60624e 100644
+--- a/Source/C++/Apps/Mp4Mux/Mp4Mux.cpp
++++ b/Source/C++/Apps/Mp4Mux/Mp4Mux.cpp
+@@ -58,11 +58,13 @@ static struct {
+ |   SampleOrder
+ +---------------------------------------------------------------------*/
+ struct SampleOrder {
+-    SampleOrder(AP4_UI32 decode_order, AP4_UI32 display_order) :
++    SampleOrder(AP4_UI32 decode_order, AP4_UI32 display_order, bool is_sync) :
+         m_DecodeOrder(decode_order),
+-        m_DisplayOrder(display_order) {}
++        m_DisplayOrder(display_order),
++        m_IsSync(is_sync) {}
+     AP4_UI32 m_DecodeOrder;
+     AP4_UI32 m_DisplayOrder;
++    bool     m_IsSync;
+ };
+ 
+ /*----------------------------------------------------------------------
+@@ -385,6 +387,36 @@ SortSamples(SampleOrder* array, unsigned int n)
+     SortSamples(left, (unsigned int)(array + n - left));
+ }
+ 
++/* High@L3 DPB is 16 frames. Larger decode/display skew means POC is garbage
++   (avcut splice + mixed SPS). Then elst would delay video by GOP-length. */
++static const unsigned int AP4_MUX_MAX_COMPOSITION_DELAY = 16;
++
++static unsigned int
++ApplyCompositionTimestamps(AP4_SyntheticSampleTable* sample_table,
++                           AP4_Array<SampleOrder>& sample_orders)
++{
++    unsigned int max_delta = 0;
++    unsigned int count = sample_orders.ItemCount();
++    for (unsigned int i=0; i<count; i++) {
++        if (sample_orders[i].m_DecodeOrder > i) {
++            unsigned int delta = sample_orders[i].m_DecodeOrder - i;
++            if (delta > max_delta) {
++                max_delta = delta;
++            }
++        }
++    }
++    if (max_delta > AP4_MUX_MAX_COMPOSITION_DELAY) {
++        /* OTR-HQ hat 2 B-Frames. CTS=DTS lässt Quick Look/Decoder puffern. */
++        printf("mp4mux: composition delay %u frames (POC unusable, assume 2)\n", max_delta);
++        max_delta = 2;
++    }
++    for (unsigned int i=0; i<count; i++) {
++        sample_table->UseSample(sample_orders[i].m_DecodeOrder).SetCts(1000ULL*(AP4_UI64)(i+max_delta));
++    }
++    printf("mp4mux: composition delay %u frames\n", max_delta);
++    return max_delta;
++}
++
+ /*----------------------------------------------------------------------
+ |   GetLanguageFromParameters
+ +---------------------------------------------------------------------*/
+@@ -1076,7 +1107,7 @@ AddH264Track(AP4_Movie&            movie,
+                 sample_table->AddSample(*sample_storage.GetStream(), position, sample_data_size, 1000, 0, 0, 0, access_unit_info.is_idr);
+             
+                 // remember the sample order
+-                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order));
++                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order, access_unit_info.is_idr));
+                 
+                 // free the memory buffers
+                 access_unit_info.Reset();
+@@ -1092,25 +1123,14 @@ AddH264Track(AP4_Movie&            movie,
+     if (sample_orders.ItemCount() > 1) {
+         unsigned int start = 0;
+         for (unsigned int i=1; i<=sample_orders.ItemCount(); i++) {
+-            if (i == sample_orders.ItemCount() || sample_orders[i].m_DisplayOrder == 0) {
++            if (i == sample_orders.ItemCount() || sample_orders[i].m_IsSync) {
+                 // we got to the end of the GOP, sort it by display order
+                 SortSamples(&sample_orders[start], i-start);
+                 start = i;
+             }
+         }
+     }
+-    unsigned int max_delta = 0;
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        if (sample_orders[i].m_DecodeOrder > i) {
+-            unsigned int delta =sample_orders[i].m_DecodeOrder-i;
+-            if (delta > max_delta) {
+-                max_delta = delta;
+-            }
+-        }
+-    }
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        sample_table->UseSample(sample_orders[i].m_DecodeOrder).SetCts(1000ULL*(AP4_UI64)(i+max_delta));
+-    }
++    unsigned int max_delta = ApplyCompositionTimestamps(sample_table, sample_orders);
+ 
+     // check the video parameters
+     AP4_AvcSequenceParameterSet* sps = NULL;
+@@ -1349,7 +1369,7 @@ AddH264DoviTrack(AP4_Movie&            movie,
+                 sample_table->AddSample(*sample_storage.GetStream(), position, sample_data_size, 1000, 0, 0, 0, access_unit_info.is_idr);
+ 
+                 // remember the sample order
+-                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order));
++                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order, access_unit_info.is_idr));
+ 
+                 // free the memory buffers
+                 access_unit_info.Reset();
+@@ -1365,25 +1385,14 @@ AddH264DoviTrack(AP4_Movie&            movie,
+     if (sample_orders.ItemCount() > 1) {
+         unsigned int start = 0;
+         for (unsigned int i=1; i<=sample_orders.ItemCount(); i++) {
+-            if (i == sample_orders.ItemCount() || sample_orders[i].m_DisplayOrder == 0) {
++            if (i == sample_orders.ItemCount() || sample_orders[i].m_IsSync) {
+                 // we got to the end of the GOP, sort it by display order
+                 SortSamples(&sample_orders[start], i-start);
+                 start = i;
+             }
+         }
+     }
+-    unsigned int max_delta = 0;
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        if (sample_orders[i].m_DecodeOrder > i) {
+-            unsigned int delta =sample_orders[i].m_DecodeOrder-i;
+-            if (delta > max_delta) {
+-                max_delta = delta;
+-            }
+-        }
+-    }
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        sample_table->UseSample(sample_orders[i].m_DecodeOrder).SetCts(1000ULL*(AP4_UI64)(i+max_delta));
+-    }
++    unsigned int max_delta = ApplyCompositionTimestamps(sample_table, sample_orders);
+ 
+     // check the video parameters
+     AP4_AvcSequenceParameterSet* sps = NULL;
+@@ -1603,7 +1612,7 @@ AddH265Track(AP4_Movie&            movie,
+                 sample_table->AddSample(*sample_storage.GetStream(), position, sample_data_size, 1000, 0, 0, 0, access_unit_info.is_random_access);
+             
+                 // remember the sample order
+-                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order));
++                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order, access_unit_info.is_random_access));
+                 
+                 // free the memory buffers
+                 access_unit_info.Reset();
+@@ -1619,25 +1628,14 @@ AddH265Track(AP4_Movie&            movie,
+     if (sample_orders.ItemCount() > 1) {
+         unsigned int start = 0;
+         for (unsigned int i=1; i<=sample_orders.ItemCount(); i++) {
+-            if (i == sample_orders.ItemCount() || sample_orders[i].m_DisplayOrder == 0) {
++            if (i == sample_orders.ItemCount() || sample_orders[i].m_IsSync) {
+                 // we got to the end of the GOP, sort it by display order
+                 SortSamples(&sample_orders[start], i-start);
+                 start = i;
+             }
+         }
+     }
+-    unsigned int max_delta = 0;
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        if (sample_orders[i].m_DecodeOrder > i) {
+-            unsigned int delta =sample_orders[i].m_DecodeOrder-i;
+-            if (delta > max_delta) {
+-                max_delta = delta;
+-            }
+-        }
+-    }
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        sample_table->UseSample(sample_orders[i].m_DecodeOrder).SetCts(1000ULL*(AP4_UI64)(i+max_delta));
+-    }
++    unsigned int max_delta = ApplyCompositionTimestamps(sample_table, sample_orders);
+     
+     // check that we have at least one SPS
+     AP4_HevcSequenceParameterSet* sps = NULL;
+@@ -1920,7 +1918,7 @@ AddH265DoviTrack(AP4_Movie&           movie,
+                 sample_table->AddSample(*sample_storage.GetStream(), position, sample_data_size, 1000, 0, 0, 0, access_unit_info.is_random_access);
+             
+                 // remember the sample order
+-                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order));
++                sample_orders.Append(SampleOrder(access_unit_info.decode_order, access_unit_info.display_order, access_unit_info.is_random_access));
+                 
+                 // free the memory buffers
+                 access_unit_info.Reset();
+@@ -1936,25 +1934,14 @@ AddH265DoviTrack(AP4_Movie&           movie,
+     if (sample_orders.ItemCount() > 1) {
+         unsigned int start = 0;
+         for (unsigned int i=1; i<=sample_orders.ItemCount(); i++) {
+-            if (i == sample_orders.ItemCount() || sample_orders[i].m_DisplayOrder == 0) {
++            if (i == sample_orders.ItemCount() || sample_orders[i].m_IsSync) {
+                 // we got to the end of the GOP, sort it by display order
+                 SortSamples(&sample_orders[start], i-start);
+                 start = i;
+             }
+         }
+     }
+-    unsigned int max_delta = 0;
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        if (sample_orders[i].m_DecodeOrder > i) {
+-            unsigned int delta =sample_orders[i].m_DecodeOrder-i;
+-            if (delta > max_delta) {
+-                max_delta = delta;
+-            }
+-        }
+-    }
+-    for (unsigned int i=0; i<sample_orders.ItemCount(); i++) {
+-        sample_table->UseSample(sample_orders[i].m_DecodeOrder).SetCts(1000ULL*(AP4_UI64)(i+max_delta));
+-    }
++    unsigned int max_delta = ApplyCompositionTimestamps(sample_table, sample_orders);
+     
+     // check that we have at least one SPS
+     AP4_HevcSequenceParameterSet* sps = NULL;

@@ -1,9 +1,44 @@
 Release Notes 
 
+4.9.99.1 (2026-xx-xx)
+ 	BUGFIXES:
+ -  ffmpeg-Remux von DivX/AVI (mpeg4_unpack_bframes) schlug in der Cut-Schleife fehl: IFS war nur Newline, dadurch kam -bsf:v als ein Argument bei ffmpeg an
+ -  DSM-Benachrichtigungen wie synOCR: synodsmnotify -c, Freitext über i18n-Platzhalter {0} (Titel/Dateiname)
+ -  SPK-Bau: INFO als ersten Tar-Eintrag und ohne "./"-Präfix (Package Center: ungültiges Dateiformat)
+ 	IMPLEMENTIERUNGEN:
+ -  OTR v3: Python-CLI-Decoder (.otr2 und .otrkey) statt der alten Binaries
+ -  Python-Umgebung (venv) mit cryptography, mutagen und apprise; DSM-Python 3.8 oder neuer, sofern Wheels passen
+ -  PushBullet durch Apprise ersetzt (GUI-Feld bleibt, jetzt Apprise-URL; alter Token wird zu pbul://…)
+ -  ffmpeg/ffprobe von SynoCommunity (ffmpeg8 bevorzugt, Fallback ffmpeg7/ffmpeg6); mitgeliefertes ffprobe entfernt
+ -  parallele AAC-Audiokonvertierung (GUI-Schalter, Standard: ein) Genutzte Threadanzahl: verfügbare CPU-Kerne -1
+ -  Zwei Schnitt-Pipelines nach Dateiherkunft:
+    .otrkey x86_64: wie 4.3.1 Cut am AVI (altes avcut bzw. avisplit), dann OTRavi2mp4 (ffmpeg-Demux + MP4Box). HD-AVI immer avisplit
+    .otrkey aarch64: kein Schnitt, nur MP4Box
+    .otr2: Smartrendering avcut 0.8 → MKV → mp4mux; Keyframe ffmpeg-Demux + mp4mux
+ -  Schnitt-Temp in WORKDIR/tmp_synotr_cut; Audio-Parallel: tmp_synotr_audio_parallel.*
+ -  otr-serien.de entfernt (Dienst ist tot). Serien nur noch über Dateiname/Cutlist und theTVDB
+ -  theTVDB auf API v4 (api4.thetvdb.com); optional PIN für Subscriber-Keys. v2/v3-Keys funktionieren nicht mehr.
+ -  altes OTR-MP4 (.mpg.mp4) als Qualität LQ (Schnitt: .LQ-cut.mp4), damit es von SD-AVI unterscheidbar ist
+ 	SONSTIGES:
+ -  Unterstützung nur noch für x86_64 und armv8 (aarch64)
+ -  i686- und ARMv7-Binaries entfernt, außer avisplit/avimerge (i386) für otrkey auf x86_64
+ -  mitgeliefertes BusyBox entfernt (wurde nicht mehr aufgerufen)
+ -  VideoStation-Reindex und synoindex entfernt (VideoStation ist abgekündigt)
+ -  Bento4 mp4mux (GPL-2, Tag v1.6.0-641) für otr2 und Keyframe; Rebuild: tools/build_mp4mux.sh
+ -  Kompilier-Skripte (avcut/MP4Box/mp4mux) und Patches liegen unter tools/, nicht im SPK
+ -  Shell-Hygiene: Tests/Pfade/ffmpeg quoted, gawk -v statt Interpolation, CSS-Farben maskiert
+ -  GUI-Zeitplaner entfernt (funktioniert nicht unter DSM 7; Planung über den DSM-Aufgabenplaner)
+ -  Hinweis in der GUI (nur Übersicht), wenn noch ein alter Zeitplaner-Eintrag in /etc/crontab steht (nur Anzeige, Löschen per root-Aufgabe)
+ -  Hinweis in der GUI (nur Übersicht), wenn ffmpeg8 fehlt (ohne jedes ffmpeg aufgeklappt; mit ffmpeg7/6 zugeklappt)
+ -  GUI: Request-Scratchpad (var.txt) nach /tmp (Ramdisk) statt ins Paketverzeichnis (beschleunigt die GUI wesentlich)
+ -  DSM7-UI wird wieder als iFrame im DSM-Fenster eingebettet (statt neuem Browserfenster)
+ -  AtomicParsley entfernt (32-Bit i386); MP4-Tags nach dem Umbenennen per mutagen in der Decoder-venv
+ -  GUI: Übersicht und Status zusammengelegt; Beschreibung, Status und LOG nur noch aufklappbar; theTVDB-Logo entfernt
+ -  GUI-Konfiguration: Frameversatz, AAC-Bitrate und Tonspurversatz als Slider (Bitrate rastet auf 32–256 kBit/s)
+
 4.3.1 (2023-08-18)
  	BUGFIXES:
  -  Wechsel von DSM-ffmpeg zu 3rdParty-ffmpeg6 (zu installieren von hier: https://synocommunity.com/package/ffmpeg6)
- -  DSM7-UI wird wieder als iFrame im DSM-Fenster eingebettet (statt neuem Browserfenster)
  
 4.3.0 (2023-06-11)
  	IMPLEMENTIERUNGEN:

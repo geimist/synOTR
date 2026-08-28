@@ -1,0 +1,26 @@
+---
+description: Zwei Schnitt-Pipelines nach Dateiherkunft (otrkey vs otr2)
+alwaysApply: true
+---
+
+# Convert-first / Schnitt
+
+- Decode (Python) schreibt `file_source` (`otrkey`|`otr2`) und `file_encrypted` in SQLite. Pipeline per exaktem Lookup; **`.avi` immer otrkey** (nie avcut 0.8/MKV). Kein AVI↔MP4-Stammtausch in der DB.
+- **otrkey + x86_64:** Cutlist am Original-AVI. HQ/SD + Smartrendering: **altes avcut (4.3.1, `bin/avcut64`)**, Ausgabe AVI, dann OTRavi2mp4 (ffmpeg-Demux + **MP4Box**). HD oder Keyframe: **avisplit/avimerge**, dann dieselben avi2mp4. AC3+avisplit: ungeschnitten. Nicht avcut 0.8, nicht mp4mux-avc3.
+- **otrkey + aarch64:** kein Schnitt, nur avi2mp4 (MP4Box).
+- **otr2:** Smartrendering = avcut 0.8 (`bin/avcut64_ffmpeg8` / `binAArch64/avcut`) → MKV, dann **ffmpeg -c copy** nach MP4 (alle Spuren, Zeiten aus der MKV). Nicht mp4mux (POC/CTS nach avcut-Spleiß unbrauchbar). Keyframe = `includes/ffmpeg_cut.sh` (ffmpeg-Demux + mp4mux).
+- Schnitt-Temp: `WORKDIR/tmp_synotr_cut`. Audio-Parallel: `tmp_synotr_audio_parallel.*`. avi2mp4-Temp: `WORKDIR/tmp_synotr_remux`.
+- `WaitOfCutlist=on`: wartende Dateien nicht remuxen, Herkunft bleibt in der DB.
+- Includes: `synotr_pipeline_otrkey.sh`, `synotr_pipeline_otr2.sh`, `synotr_db.sh`. `ensure_mp4.sh` nicht für otrkey-AVI→MP4.
+- HQ ist H.264, 576 px hoch. HD = Höhe ≥ 700 oder `.HD.` im Dateinamen – gilt nur für **otrkey** (avisplit). otr2-HD darf avcut 0.8 nutzen.
+- avcut 0.8 dynamisch ffmpeg8; Rebuild `tools/build_avcut.sh` → `avcut64_ffmpeg8`, nicht `avcut64`. Decoder `threads=0`; Encoder 1 Thread.
+- Packed-Bitstream-Zittern gilt für `ffmpeg -c copy` auf AVI – deshalb otrkey erst schneiden, dann MP4Box, nicht convert-first.
+- `OTRavi2mp4` = Video-Copy + AAC + MP4Box. Bereits H.264/AAC (.otr2) nicht nochmal encoden.
+- `AudioDelayMs` Default 0; Upgrade kopiert vorhandenen `MP4BOX_DELAY`. MP4Box `#delay=` auf dem otrkey-Pfad.
+
+# Shell-Hygiene (neue / geänderte Skripte)
+
+- Neue Funktionen: `synotr_*`, Hilfsvariablen `_…`. Konfig-Keys (`OTRcutactiv`, `LOGlevel`, …) nicht umbenennen.
+- Tests und Pfade quoten: `[ "$OTRcutactiv" = "on" ]`, `"$WORKDIR"`, `"$ffmpeg"`. Optionale Flags (`$cURLloglevel`, `$time`) bewusst unquoted, mit `# shellcheck disable=SC2086`.
+- Zahlen in awk/gawk per `-v`, nicht in das Programm interpolieren.
+- GUI: CSS-Variablen mit Leerzeichen als `'"$synotrred"'` einsetzen, nicht `'$synotrred'`.

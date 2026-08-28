@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC2034
 
 # Script Environment Variables
 # -------------------------------------------------------------------------------------
@@ -33,11 +34,9 @@ TIMESTAMP=$(date +%Y-%m-%d%t%H:%M:%S)
 machinetyp=$(uname --machine)
 device=$( uname -a | awk -F_ '{print $NF}' | sed "s/+/plus/g" )
 
-if [ $machinetyp = "x86_64" ] || [ $machinetyp = "i686" ] || [ `echo $machinetyp | grep "armv7" ` ] || [ `echo $machinetyp | grep "armv8" ` ]; then
+if [ "$machinetyp" = "x86_64" ] || [ "$machinetyp" = "aarch64" ] || echo "$machinetyp" | grep -q "armv8"; then
     exit 0
 else
-    echo "Dein Gerät (${device}) mit der CPU-Architektur ${machinetyp} wird von synOTR nicht unterstützt (nur x86_64, i686, armv7)" > $SYNOPKG_TEMP_LOGFILE
+    echo "Dein Gerät (${device}) mit der CPU-Architektur ${machinetyp} wird von synOTR nicht unterstützt (nur x86_64 und armv8 / aarch64)." > "${SYNOPKG_TEMP_LOGFILE}"
     exit 1
 fi
-
-exit 0

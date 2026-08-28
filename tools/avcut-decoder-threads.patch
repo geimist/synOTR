@@ -1,0 +1,20 @@
+--- a/avcut.c
++++ b/avcut.c
+@@ -1519,12 +1519,17 @@
+ 			#ifdef AV_CODEC_FLAG_COPY_OPAQUE
+ 			codec_ctx->flags |= AV_CODEC_FLAG_COPY_OPAQUE;
+ 			#endif
++			/* synOTR: FFmpeg-Default ist threads=1. 0 = auto (nproc+1). */
++			codec_ctx->thread_count = 0;
++			codec_ctx->thread_type = FF_THREAD_FRAME | FF_THREAD_SLICE;
+ 			ret = avcodec_open2(codec_ctx, codec, NULL);
+ 			if (ret < 0) {
+ 				av_log(NULL, AV_LOG_ERROR, "Failed to open decoder for stream %u, error %d\n", i, ret);
+ 				avcodec_free_context(&codec_ctx);
+ 				return ret;
+ 			}
++			av_log(NULL, AV_LOG_INFO, "decoder stream %u: threads=%d\n",
++			       i, codec_ctx->thread_count);
+ 			
+ 			// detect h264 format
+ 			if (codec_ctx->codec_id == AV_CODEC_ID_H264 && codec_ctx->extradata_size > 2) {

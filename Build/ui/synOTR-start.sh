@@ -4,11 +4,11 @@
 
 # wurde das Skript von der GUI aufgerufen (Aufruf mit Parameter "GUI" für )?
     callFrom=$1
-    if [[ ! $callFrom = GUI ]] ; then
+    if [[ "$callFrom" != "GUI" ]] ; then
         callFrom=shell
 
         # set admin permission to user synOTR for DSM7 and above
-        if [ $(synogetkeyvalue /etc.defaults/VERSION majorversion) -ge 7 ]; then
+        if [ "$(synogetkeyvalue /etc.defaults/VERSION majorversion)" -ge 7 ]; then
             if ! cat /etc/group | grep ^administrators | grep -q synOTR ; then
                 echo "added user synOTR to group administrators ..."
                 sed -i "/^administrators:/ s/$/,synOTR/" /etc/group
@@ -16,7 +16,7 @@
         fi
     else
         callFrom="GUI"
-        if [ $(synogetkeyvalue /etc.defaults/VERSION majorversion) -ge 7 ]; then
+        if [ "$(synogetkeyvalue /etc.defaults/VERSION majorversion)" -ge 7 ]; then
             if ! cat /etc/group | grep ^administrators | grep -q synOTR ; then
                 echo '<p class="center" style="color: #BD0010;">Führe zunächst als root das nachstehende Skript im DSM-Aufgabenplaner aus ...<br /><br /></p>
                 <code><span style="background-color:#cccccc;font-hight:1.1em;">/usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh</span></code>'
@@ -27,12 +27,14 @@
     fi
 
 # Arbeitsverzeichnis auslesen und hineinwechseln:
-    APPDIR=$(cd $(dirname $0);pwd)
-    cd ${APPDIR}
+    APPDIR=$(cd "$(dirname "$0")" || exit 1; pwd)
+    cd "${APPDIR}" || exit 1
 
 # Konfigurationsdatei einbinden:
     CONFIG=app/etc/Konfiguration.txt
-    . ./$CONFIG
+    # shellcheck source=app/etc/Konfiguration.txt
+    # shellcheck disable=SC1090,SC1091
+    . "./${CONFIG}"
 
 # check if script is already active
     #    ps x|grep synOTR.sh|grep -v grep >/dev/null
@@ -43,15 +45,15 @@
     synOTR_pid=$( /bin/pidof synOTR.sh )
 
     if [ ! -z "$synOTR_pid" ] ; then
-        if [ $callFrom = GUI ] ; then
-            echo '<p class="center"><span style="color: #BD0010;"><b>synOTR läuft bereits!</b><br>(Prozess-ID: '$synOTR_pid')</span></p>'
+        if [ "$callFrom" = GUI ] ; then
+            echo '<p class="center"><span style="color: #BD0010;"><b>synOTR läuft bereits!</b><br>(Prozess-ID: '"$synOTR_pid"')</span></p>'
             echo '<br /><p class="center"><button name="page" value="status-kill-synotr" style="color: #BD0010;">(Beenden erzwingen?)</button></p><br />'
         else
             echo "synOTR läuft bereits! (Prozess-ID: $synOTR_pid)"
         fi
         exit
     else
-        if [ $callFrom = GUI ] ; then
+        if [ "$callFrom" = GUI ] ; then
             echo '<p class="title">synOTR wurde gestartet ...</p><br><br><br><br>
     	    <center><table id="system_msg" style="width: 40%;table-align: center;">
                 <tr>   
@@ -66,11 +68,11 @@
     fi
 
 # Variablenkorrektur für ältere Konfiguration.txt und Slash anpassen:
-    if [ -z $DESTDIR ] ; then
-        DESTDIR="${destdir%/}/"
+    if [ -z "$DESTDIR" ] ; then
+        DESTDIR="${destdir:+${destdir%/}/}"
     fi
 
-    if [ -z $WORKDIR ] ; then
+    if [ -z "$WORKDIR" ] ; then
         WORKDIR="${DESTDIR%/}/"     # Variable WORKDIR nicht gesetzt. Es wird im Ausgabeordner gearbeitet!
     else
         WORKDIR="${WORKDIR%/}/"
@@ -79,13 +81,13 @@
     umask 000   # damit Files auch von anderen Usern bearbeitet werden können / http://openbook.rheinwerk-verlag.de/shell_programmierung/shell_011_003.htm
 	
 # LOGlevel=0  => Logging inaktiv / 1 => normal / 2 => erweitert
-    if [ $LOGlevel = "0" ] ; then
+    if [ "$LOGlevel" = "0" ] ; then
     	./synOTR.sh
     else
     	DECODIR="${WORKDIR%/}/_decodiert"
     	
         if [ ! -d "$DESTDIR" ] || [ "$DESTDIR" = "/" ]; then
-            if [ $callFrom = GUI ] ; then
+            if [ "$callFrom" = GUI ] ; then
                 echo '
                <p class="center"><span style="color: #BD0010;"><b>! ! ! Zielverzeichnis in der Konfiguration prüfen ! ! !</b><br>Programmlauf wird beendet.<br></span></p>'
             else
@@ -95,10 +97,10 @@
             exit 1
     	fi
     	
-        if [ $OTRcutactiv = "off" ] ; then
+        if [ "$OTRcutactiv" = "off" ] ; then
     		DECODIR="$WORKDIR"
     	fi
         
         mkdir -p "${DECODIR%/}/_LOGsynOTR"
-        ./synOTR.sh >> ${DECODIR%/}/_LOGsynOTR/synOTR_`date +%Y`-`date +%m`-`date +%d`_`date +%H`-`date +%M`.log 2>&1
+        ./synOTR.sh >> "${DECODIR%/}/_LOGsynOTR/synOTR_$(date +%Y)-$(date +%m)-$(date +%d)_$(date +%H)-$(date +%M).log" 2>&1
     fi

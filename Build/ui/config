@@ -14,6 +14,7 @@
             "advanceGrantPrivilege": true,
             "configablePrivilege": true,
             "texts": "texts",
+            "preloadTexts": ["app:app_name", "app:job_successful", "app:error"],
             "depend": ["SYNO.SDS.synOTR.MainWindow"]
         },
         "SYNO.SDS.synOTR.MainWindow": {
@@ -21,6 +22,7 @@
             "title": "synOTR",
             "icon": "images\/synOTR_{0}.png",
             "texts": "texts",
+            "preloadTexts": ["app:app_name", "app:job_successful", "app:error"],
             "depend": ["SYNO.SDS.synOTR.Utils"]
         },
         "SYNO.SDS.synOTR.Utils": []

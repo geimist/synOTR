@@ -1,5 +1,6 @@
 #!/bin/bash
 # help.sh
+# shellcheck disable=SC2154
 
 
 echo '
@@ -10,16 +11,12 @@ echo '
 	</div>
 	<ol style="list-style:decimal">
     <p>
-    <li>Passe zunächst deine Installation in den <a href="index.cgi?page=edit" style="'$synotrred';">Einstellungen</a> an.
+    <li>Passe zunächst deine Installation in den <a href="index.cgi?page=edit" style="'"$synotrred"';">Einstellungen</a> an.
+    <br>FFmpeg kommt von SynoCommunity (<a href="https://synocommunity.com/package/ffmpeg8" style="'"$synotrred"';">ffmpeg8</a> bevorzugt; ffmpeg7/ffmpeg6 gehen ebenfalls).
     </li></p>
     <p>
     <li>Um synOTR regelmäßig laufen zu lassen (was sich empfiehlt), erstelle als
-      nächstes <br>einen automatisierten Programmaufruf.
-      <div class="tab"><br>
-      Dazu hast du 2 Möglichkeiten:<br>verwende den <a href="index.cgi?page=timer" style="'$synotrred';">Zeitplaner</a> für einen programmierten synOTR-Start.
-      <br><br>Hierbei ist zu beachten, dass der DSM-Sicherheitsbereater den Zusätzlichen Croneintrag (da für DSM unbekannt) bemängelt!</p><hr>
-      <p>Oder, erstelle alternativ im Aufgabenplaner einen neuen Task mit diesem
-      Programmpfad<br>(zu empfehlen, sofern du kürzere Intervalle als "stündlich" benötigst):</p>
+      nächstes <br>einen automatisierten Programmaufruf im DSM-Aufgabenplaner:
     <p style="margin-left: 40px;"><code>/usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh</code></p>
     <h3>Öffne dazu im DSM die Systemsteuerung </h3>
         <ul class="li_standard">
@@ -43,6 +40,7 @@ echo '
         <li>hier den nachstehenden Pfad hineinkopieren:</li><br>
         <code><span style="background-color:#cccccc;font-hight:1.1em;">/usr/syno/synoman/webman/3rdparty/synOTR/synOTR-start.sh</span></code>
       </ul><br>
+    </li></p>
     </ol>
     <hr>
     <p>

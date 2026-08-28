@@ -1,0 +1,26 @@
+--- a/avcut.c
++++ b/avcut.c
+@@ -654,7 +654,23 @@
+ 		// different properties
+ 		if (0)
+ 			if (pr->out_fctx->oformat->flags & AVFMT_GLOBALHEADER)
+ 				enc_cctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
++
++		/* synOTR: x264 am GOP-Rand mit derselben SPS/PPS wie der OTR-Decode. */
++		if (dec_cctx->codec_id == AV_CODEC_ID_H264 &&
++		    dec_cctx->extradata_size > 0 && dec_cctx->extradata) {
++			av_freep(&enc_cctx->extradata);
++			enc_cctx->extradata = av_malloc(dec_cctx->extradata_size +
++			                                AV_INPUT_BUFFER_PADDING_SIZE);
++			if (!enc_cctx->extradata) {
++				av_log(NULL, AV_LOG_ERROR,
++				       "Failed to alloc encoder extradata\n");
++				return AVERROR(ENOMEM);
++			}
++			memcpy(enc_cctx->extradata, dec_cctx->extradata,
++			       dec_cctx->extradata_size);
++			enc_cctx->extradata_size = dec_cctx->extradata_size;
++		}
+ 		
+ 		ret = avcodec_open2(enc_cctx, encoder, NULL);
+ 		if (ret < 0) {
