@@ -2671,6 +2671,62 @@ sleep 1
 }
 
 
+# synotr_prepare_target_path DESTDIR FILENAME
+# Wie synOCR prepare_target_path: nächsten freien Namen im Zielordner bestimmen
+# (Stamm, Stamm (1), Stamm (2), …). Setzt synotr_target_filename und
+# synotr_target_count (leer, wenn der Originalname frei ist).
+synotr_prepare_target_path()
+{
+    _dest="${1%/}"
+    _name="$2"
+    synotr_target_filename="$_name"
+    synotr_target_count=""
+
+    [ -n "$_dest" ] && [ -n "$_name" ] || return 1
+
+    if [ ! -f "${_dest}/${_name}" ]; then
+        unset _dest _name
+        return 0
+    fi
+
+    case "$_name" in
+        *.*)
+            _ext="${_name##*.}"
+            _base="${_name%.*}"
+            ;;
+        *)
+            _ext=""
+            _base="$_name"
+            ;;
+    esac
+
+    # vorhandenen Zähler " (N)" am Stamm abstreifen, damit nicht (1) (2) entsteht
+    _stripped=$(printf '%s' "$_base" | sed 's/ ([0-9][0-9]*)$//')
+    _base="$_stripped"
+
+    _n=1
+    while [ "$_n" -le 9999 ]; do
+        if [ -n "$_ext" ]; then
+            _cand="${_base} (${_n}).${_ext}"
+        else
+            _cand="${_base} (${_n})"
+        fi
+        if [ ! -f "${_dest}/${_cand}" ]; then
+            synotr_target_filename="$_cand"
+            synotr_target_count="$_n"
+            unset _dest _name _ext _base _stripped _n _cand
+            return 0
+        fi
+        _n=$((_n + 1))
+    done
+
+    synotr_target_filename=""
+    synotr_target_count=""
+    unset _dest _name _ext _base _stripped _n _cand
+    return 1
+}
+
+
 MOVE2DESTDIR()
 {
 #########################################################################################
@@ -2686,57 +2742,30 @@ if [ "$useWORKDIR" == "yes" ] && [ ! -z "$filetest" ]; then
             IFS=$OLDIFS
             filename=$(basename "$i")
 
-            if [ ! -f "${DESTDIR}/${filename}" ]; then
-                mv "$i" "${DESTDIR}"
-                echo "    L=> verschiebe ${filename}"
-                
-                if [ "$dsmtextnotify" = "on" ] ; then
-                    sleep 1
-                    synotr_dsmnotify job_successful "Film [$filename] ist fertig"
-                    sleep 1
-                fi
-                if [ "$dsmbeepnotify" = "on" ] ; then
-                    sleep 1
-                    echo 2 > /dev/ttyS1 #short beep
-                    sleep 1
-                fi
-                synotr_apprise_notify "Film [$filename] ist fertig."
-
-                wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
-            else
-                # prüfen und zählen von gleichnamigen Filmen in der DB:
-                # ToDo: evtl. mit einer Zählschleife von Dateinamen im Zielordner realisieren => wäre von DB unabhängig und sicherer
-                filenameMask=$(echo "$filename" | sed "s/'/''/g")
-                sSQL="SELECT count(rowid) FROM raw WHERE file_rename='$filenameMask' "
-                
-                FilenameCount=$(sqlite3 -separator $'\t' ${APPDIR}/app/etc/synOTR.sqlite "$sSQL")
-
-                if [ "$FilenameCount" == "0" ] || [ -z "$FilenameCount" ]; then
-                    echo "    Film [$filename] kann nicht in Zielordner verschoben werden, da er darin bereits vorhanden ist und in der Datenbank kein Zählgrundlage gefunden wurde!"
-                else
-                    filename=$(echo "$filename" | sed "s/.avi/ \(${FilenameCount}\).avi/g" | sed "s/.mp4/ \(${FilenameCount}\).mp4/g" )
-                    echo "    Dateiname wird um einen Zähler ergänzt (${FilenameCount}), da die Datei bereits im Zielordner existiert."
-                    if [ ! -f "${DESTDIR}/${filename}" ]; then
-                        mv "$i" "${DESTDIR}/${filename}"
-                        echo "    L=> verschiebe ${filename}"
-
-                        if [ "$dsmtextnotify" = "on" ] ; then
-                            sleep 1
-                            synotr_dsmnotify job_successful "Film [$filename] ist fertig"
-                            sleep 1
-                        fi
-                        if [ "$dsmbeepnotify" = "on" ] ; then
-                            sleep 1
-                            echo 2 > /dev/ttyS1 #short beep
-                            sleep 1
-                        fi
-                        synotr_apprise_notify "Film [$filename] ist fertig."
-                        wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
-                    else
-                        echo "    Alternativer Dateiname [$filename] ebenfalls bereits vergeben …"
-                    fi
-                fi
+            if ! synotr_prepare_target_path "${DESTDIR}" "$filename" || [ -z "$synotr_target_filename" ]; then
+                echo "    Film [$filename] kann nicht in Zielordner verschoben werden, da kein freier Dateiname gefunden wurde."
+                continue
             fi
+            if [ "$filename" != "$synotr_target_filename" ]; then
+                echo "    Dateiname wird um einen Zähler ergänzt (${synotr_target_count}), da die Datei bereits im Zielordner existiert."
+            fi
+
+            mv "$i" "${DESTDIR}/${synotr_target_filename}"
+            echo "    L=> verschiebe ${synotr_target_filename}"
+
+            if [ "$dsmtextnotify" = "on" ] ; then
+                sleep 1
+                synotr_dsmnotify job_successful "Film [$synotr_target_filename] ist fertig"
+                sleep 1
+            fi
+            if [ "$dsmbeepnotify" = "on" ] ; then
+                sleep 1
+                echo 2 > /dev/ttyS1 #short beep
+                sleep 1
+            fi
+            synotr_apprise_notify "Film [$synotr_target_filename] ist fertig."
+
+            wget --timeout=30 --tries=2 -q -O - "http://${synotrdomain}/synOTR/synOTR_FILECOUNT" >/dev/null 2>&1
         done
 fi
 

@@ -1309,4 +1309,237 @@ div.HorCrumbs {
 	color: inherit;
 }
 
+.synotr-form-page .synotr-path-wrap {
+	position: relative;
+	min-width: 0;
+	width: 100%;
+}
+
+.synotr-form-page .synotr-path-input {
+	padding-right: 2.1em;
+}
+
+.synotr-form-page button.synotr-path-pick,
+.synotr-form-page button.synotr-path-pick:hover,
+.synotr-form-page button.synotr-path-pick:focus {
+	position: absolute;
+	right: 0.15rem;
+	top: 50%;
+	transform: translateY(-50%);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	width: 1.8em;
+	height: 1.8em;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0.3rem;
+	background: transparent;
+	background-image: none;
+	color: #6c7a8a;
+	line-height: 1;
+	z-index: 2;
+}
+
+.synotr-form-page button.synotr-path-pick:hover,
+.synotr-form-page button.synotr-path-pick:focus-visible {
+	color: #0086E5;
+	background: rgba(0, 134, 229, 0.08);
+}
+
+.synotr-form-page button.synotr-path-pick svg {
+	pointer-events: none;
+}
+
+html.synotr-fp-open {
+	overflow: hidden;
+}
+
+.synotr-fp-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 4000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.2rem;
+	background: rgba(20, 32, 48, 0.42);
+}
+
+.synotr-fp-modal[hidden] {
+	display: none !important;
+}
+
+.synotr-fp-dialog {
+	display: flex;
+	flex-direction: column;
+	width: min(36rem, 100%);
+	max-height: min(32rem, 90vh);
+	background: #fff;
+	border: 1px solid #bcc7d4;
+	border-radius: 6px;
+	box-shadow: 0 12px 40px rgba(20, 32, 48, 0.22);
+}
+
+.synotr-fp-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.7rem 0.9rem;
+	background: #f5f7fa;
+	border-bottom: 1px solid #d7dfe8;
+}
+
+.synotr-fp-title {
+	margin: 0;
+	font-size: 1.05em;
+	font-weight: 600;
+	color: #2A588C;
+}
+
+.synotr-fp-x,
+.synotr-fp-x:hover,
+.synotr-fp-x:focus {
+	min-width: 0;
+	width: 1.8em;
+	height: 1.8em;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: transparent;
+	background-image: none;
+	font-size: 1.4em;
+	line-height: 1;
+	color: #53657D;
+}
+
+.synotr-fp-content {
+	flex: 1 1 auto;
+	min-height: 12rem;
+	overflow: auto;
+	margin: 0.7rem 0.9rem;
+	padding: 0;
+	background: #f9fbfd;
+	border: 1px solid #d7dfe8;
+	border-radius: 4px;
+}
+
+.synotr-fp-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 12rem;
+}
+
+.synotr-fp-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.synotr-fp-section,
+.synotr-fp-nav,
+.synotr-fp-item {
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid #e3e8ee;
+	cursor: pointer;
+}
+
+.synotr-fp-section {
+	font-weight: 600;
+	background: #eef2f6;
+	color: #3f4b5b;
+	cursor: default;
+}
+
+.synotr-fp-nav {
+	font-weight: 600;
+	background: #f3f6f9;
+	color: #2A588C;
+}
+
+.synotr-fp-item {
+	background: #fff;
+	color: #374355;
+}
+
+.synotr-fp-nav:hover,
+.synotr-fp-item:hover {
+	background: #edf4fb;
+}
+
+.synotr-fp-item.is-active {
+	background: #e1edf9;
+}
+
+.synotr-fp-ico {
+	display: inline-block;
+	width: 1.1em;
+	margin-right: 0.35em;
+}
+
+.synotr-fp-ico::before {
+	content: "▸";
+	color: #0086E5;
+}
+
+.synotr-fp-ico-back::before {
+	content: "←";
+}
+
+.synotr-fp-ico-up::before {
+	content: "↑";
+}
+
+.synotr-fp-msg {
+	margin: 0.9rem;
+	padding: 0.7em 0.8em;
+	border-radius: 0.375rem;
+	font-size: 0.9em;
+	line-height: 1.5;
+}
+
+.synotr-fp-msg-warn {
+	background: #fff8e6;
+	border: 1px solid #f0d48a;
+	color: #5c4a12;
+}
+
+.synotr-fp-msg-err {
+	background: #fdeeee;
+	border: 1px solid #f0c0c0;
+	color: #8a1f1f;
+}
+
+.synotr-fp-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.45rem;
+	padding: 0.65rem 0.9rem 0.8rem;
+	border-top: 1px solid #d7dfe8;
+}
+
+.synotr-fp-btn {
+	min-width: 6.5em;
+}
+
+button.synotr-fp-btn-primary,
+button.synotr-fp-btn-primary:hover {
+	color: #fff !important;
+	border: solid 1px #1687D9;
+	background-image: linear-gradient(#32AAFF, #1994EB);
+	background-color: #1994EB;
+}
+
+button.synotr-fp-btn-primary:disabled,
+button.synotr-fp-btn-primary:disabled:hover {
+	opacity: 0.45;
+	cursor: default;
+	background-image: linear-gradient(#32AAFF, #1994EB);
+}
+
+
 

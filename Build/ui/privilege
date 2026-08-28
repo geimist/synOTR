@@ -13,6 +13,9 @@
         },
         "SYNO.Core.Desktop": {
             "allowed": ["getSessionData"]
+        },
+        "SYNO.FileStation.List": {
+            "allowed": ["list", "list_share"]
         }
     },
     "privilege": {

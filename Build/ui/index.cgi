@@ -21,7 +21,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
 
     # Cache-bust CSS/JS: Query ändert sich mit Datei-mtime (wie synOCR), auch ohne Versionsbump.
     synotr_asset_ver=0
-    for _synotr_f in "${app_home}/css/synotr.css" "${app_home}/js/chartsloader.js"; do
+    for _synotr_f in "${app_home}/css/synotr.css" "${app_home}/js/chartsloader.js" "${app_home}/js/synotr-folderpicker.js"; do
         [ -f "${_synotr_f}" ] || continue
         _synotr_m=$(stat -c %Y "${_synotr_f}" 2>/dev/null)
         [ -z "${_synotr_m}" ] && _synotr_m=$(stat -f %m "${_synotr_f}" 2>/dev/null)
@@ -50,6 +50,8 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
     else
         exit
     fi
+    # Session-ID (Cookie id=) für FileStation-Aufrufe als Fallback neben dem Cookie
+    sid=$(echo "${syno_login}" | sed -n 's/.*Set-Cookie: id=\([^;]*\).*/\1/p' | head -n1)
 
 # Füge den SynoToken dem QUERY_STRING hinzu
     [ -z "${QUERY_STRING}" ] && QUERY_STRING="SynoToken=${syno_token}" || QUERY_STRING="${QUERY_STRING}&SynoToken=${syno_token}"
@@ -102,7 +104,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
 
 # Zugangsberechtigungen und Privilegien zum Schutz auf "readonly" setzen oder leeren
     unset syno_login rar_data syno_privilege
-    readonly syno_token syno_user user_exist is_admin is_authenticated
+    readonly syno_token syno_user user_exist is_admin is_authenticated sid
 
 # ---------------------------------------------------------------------
 	# Benutzerordner initiieren
@@ -164,7 +166,7 @@ for i in "$@"; do
 	# SynoToken steht in jeder Query – nicht in die Datei, sonst killt source die CGI
 	# (Sonderzeichen / readonly syno_token) noch vor dem Content-type → DSM-404.
 	case "$variable" in
-		SynoToken|encode_SynoToken) continue ;;
+		SynoToken|encode_SynoToken|sid|encode_sid) continue ;;
 	esac
 	[[ "$variable" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
 	if [ "$variable" = "page" ]; then
@@ -185,7 +187,7 @@ if [ -f "$var" ] && bash -n "$var" 2>/dev/null; then
 		encode_value=${i##*=}
 		decode_value=$(echo "$encode_value" | sed -f "${dir}/includes/decode.sed")
 		case "$variable" in
-			SynoToken|encode_SynoToken) continue ;;
+			SynoToken|encode_SynoToken|sid|encode_sid) continue ;;
 		esac
 		[[ "$variable" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
 		printf -v "$variable" '%s' "$decode_value"
@@ -233,6 +235,8 @@ echo '
 	<title>synOTR</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="syno-token" content="'"$(printf '%s' "${syno_token-}" | sed 's/&/\&amp;/g; s/"/\&quot;/g; s/</\&lt;/g')"'"/>
+	<meta name="syno-sid" content="'"$(printf '%s' "${sid-}" | sed 's/&/\&amp;/g; s/"/\&quot;/g; s/</\&lt;/g')"'"/>
 	
 	<link rel="icon" type="image/svg+xml" href="images/synOTR-LOGO.svg" sizes="any">
 	<!-- <link rel="shortcut icon" href="images/uh_32.png" type="image/x-icon" /> -->
@@ -400,6 +404,12 @@ echo '
 		window.setTimeout(go, fadeMs);
 	}, delayMs);
 })();
-</script>
+</script>'
+
+if [[ "$mainpage" == "edit" ]]; then
+	echo '<script type="text/javascript" src="js/synotr-folderpicker.js'"${synotr_asset_q}"'"></script>'
+fi
+
+echo '
 </body>
 </html>'

@@ -175,6 +175,10 @@ if [[ "$page" == "edit" ]]; then
 		source "$dir/app/etc/Konfiguration.txt"
 	fi
 
+	# shellcheck source=includes/folderpicker.sh
+	# shellcheck disable=SC1091
+	[ -f "$dir/includes/folderpicker.sh" ] && . "$dir/includes/folderpicker.sh"
+
 	synotr_html_attr() {
 		printf '%s' "${1-}" | sed 's/&/\&amp;/g; s/"/\&quot;/g; s/</\&lt;/g'
 	}
@@ -214,6 +218,26 @@ if [[ "$page" == "edit" ]]; then
 		echo '<div class="synotr-form-row">
 			<label for="'"$_n"'">'"$_l"'</label>
 			<input type="text" class="synotr-form-control" name="'"$_n"'" id="'"$_n"'" value="'"$_esc"'" />'
+		synotr_form_help_btn "$_n" "$_h"
+		echo '</div>'
+		synotr_form_hint "$_n" "$_h"
+		echo '</div>'
+	}
+
+	# name label value help [wrap_id] [hidden] — Pfadfeld mit FileStation-Picker
+	synotr_form_path() {
+		local _n="$1" _l="$2" _v="$3" _h="$4"
+		local _esc
+		_esc=$(synotr_html_attr "$_v")
+		synotr_field_open "$5" "$6"
+		echo '<div class="synotr-form-row">
+			<label for="'"$_n"'">'"$_l"'</label>
+			<div class="synotr-path-wrap">
+				<input type="text" class="synotr-form-control synotr-path-input" name="'"$_n"'" id="'"$_n"'" value="'"$_esc"'" spellcheck="false"/>
+				<button type="button" class="synotr-path-pick" data-synotr-pick="'"$_n"'" title="Ordner auswählen" aria-label="Ordner auswählen">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+				</button>
+			</div>'
 		synotr_form_help_btn "$_n" "$_h"
 		echo '</div>'
 		synotr_form_hint "$_n" "$_h"
@@ -356,9 +380,8 @@ if [[ "$page" == "edit" ]]; then
     	Trage hier deine Einstellungen ein und passe die Pfade an.
 	    <br>Hilfe für die einzelnen Felder erhältst du über das blaue Info-Symbol am rechten Rand.
 	    <br>
-	    <br>Achte unbedingt darauf, die kompletten Pfade inkl. Volume (z.B. <code>/volume1/…</code>) einzutragen. 
-	    Das sicherste ist, wenn du in der Filestation den gewünschten Ordner suchst und du dir über Rechtsklick die Eigenschaften anzeigen lässt. 
-	    In diesem Dialog kannst du dir den korrekten Pfad kopieren.
+	    <br>Achte unbedingt darauf, die kompletten Pfade inkl. Volume (z.B. <code>/volume1/…</code>) einzutragen.
+	    Am einfachsten wählst du den Ordner über das Ordnersymbol im jeweiligen Feld. Alternativ kopierst du in der Filestation über Rechtsklick → Eigenschaften den Pfad.
 	    <br><br>'
 
 	# -> Abschnitt Allgemein
@@ -371,16 +394,16 @@ if [[ "$page" == "edit" ]]; then
     </summary>
     <div>'
 
-	synotr_form_text "WORKDIR" "Arbeitsverzeichnis" "$WORKDIR" \
+	synotr_form_path "WORKDIR" "Arbeitsverzeichnis" "$WORKDIR" \
 		'Das Arbeitsverzeichnis ist zunächst einmal optional, ist aber sehr zu empfehlen. Z.B. werden bei aktivierter MP4-Konvertierung alle avi-Dateien im Arbeitsverzeichnis konvertiert. Setzt man kein spezielles Arbeitsverzeichnis ein, so ist das Zielverzeichnis das Arbeitsverzeichnis und alle darin enthaltenen avi-Dateien werden konviertiert!<br><br>(wird ggf. erstellt)'
 
-	synotr_form_text "DESTDIR" "Zielverzeichnis" "$DESTDIR" \
+	synotr_form_path "DESTDIR" "Zielverzeichnis" "$DESTDIR" \
 		'Ausgabeverzeichnis der fertigen Filme'
 
-	synotr_form_text "OTRkeydir" "Quellverzeichnis (.otrkey / .otr2)" "$OTRkeydir" \
+	synotr_form_path "OTRkeydir" "Quellverzeichnis (.otrkey / .otr2)" "$OTRkeydir" \
 		'Verzeichnis mit den .otrkey- und .otr2-Dateien'
 
-	synotr_form_text "OTRkeydeldir" "Papierkorb" "$OTRkeydeldir" \
+	synotr_form_path "OTRkeydeldir" "Papierkorb" "$OTRkeydeldir" \
 		'Löschverzeichnis der Quelldateien<br><br>! ! ! ACHTUNG ! ! !<br>gleichnamige vorhandene Dateien in dem Verzeichnis werden überschrieben'
 
 	synotr_form_switch "endgueltigloeschen" "Dateien endgültig löschen" "$endgueltigloeschen" \
@@ -437,7 +460,7 @@ if [[ "$page" == "edit" ]]; then
 		'Es können auch Cutlits für andere Qualitäten gefunden werden (z.B. wird für einen HD-Film, für den es keine Cutlist gibt, die entsprechende Cutlist des HQ-Formats verwendet).<br><br>Es können derzeit nur alternative Cutlits mit zeitbasierten Schnitten verwendet werden. Die Schnitte können allerdings ungenau werden. Daher ist eine objektive Bewertung schlecht möglich weshalb die Cuts nicht über die persönliche Benutzer-ID geladen werden – sie erscheinen daher auch nicht im Benutzerkonto von cutlist.at' \
 		"1" "0"
 
-	synotr_form_text "OTRlocalcutlistdir" "Ordner für lokale Cutlist (optional)" "$OTRlocalcutlistdir" \
+	synotr_form_path "OTRlocalcutlistdir" "Ordner für lokale Cutlist (optional)" "$OTRlocalcutlistdir" \
 		'optionaler Ordner für lokale Cutlists<br>(Dateiname = Filmname plus .cutlist, Qualität LQ/HQ/HD ist egal)<br>Gesucht wird zuerst neben dem Film (Dekodier- und Downloadordner), danach in diesem Pfad.<br><br>Eine lokale Cutlist wird nur für diese Sendung verwendet, aber ohne Qualitätsdifferenzierung – Error-Flags wie MissingEnding sind kein Veto.<br>Die Einstellung „auch für Alternativformate“ gilt nur für cutlist.at.<br><br>Bei Nichtnutzung leer lassen'
 
 	synotr_form_text "cutlistat_ID" "Benutzer-ID von cutlist.at" "$cutlistat_ID" \
@@ -598,6 +621,10 @@ EOF
         </details>
     	<br><hr style="border-style: dashed; size: 1px;">
 	</fieldset>'
+
+	if type synotr_folderpicker_emit >/dev/null 2>&1; then
+		synotr_folderpicker_emit
+	fi
 
 	echo '
 	</div>
