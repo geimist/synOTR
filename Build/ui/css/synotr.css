@@ -1353,6 +1353,131 @@ div.HorCrumbs {
 	pointer-events: none;
 }
 
+.synotr-form-page .synotr-form-row.synotr-namesyntax-row {
+	align-items: start;
+}
+
+.synotr-form-page .synotr-form-row.synotr-namesyntax-row > label:first-child {
+	padding-top: 0.45em;
+}
+
+.synotr-namesyntax-editor-wrap {
+	position: relative;
+	z-index: 1;
+	isolation: isolate;
+	min-width: 0;
+	width: 100%;
+}
+
+.synotr-namesyntax-drop-indicator {
+	display: none;
+	position: absolute;
+	width: 3px;
+	margin-left: -1px;
+	background-color: #BD0010;
+	border-radius: 1px;
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 8px 2px rgba(189, 0, 16, 0.45);
+	pointer-events: none;
+	z-index: 5;
+	min-height: 1.1em;
+}
+
+.synotr-form-page .synotr-namesyntax-editor {
+	min-height: calc(1.5em + 0.7rem);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	cursor: text;
+	line-height: 1.7;
+}
+
+.synotr-form-page .synotr-namesyntax-editor:focus,
+.synotr-form-page .synotr-namesyntax-editor.synotr-namesyntax-editor-active {
+	background-color: var(--synotr-field-bg);
+	border-color: var(--synotr-field-border-focus);
+	box-shadow: var(--synotr-field-focus-ring);
+	outline: none;
+}
+
+.synotr-namesyntax-chip {
+	display: inline-block;
+	margin: 0 0.12em;
+	padding: 0.08em 0.45em;
+	vertical-align: baseline;
+	font-size: 0.82em;
+	font-weight: 600;
+	line-height: 1.45;
+	color: #fff;
+	background: #0086E5;
+	border-radius: 0.3rem;
+	cursor: grab;
+	user-select: none;
+	-webkit-user-select: none;
+	white-space: nowrap;
+}
+
+.synotr-namesyntax-chip:active {
+	cursor: grabbing;
+}
+
+.synotr-namesyntax-palette-field {
+	margin-top: 0.15rem;
+}
+
+.synotr-namesyntax-palette-intro {
+	margin: 0 0 0.55rem;
+	font-size: 0.86em;
+	line-height: 1.45;
+	color: #6c7a8a;
+}
+
+.synotr-namesyntax-palette-caption {
+	display: block;
+	flex: 1 0 100%;
+	width: 100%;
+	margin: 0.45rem 0 0.2rem;
+	font-size: 0.78em;
+	font-weight: 600;
+	color: #6c7a8a;
+	letter-spacing: 0.01em;
+}
+
+.synotr-namesyntax-palette-caption:first-child {
+	margin-top: 0;
+}
+
+.synotr-namesyntax-palette {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	align-items: center;
+}
+
+.synotr-namesyntax-palette-item {
+	display: inline-block;
+	padding: 0.28em 0.55em;
+	font-size: 0.82em;
+	font-weight: 500;
+	line-height: 1.25;
+	border-radius: 0.35rem;
+	cursor: grab;
+	user-select: none;
+	-webkit-user-select: none;
+	background-color: #e8f2fb;
+	color: #2a4a66;
+	border: 1px solid #8eb8e0;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.synotr-namesyntax-palette-item:hover {
+	background-color: #dceaf8;
+	border-color: #6fa3d4;
+	color: #1f3d56;
+}
+
+.synotr-namesyntax-palette-item:active {
+	cursor: grabbing;
+}
+
 html.synotr-fp-open {
 	overflow: hidden;
 }

@@ -87,6 +87,9 @@
     	if ! cat ./$CONFIG | grep -q "OTRavi2mp4active" ; then
     	    echo "OTRavi2mp4active=\"on\"" >> ./$CONFIG
         fi
+    	if ! cat ./$CONFIG | grep -q "OTRotr2audio" ; then
+    	    echo "OTRotr2audio=\"both\"" >> ./$CONFIG
+        fi
     	if ! cat ./$CONFIG | grep -q "OTRaacqal" ; then
     	    echo "OTRaacqal=\"80k\"" >> ./$CONFIG
         fi

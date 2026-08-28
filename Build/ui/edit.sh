@@ -24,6 +24,11 @@ if [[ "$page" == "edit-save" ]]; then
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "NameSyntax" "$NameSyntax"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "NameSyntaxSerientitel" "$NameSyntaxSerientitel"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "OTRavi2mp4active" "$OTRavi2mp4active"
+	case "${OTRotr2audio:-both}" in
+		aac|ac3) ;;
+		*) OTRotr2audio="both" ;;
+	esac
+	"$set_var" "$dir/app/etc/Konfiguration.txt" "OTRotr2audio" "$OTRotr2audio"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "OTRaacqal" "$OTRaacqal"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "normalizeAudio" "$normalizeAudio"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "parallelAudioConvert" "$parallelAudioConvert"
@@ -85,6 +90,11 @@ if [[ "$page" == "edit-import-query" ]] || [[ "$page" == "edit-import" ]]; then
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "NameSyntax" "$NameSyntax"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "NameSyntaxSerientitel" "$NameSyntaxSerientitel"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "OTRavi2mp4active" "$OTRavi2mp4active"
+            	case "${OTRotr2audio:-both}" in
+            	    aac|ac3) ;;
+            	    *) OTRotr2audio="both" ;;
+            	esac
+            	"$set_var" "$dir/app/etc/Konfiguration.txt" "OTRotr2audio" "$OTRotr2audio"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "OTRaacqal" "$OTRaacqal"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "normalizeAudio" "$normalizeAudio"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "parallelAudioConvert" "$parallelAudioConvert"
@@ -237,6 +247,28 @@ if [[ "$page" == "edit" ]]; then
 				<button type="button" class="synotr-path-pick" data-synotr-pick="'"$_n"'" title="Ordner auswählen" aria-label="Ordner auswählen">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
 				</button>
+			</div>'
+		synotr_form_help_btn "$_n" "$_h"
+		echo '</div>'
+		synotr_form_hint "$_n" "$_h"
+		echo '</div>'
+	}
+
+	synotr_chip_pin() {
+		printf '<span draggable="true" class="synotr-namesyntax-palette-item" data-token="%s" title="%s">%s</span>\n' "$1" "$1" "$2"
+	}
+
+	# name label value help
+	synotr_form_namesyntax() {
+		local _n="$1" _l="$2" _v="$3" _h="$4"
+		local _esc
+		_esc=$(synotr_html_attr "$_v")
+		synotr_field_open
+		echo '<div class="synotr-form-row synotr-namesyntax-row">
+			<label for="'"$_n"'-visual">'"$_l"'</label>
+			<div class="synotr-namesyntax-editor-wrap">
+				<input type="hidden" name="'"$_n"'" id="'"$_n"'" value="'"$_esc"'" />
+				<div id="'"$_n"'-visual" class="synotr-form-control synotr-namesyntax-editor" contenteditable="true" role="textbox" aria-multiline="false" spellcheck="false" tabindex="0" data-synotr-chip-hidden="'"$_n"'" data-synotr-chip-palette="synotr-namesyntax-palette"></div>
 			</div>'
 		synotr_form_help_btn "$_n" "$_h"
 		echo '</div>'
@@ -487,13 +519,7 @@ if [[ "$page" == "edit" ]]; then
     <summary>
         <span class="detailsitem">Filme umbenennen</span>
     </summary>
-    <div>
-		<div class="info">
-			folgende Parameter stehen f&uuml;r die Umbenennung zur Verf&uuml;gung:<br /><br />
-			<u><b>Parameter aus Dateinamen:</b></u><br />- <span style="color:#BD0010;">&sect;dur</span> (Filml&auml;nge [EPG]	- Filml&auml;nge laut EPG / inkl. Werbebl&ouml;cke)<br />- <span style="color:#BD0010;">&sect;tit</span> (Titel)<br />- <span style="color:#BD0010;">&sect;ylong</span> (Jahr [4stellig])<br />- <span style="color:#BD0010;">&sect;yshort</span> (Jahr [2stellig])<br />- <span style="color:#BD0010;">&sect;mon</span> (Monat)<br />- <span style="color:#BD0010;">&sect;day</span> (Tag)<br />- <span style="color:#BD0010;">&sect;hou</span> (Stunde)<br />- <span style="color:#BD0010;">&sect;min</span> (Minute)<br />- <span style="color:#BD0010;">&sect;cha</span> (Sender)<br />- <span style="color:#BD0010;">&sect;qua</span> (Qualtit&auml;t / Format)<br /><br />
-			<u><b>Parameter f&uuml;r Serientitel:</b></u><br />- <span style="color:#BD0010;">&sect;sertit</span> (Serientitel)<br />- <span style="color:#BD0010;">&sect;epitit</span> (Episodentitel)<br />- <span style="color:#BD0010;">&sect;sta</span> (Staffel [2stellig])<br />- <span style="color:#BD0010;">&sect;epi</span> (Episode [2stellig])<br /><br />
-			<u><b>technische Parameter:</b></u><br />- <span style="color:#BD0010;">&sect;fps</span> (Framerate)<br />- <span style="color:#BD0010;">&sect;redur</span> (Filml&auml;nge [real])<br />- <span style="color:#BD0010;">&sect;height</span> (Aufl&ouml;sung H&ouml;he)<br />- <span style="color:#BD0010;">&sect;width</span> (Aufl&ouml;sung Breite)<br />- <span style="color:#BD0010;">&sect;asra</span> (Seitenverh&auml;ltnis)<br />- <span style="color:#BD0010;">&sect;acod</span> (Audiocodec)<br />- <span style="color:#BD0010;">&sect;vcod</span> (Videocodec)<br />- <span style="color:#BD0010;">&sect;ac01</span> (AC3 vorhanden - Tonspur in AC3 ja ==> " AC3" sonst ==> "")
-		</div><br />'
+    <div>'
 
 	synotr_form_switch "OTRrenameactiv" "automatisch umbenennen?" "$OTRrenameactiv" \
 		'ein =&gt; umbenennen aktiv<br>aus =&gt; umbenennen inaktiv'
@@ -508,22 +534,56 @@ if [[ "$page" == "edit" ]]; then
 		'Nur nötig für nutzergebundene / Subscriber-Keys. Projekt-Keys ohne PIN leer lassen.'
 
 	_synotr_help=$(cat <<'EOF'
-&quot;Name-Syntax&quot; beschreibt den zukünftigen Dateinamen indem du die verfügbaren Parameter als Platzhalter wie gewünscht zusammenstellst. Des weiteren kannst du beliebigen Text hinzufügen (Sonderzeichen können zu unvorhergesehen Verhalten führen und sollten möglichst vermieden werden)
+Die Pins unten per Klick oder Drag &amp; Drop in das Namensfeld setzen. Trennzeichen und beliebigen Text dazwischen einfach eintippen (Sonderzeichen möglichst vermeiden).<br>
+Klick auf einen Pin trifft das zuletzt angeklickte Namensfeld.
 <br><br>Ein Beispiel:
 <br>aus<br>
 <i>&quot;Die_Sendung_14.11.21_22-40_orf3_30_TVOON_DE.mpg.HQ.avi&quot;</i>
 <br>wird mit der Syntax<br>
 <i>&quot;<b>§tit</b> [<b>§ylong</b>-<b>§mon</b>-<b>§day</b> <b>§hou</b>-<b>§min</b> <b>§cha</b> <b>§height</b>p <b>§redur</b>min <b>§ac01</b>] autocut&quot;</i>
 <br>der Zieldateiname<br>
-<i>&quot;Die Sendung [2014-11-21 22-40 ORF3 576p 24min] autocut.avi&quot;</i><br>
-<br>Standardvorgabe folgt dem üblichen Serien-Dateinamen (Titel.S01.E01 Episode)
+<i>&quot;Die Sendung [2014-11-21 22-40 ORF3 576p 24min] autocut.avi&quot;</i>
+<br><br>§ac01 wird zu &quot; ac3&quot;, wenn irgendeine Tonspur AC3/E-AC3 ist, sonst leer. §dur ist die EPG-Länge (inkl. Werbung), §redur die reale Filmlänge.
+<br><br>Standardvorgabe folgt dem üblichen Serien-Dateinamen (Titel.S01.E01 Episode)
 <br>Info Plex: https://forums.plex.tv/discussion/135388/anleitung-deutsche-filmtitel-und-bessere-beschreibung-2
 EOF
 )
-	synotr_form_text "NameSyntax" "Name-Syntax" "$NameSyntax" "$_synotr_help"
+	synotr_form_namesyntax "NameSyntax" "Name-Syntax" "$NameSyntax" "$_synotr_help"
 
-	synotr_form_text "NameSyntaxSerientitel" "Name-Syntax für Serientitel" "$NameSyntaxSerientitel" \
-		'gleicher Aufbau wie &quot;Name-Syntax&quot;.<br>Wird eine Serie erkannt, so wird der Titel (§tit) durch die hier eingetragene Syntax ersetzt.'
+	synotr_form_namesyntax "NameSyntaxSerientitel" "Name-Syntax für Serientitel" "$NameSyntaxSerientitel" \
+		'Gleicher Aufbau wie &quot;Name-Syntax&quot; (Pins und Freitext).<br>Wird eine Serie erkannt, so wird der Titel (§tit) durch die hier eingetragene Syntax ersetzt.'
+
+	echo '<div class="synotr-field synotr-namesyntax-palette-field">
+		<p class="synotr-namesyntax-palette-intro">Pins per Klick oder Drag &amp; Drop in das Namensfeld setzen (das zuletzt angeklickte Feld nimmt den Pin auf). Trennzeichen dazwischen eintippen.</p>
+		<div id="synotr-namesyntax-palette" class="synotr-namesyntax-palette">
+			<span class="synotr-namesyntax-palette-caption">aus dem Dateinamen</span>'
+	synotr_chip_pin "§tit" "Titel"
+	synotr_chip_pin "§dur" "Filmlänge [EPG]"
+	synotr_chip_pin "§ylong" "Jahr [4]"
+	synotr_chip_pin "§yshort" "Jahr [2]"
+	synotr_chip_pin "§mon" "Monat"
+	synotr_chip_pin "§day" "Tag"
+	synotr_chip_pin "§hou" "Stunde"
+	synotr_chip_pin "§min" "Minute"
+	synotr_chip_pin "§cha" "Sender"
+	synotr_chip_pin "§qua" "Qualität"
+	echo '			<span class="synotr-namesyntax-palette-caption">Serie</span>'
+	synotr_chip_pin "§sertit" "Serientitel"
+	synotr_chip_pin "§epitit" "Episodentitel"
+	synotr_chip_pin "§sta" "Staffel"
+	synotr_chip_pin "§epi" "Episode"
+	echo '			<span class="synotr-namesyntax-palette-caption">technisch</span>'
+	synotr_chip_pin "§fps" "Framerate"
+	synotr_chip_pin "§redur" "Filmlänge [real]"
+	synotr_chip_pin "§height" "Höhe"
+	synotr_chip_pin "§width" "Breite"
+	synotr_chip_pin "§asra" "Seitenverhältnis"
+	synotr_chip_pin "§acod" "Audiocodec"
+	synotr_chip_pin "§vcod" "Videocodec"
+	synotr_chip_pin "§ac01" "AC3"
+	echo '
+		</div>
+	</div>'
 
 	echo '
     </div>
@@ -545,9 +605,20 @@ EOF
 	_synotr_mp4_hidden=""
 	[[ "$OTRcutactiv" == "on" ]] && _synotr_mp4_hidden="hidden"
 	synotr_form_switch "OTRavi2mp4active" "Ausgabe immer MP4" "$OTRavi2mp4active" \
-		'ein =&gt; Rest-AVI nach MP4 (ffmpeg-Demux + MP4Box, wie OTRavi2mp4 in 4.3.1)<br>aus =&gt; AVI bleibt AVI<br><br>Gilt nur, wenn Schneiden aus ist. Beim Schneiden wird die Ausgabe immer MP4 (.otrkey über MP4Box, .otr2 bleibt MP4 bzw. wird nach dem Cut gemuxt).<br>.otr2-MP4 ohne Schnitt wird nicht noch einmal remuxt.' \
+		'ein =&gt; Rest-AVI nach MP4 (ffmpeg-Demux + MP4Box, wie OTRavi2mp4 in 4.3.1)<br>aus =&gt; AVI bleibt AVI<br><br>Gilt nur, wenn Schneiden aus ist. Beim Schneiden wird die Ausgabe immer MP4 (.otrkey über MP4Box, .otr2 bleibt MP4 bzw. wird nach dem Cut gemuxt).<br>.otr2-MP4 ohne Schnitt bleibt unverändert, außer unter „otr2-Tonspuren“ ist nicht „beide“ gewählt.' \
 		"on" "off" "row_OTRavi2mp4active" "$_synotr_mp4_hidden"
 	unset _synotr_mp4_hidden
+
+	_synotr_a="${OTRotr2audio:-both}"
+	case "$_synotr_a" in
+		aac|ac3) ;;
+		*) _synotr_a="both" ;;
+	esac
+	_synotr_opts="$(synotr_option "both" "AAC und AC3 (beide)" "$_synotr_a")$(synotr_option "aac" "nur AAC (Stereo)" "$_synotr_a")$(synotr_option "ac3" "nur AC3 (5.1)" "$_synotr_a")"
+	synotr_form_select "OTRotr2audio" "otr2-Tonspuren" \
+		'Welche Tonspuren ins fertige MP4 sollen, wenn die .otr2-Quelle mehrere hat (typisch HQ: AAC-Stereo und AC3-5.1).<br><br>beide =&gt; AAC und AC3, AAC bleibt die Standardspur (wie QuickTime)<br>nur AAC =&gt; kleinere Datei, maximale Kompatibilit&auml;t<br>nur AC3 =&gt; Surround, falls vorhanden<br><br>Fehlt die gewählte Spur, bleibt die vorhandene. Gilt für Smartrendering, Keyframe-Schnitt und – wenn Schneiden aus ist – für ungeschnittene .otr2-MP4. AAC-Bitrate und Normalisierung unten betreffen nur otrkey (MP3→AAC).' \
+		"$_synotr_opts"
+	unset _synotr_opts _synotr_a
 
 	synotr_form_range_steps "OTRaacqal" "Bitrate der AAC-Tonspur" "$OTRaacqal" \
 		'Ziel-Bitrate der AAC-Audiospur. Der Regler rastet auf üblichen Stereo-Stufen ein: 32, 48, 64, 80, 96, 112, 128, 160, 192, 256 kBit/s. Standard: 80 kBit/s. AC3 bleibt unverändert.' \

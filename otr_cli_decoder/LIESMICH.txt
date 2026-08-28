@@ -1,0 +1,112 @@
+OTR-Decoder zum Herunterladen  -  Kurzanleitung
+================================================
+
+Dieses Paket entschluesselt Ihre OTR-Aufnahmen auf dem eigenen Rechner, ohne Browser.
+Es versteht beide Formate: .otr2 (aktuell) und .otrkey (aelter).
+
+Es gibt zwei Bedienarten - Sie brauchen nur eine davon:
+
+  otr_decoder_gui.py    grafische Oberflaeche (Ordner auswaehlen, anklicken, fertig)
+  otr_cli_decoder.py    Kommandozeile (fuer Skripte, Server, viele Dateien)
+
+
+1. WAS SIE BRAUCHEN
+-------------------
+* Python 3.7 oder neuer.
+* EIN Zusatzpaket:
+
+      python3 -m pip install cryptography
+
+  Mehr nicht. Aeltere Anleitungen nannten zusaetzlich "requests" - das wird seit dem
+  12.08.2026 NICHT mehr gebraucht. Falls Sie das noch irgendwo lesen: ignorieren.
+
+* Nur fuer die grafische Oberflaeche unter Linux zusaetzlich einmalig:
+      Debian/Ubuntu:  sudo apt install python3-tk
+      Fedora:         sudo dnf install python3-tkinter
+      Arch:           sudo pacman -S tk
+  Unter Windows und macOS ist das bereits enthalten.
+
+
+2. WENN "pip install" MIT EINEM FEHLER ABBRICHT
+-----------------------------------------------
+Aktuelle Linux-Systeme (Ubuntu ab 23.04, Debian ab 12, Fedora) lassen Installationen
+ins System nicht mehr zu und melden:
+
+      error: externally-managed-environment
+
+Das ist kein Fehler Ihrerseits. Zwei Wege, beide in Ordnung:
+
+  a) Aus der Paketverwaltung installieren (empfohlen):
+        Debian/Ubuntu:  sudo apt install python3-cryptography
+        Fedora:         sudo dnf install python3-cryptography
+        Arch:           sudo pacman -S python-cryptography
+
+  b) Eine eigene Umgebung anlegen:
+        python3 -m venv ~/otr-decoder-umgebung
+        ~/otr-decoder-umgebung/bin/pip install cryptography
+        ~/otr-decoder-umgebung/bin/python otr_decoder_gui.py
+
+
+3. STARTEN
+----------
+Alle Dateien aus diesem Paket muessen im SELBEN Ordner liegen.
+
+  Grafische Oberflaeche:   python3 otr_decoder_gui.py
+  Kommandozeile:           python3 otr_cli_decoder.py --quellordner "/pfad/zu/dateien"
+
+Beim ersten Start werden E-Mail und Passwort Ihres OTR-Kontos abgefragt; auf Wunsch
+werden sie neben dem Programm gespeichert, dann entfaellt die Eingabe kuenftig.
+
+Windows-Nutzer ohne Python nehmen stattdessen das fertige Programm
+"otr_decoder_launcher.exe" von der Decoder-Seite - dort ist kein Python noetig.
+Es oeffnet ein schwarzes Konsolenfenster; das ist richtig so, das IST das Programm.
+
+
+4. EINSTELLUNGSDATEI (optional)
+--------------------------------
+Legen Sie neben das Programm eine Datei "otr_decoder.ini":
+
+      [otr]
+      email = ich@beispiel.de
+      password = *****
+      quellordner = C:\Downloads
+      zielordner  = C:\Videos
+
+Angaben auf der Kommandozeile haben Vorrang vor dieser Datei.
+Die aeltere "otr_login.txt" wird weiterhin gelesen - wer sie hat, muss nichts umstellen.
+
+
+5. NUETZLICHE SCHALTER (Kommandozeile)
+---------------------------------------
+  --quellordner ORDNER     wo die .otr2/.otrkey liegen (Vorgabe: aktueller Ordner)
+  --zielordner ORDNER      wohin die fertigen Dateien sollen
+  --force                  vorhandene Ausgabedateien ueberschreiben
+  --delete-source          Quelldatei nach ERFOLGREICHER Entschluesselung loeschen
+  --fehler-ignorieren      unvollstaendige Dateien so weit wie moeglich retten
+  --protokoll [ORDNER]     Sitzungsprotokoll schreiben (Datum+Uhrzeit im Dateinamen)
+  --nicht-warten           am Ende nicht auf die Eingabetaste warten
+  --version                Versionsnummer anzeigen
+  --help                   vollstaendige Hilfe, inklusive der Rueckgabewerte
+
+Rueckgabewerte fuer Skripte:
+  0 alles entschluesselt · 1 allgemeiner Fehler · 2 Zugangsdaten · 3 nichts gefunden
+  4 kein Recht auf die Aufnahme · 5 abgebrochen
+
+
+6. HAEUFIGE FRAGEN
+------------------
+Grosse Dateien?
+  Kein Problem - dieses Programm kennt die Speichergrenze des Browsers nicht. Gerade
+  bei mehreren Gigabyte ist es die entspanntere Wahl.
+
+"nicht registriert" bei einer .otrkey?
+  Ein Schluessel gehoert immer zu genau EINER Fassung einer Sendung. Haben Sie die
+  Datei von einer fremden Spiegelseite, kann es eine Fassung sein, die bei uns nie
+  registriert wurde. Dann hilft nur, dieselbe Sendung bei uns zu laden.
+
+Aktualisiert sich das Programm selbst?
+  Ja. Beim Start wird geprueft, ob eine neuere Fassung vorliegt; sie wird geprueft
+  und erst dann eingesetzt. Mit --no-update-check schalten Sie das ab.
+
+
+Fragen und Fehlermeldungen bitte ueber das Rueckmeldeformular auf der Decoder-Seite.

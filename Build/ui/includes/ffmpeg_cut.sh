@@ -5,6 +5,7 @@
 # oder Fallback MP4Box -add (i386). ffmpeg-Concat zittert bei HD-H.264.
 # Erwartet (aus synOTR.sh): ffmpeg ffprobe mp4mux mp4box ffloglevel LOGlevel
 #           mp4boxloglevel keep_times WORKDIR tmp AudioDelayMs AC_ffprobeInfo OLDIFS
+#           OTRotr2audio / synotr_otr2_audio_plan (otr2-Tonspuren)
 # otr2-Keyframe (SMARTRENDERING=off). otrkey nutzt avisplit, nicht diese Funktion.
 
 synotr_ffmpeg_cut() {
@@ -39,7 +40,6 @@ synotr_ffmpeg_cut() {
         _probe="{ ${_probe#*\{}"
     fi
     _vcodec=$(echo "$_probe" | jq -r '[.streams[]? | select(.codec_type=="video") | .codec_name] | .[0] // empty')
-    _acodec=$(echo "$_probe" | jq -r '[.streams[]? | select(.codec_type=="audio") | .codec_name] | .[0] // empty')
     _fr=$(echo "$_probe" | jq -r '[.streams[]? | select(.codec_type=="video") | .r_frame_rate] | .[0] // "25/1"')
     _fr1=$(echo "$_fr" | awk -F/ '{print $1}')
     _fr2=$(echo "$_fr" | awk -F/ '{print $2}')
@@ -49,6 +49,25 @@ synotr_ffmpeg_cut() {
         _fps=$(gawk -v a="$_fr1" -v b="$_fr2" 'BEGIN { print a/b }')
     fi
     [ -n "$_fps" ] || _fps=25
+
+    if type synotr_otr2_audio_plan >/dev/null 2>&1 && synotr_otr2_audio_plan "$_probe"; then
+        echo "    otr2-Tonspuren:       $synotr_otr2_a_note"
+    else
+        synotr_otr2_a_rel=0
+        synotr_otr2_a_codec=$(echo "$_probe" | jq -r '[.streams[]? | select(.codec_type=="audio") | .codec_name] | .[0] // "aac"')
+        synotr_otr2_a_n=1
+        if [ -z "$synotr_otr2_a_codec" ] || [ "$synotr_otr2_a_codec" = "null" ]; then
+            echo "    keine Audiospur – Keyframe-Cut abgebrochen."
+            rm -rf "$_segdir"
+            return 1
+        fi
+        echo "    otr2-Tonspuren:       erste Spur (${synotr_otr2_a_codec})"
+    fi
+    if [ "${synotr_otr2_a_n:-0}" -lt 1 ]; then
+        echo "    keine Audiospur – Keyframe-Cut abgebrochen."
+        rm -rf "$_segdir"
+        return 1
+    fi
 
     _vbsf=""
     _vext=h264
@@ -65,12 +84,6 @@ synotr_ffmpeg_cut() {
         _vext=tmp.m4v
         _vtype=""
     fi
-    _aext="${_acodec:-aac}"
-    case "$_acodec" in
-        ac3) _atype=ac3 ;;
-        eac3|ec3) _atype=ec3 ;;
-        *) _atype=aac ;;
-    esac
 
     _use_mp4mux=0
     if [ -n "$mp4mux" ] && [ -x "$mp4mux" ] && [ -n "$_vtype" ]; then
@@ -121,7 +134,6 @@ synotr_ffmpeg_cut() {
         _n=$((_n + 1))
         _kdur=$(gawk -v e="$_kend" -v s="$_kstart" 'BEGIN { d=e-s; if (d < 0.04) d=0.04; printf "%.3f", d }')
         _vfile="${_segdir}/v${_n}.${_vext}"
-        _afile="${_segdir}/a${_n}.${_aext}"
         echo "    Segment ${_n}: ${_kstart}s – ${_kend}s (${_kdur}s)"
 
         if [ -n "$_vbsf" ]; then
@@ -133,18 +145,35 @@ synotr_ffmpeg_cut() {
                 -ss "$_kstart" -i "$_src" -t "$_kdur" \
                 -map 0:v:0 -an -c:v copy "$_vfile" 2>&1)
         fi
-        _ALOG=$("$ffmpeg" -hide_banner -loglevel "$ffloglevel" -y \
-            -ss "$_kstart" -i "$_src" -t "$_kdur" \
-            -map 0:a:0 -vn -c:a copy "$_afile" 2>&1)
         if [ "$LOGlevel" = "2" ]; then
             echo "ffmpeg-VideoDemux Segment ${_n}: $_VLOG"
-            echo "ffmpeg-AudioDemux Segment ${_n}: $_ALOG"
         fi
-        if [ ! -f "$_vfile" ] || [ ! -f "$_afile" ]; then
-            echo "    Demux Segment ${_n} fehlgeschlagen."
+        if [ ! -f "$_vfile" ]; then
+            echo "    Demux Segment ${_n} fehlgeschlagen (Video)."
             _ok=0
             break
         fi
+        _ak=1
+        while [ "$_ak" -le "$synotr_otr2_a_n" ]; do
+            _arel=$(synotr_otr2_nth "$synotr_otr2_a_rel" "$_ak")
+            _acod=$(synotr_otr2_nth "$synotr_otr2_a_codec" "$_ak")
+            _apair=$(synotr_otr2_audio_muxkind "$_acod")
+            _aextk=$(printf '%s\n' "$_apair" | awk '{print $1}')
+            _afile="${_segdir}/a${_n}_${_ak}.${_aextk}"
+            _ALOG=$("$ffmpeg" -hide_banner -loglevel "$ffloglevel" -y \
+                -ss "$_kstart" -i "$_src" -t "$_kdur" \
+                -map "0:a:${_arel}" -vn -c:a copy "$_afile" 2>&1)
+            if [ "$LOGlevel" = "2" ]; then
+                echo "ffmpeg-AudioDemux Segment ${_n} Spur ${_ak} (0:a:${_arel} ${_acod}): $_ALOG"
+            fi
+            if [ ! -f "$_afile" ]; then
+                echo "    Demux Segment ${_n} fehlgeschlagen (Tonspur ${_ak})."
+                _ok=0
+                break
+            fi
+            _ak=$((_ak + 1))
+        done
+        [ "$_ok" = "1" ] || break
     done
 
     if [ "$_ok" != "1" ] || [ "$_n" -lt 1 ]; then
@@ -155,19 +184,31 @@ synotr_ffmpeg_cut() {
     rm -f "$_dst"
     if [ "$_use_mp4mux" = "1" ]; then
         _vall="${_segdir}/all.${_vext}"
-        _aall="${_segdir}/all.${_aext}"
         : > "$_vall"
-        : > "$_aall"
         _i=1
         while [ "$_i" -le "$_n" ]; do
             cat "${_segdir}/v${_i}.${_vext}" >> "$_vall"
-            cat "${_segdir}/a${_i}.${_aext}" >> "$_aall"
             _i=$((_i + 1))
         done
-        _MUXLOG=$("$mp4mux" \
-            --track "${_vtype}:${_vall}#frame_rate=${_fps}" \
-            --track "${_atype}:${_aall}" \
-            "$_dst" 2>&1)
+        set -- "$mp4mux" --track "${_vtype}:${_vall}#frame_rate=${_fps}"
+        _ak=1
+        while [ "$_ak" -le "$synotr_otr2_a_n" ]; do
+            _acod=$(synotr_otr2_nth "$synotr_otr2_a_codec" "$_ak")
+            _apair=$(synotr_otr2_audio_muxkind "$_acod")
+            _aextk=$(printf '%s\n' "$_apair" | awk '{print $1}')
+            _akind=$(printf '%s\n' "$_apair" | awk '{print $2}')
+            _aall="${_segdir}/all${_ak}.${_aextk}"
+            : > "$_aall"
+            _i=1
+            while [ "$_i" -le "$_n" ]; do
+                cat "${_segdir}/a${_i}_${_ak}.${_aextk}" >> "$_aall"
+                _i=$((_i + 1))
+            done
+            set -- "$@" --track "${_akind}:${_aall}"
+            _ak=$((_ak + 1))
+        done
+        set -- "$@" "$_dst"
+        _MUXLOG=$("$@" 2>&1)
         if [ "$LOGlevel" = "2" ]; then
             echo "mp4mux LOG: $_MUXLOG"
         fi
@@ -181,13 +222,20 @@ synotr_ffmpeg_cut() {
         _i=1
         while [ "$_i" -le "$_n" ]; do
             _vfile="${_segdir}/v${_i}.${_vext}"
-            _afile="${_segdir}/a${_i}.${_aext}"
             _seg=$(printf "%s/seg%03d.mp4" "$_segdir" "$_i")
             set -- "$mp4box"
             [ -n "$_quiet" ] && set -- "$@" "$_quiet"
+            set -- "$@" -add "${_vfile}${_vdelay}"
+            _ak=1
+            while [ "$_ak" -le "$synotr_otr2_a_n" ]; do
+                _acod=$(synotr_otr2_nth "$synotr_otr2_a_codec" "$_ak")
+                _apair=$(synotr_otr2_audio_muxkind "$_acod")
+                _aextk=$(printf '%s\n' "$_apair" | awk '{print $1}')
+                _afile="${_segdir}/a${_i}_${_ak}.${_aextk}"
+                set -- "$@" -add "${_afile}${_adelay}"
+                _ak=$((_ak + 1))
+            done
             set -- "$@" \
-                -add "${_vfile}${_vdelay}" \
-                -add "${_afile}${_adelay}" \
                 -fps "$_fps" \
                 -tmp "$_segdir" \
                 "$_seg"

@@ -41,6 +41,7 @@ NameSyntaxSerientitel="§sertit.S§sta.E§epi §epitit"
 #       .avi's in native MP4's (MAC OS tauglich) umwandeln:         |
 #--------------------------------------------------------------------
 OTRavi2mp4active="on"
+OTRotr2audio="both"
 OTRaacqal="80k"
 normalizeAudio="on"
 parallelAudioConvert="on"

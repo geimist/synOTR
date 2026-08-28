@@ -21,6 +21,7 @@
     OTRlocalcutlistdir=""       # optionaler Ordner für lokale Cutlists (zusätzlich zu Dekodier-/Downloadordner); gefunden = immer nutzen
     normalizeAudio="on"         # Audiospur normalisieren (nur in Verbindung mit avi2mp4)
     parallelAudioConvert="on"   # AAC-Konvertierung parallel (nproc-1 Jobs; nur avi2mp4 / MP3-Quellspur)
+    OTRotr2audio="both"         # otr2-Tonspuren im fertigen MP4: both | aac | ac3
     autoupdate="off"
     forceupdate="off"           # Updateaufruf ohne Prüfung erzwingen
     synotrdomain="geimist.eu"   # notwendig für Update, Konsitenzprüfung, DEV-Report und evtl. in Zukunft zum abfragen der API-Keys
@@ -68,6 +69,10 @@
         AudioDelayMs="$MP4BOX_DELAY"
     fi
     AudioDelayMs="${AudioDelayMs:-0}"
+    case "${OTRotr2audio:-both}" in
+        aac|ac3|both) ;;
+        *) OTRotr2audio="both" ;;
+    esac
     if [ -z "$APPRISEURL" ] && [ -n "$PBTOKEN" ]; then
         case "$PBTOKEN" in
             *://*) APPRISEURL="$PBTOKEN" ;;
@@ -2136,7 +2141,7 @@ OTRavi2mp4()
 {
 #########################################################################################
 # Rest-AVI → MP4 (Video-Copy, MP3→AAC, MP4Box). otrkey-Schnitt macht das bereits in    #
-# OTRautocut. Natives .otr2-MP4 wird nicht angefasst.                                  #
+# OTRautocut. Ungeschnittenes .otr2-MP4 nur bei OTRotr2audio≠both (Tonspur-Filter).     #
 #########################################################################################
 
 cd "$WORKDIR"
@@ -2148,6 +2153,10 @@ fi
 if [ -d "${WORKDIR%/}/tmp_synotr_remux" ]; then
     echo "Entferne liegengebliebenes Remux-Temp: ${WORKDIR%/}/tmp_synotr_remux"
     rm -rf "${WORKDIR%/}/tmp_synotr_remux"
+fi
+
+if type synotr_otr2_filter_uncut >/dev/null 2>&1; then
+    synotr_otr2_filter_uncut
 fi
 
 filetest=$(find "$WORKDIR" -maxdepth 1 -name "*.avi" -type f)
@@ -2422,8 +2431,9 @@ for i in $(find "$WORKDIR" -maxdepth 1 \( -name "*TVOON*.avi" -o -name "*TVOON*.
         aspect_ratio=$(echo "$ffprobeInfo" | jq '.streams[0].display_aspect_ratio' | sed "s/\"//g"  | sed "s/\:/-/g" )
         echo "Seitenverhältnis:         ${aspect_ratio}"
         #	------------------ Audiocodec:
-        a_codec=$(echo "$ffprobeInfo" | jq '.streams[1].codec_name' | sed "s/\"//g" )
+        a_codec=$(echo "$ffprobeInfo" | jq -r '[.streams[]? | select(.codec_type=="audio") | .codec_name] | .[0] // empty')
         echo "Audiocodec:               ${a_codec}"
+        _has_ac3=$(echo "$ffprobeInfo" | jq '[.streams[]? | select(.codec_type=="audio") | .codec_name] | map(select(.=="ac3" or .=="eac3" or .=="ec3")) | length')
         #	------------------ Videocodec:
         v_codec=$(echo "$ffprobeInfo" | jq '.streams[0].codec_name' | sed "s/\"//g" )
         echo "Videocodec:               ${v_codec}"
@@ -2465,11 +2475,12 @@ for i in $(find "$WORKDIR" -maxdepth 1 \( -name "*TVOON*.avi" -o -name "*TVOON*.
         if [ "$missSeries" = "0" ] ; then
             title="$serietitle - S${season}E${episode} $episodetitle"	# Titel für DSM-Benachrichtigung generieren
         fi
-        if [ "$a_codec" = "ac3" ] ; then
-            NewName=$(echo $NewName | sed "s/§ac01/ ${a_codec}/g")
+        if echo "${_has_ac3:-0}" | grep -Eq '^[1-9][0-9]*$'; then
+            NewName=$(echo $NewName | sed "s/§ac01/ ac3/g")
         else
             NewName=$(echo $NewName | sed "s/§ac01//g")
         fi
+        unset _has_ac3
 
         NewName="$NewName.$fileextension"
         echo -e; echo "Neuer Dateiname:          $NewName" ; echo -e

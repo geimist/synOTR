@@ -21,7 +21,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
 
     # Cache-bust CSS/JS: Query ändert sich mit Datei-mtime (wie synOCR), auch ohne Versionsbump.
     synotr_asset_ver=0
-    for _synotr_f in "${app_home}/css/synotr.css" "${app_home}/js/chartsloader.js" "${app_home}/js/synotr-folderpicker.js"; do
+    for _synotr_f in "${app_home}/css/synotr.css" "${app_home}/js/chartsloader.js" "${app_home}/js/synotr-folderpicker.js" "${app_home}/js/synotr-namesyntax-editor.js"; do
         [ -f "${_synotr_f}" ] || continue
         _synotr_m=$(stat -c %Y "${_synotr_f}" 2>/dev/null)
         [ -z "${_synotr_m}" ] && _synotr_m=$(stat -f %m "${_synotr_f}" 2>/dev/null)
@@ -408,6 +408,7 @@ echo '
 
 if [[ "$mainpage" == "edit" ]]; then
 	echo '<script type="text/javascript" src="js/synotr-folderpicker.js'"${synotr_asset_q}"'"></script>'
+	echo '<script type="text/javascript" src="js/synotr-namesyntax-editor.js'"${synotr_asset_q}"'"></script>'
 fi
 
 echo '
