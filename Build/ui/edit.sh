@@ -42,11 +42,21 @@ if [[ "$page" == "edit-save" ]]; then
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "endgueltigloeschen" "$endgueltigloeschen"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "cutlistat_ID" "$cutlistat_ID"
 	"$set_var" "$dir/app/etc/Konfiguration.txt" "useallcutlistformat" "$useallcutlistformat"
+	case "${CutEditorQueue:-miss_both}" in
+		miss_both|no_local|all_uncut) ;;
+		*) CutEditorQueue="miss_both" ;;
+	esac
+	case "${CutEditorOtrkeyMp4:-off}" in
+		on) CutEditorOtrkeyMp4="on" ;;
+		*) CutEditorOtrkeyMp4="off" ;;
+	esac
+	"$set_var" "$dir/app/etc/Konfiguration.txt" "CutEditorQueue" "$CutEditorQueue"
+	"$set_var" "$dir/app/etc/Konfiguration.txt" "CutEditorOtrkeyMp4" "$CutEditorOtrkeyMp4"
 #	"$set_var" "$dir/app/etc/Konfiguration.txt" "customizedConfig" "1"
 
 	echo '<div class="Content_1Col_full synotr-flash">'
 	echo '<br /><div class="info"><br /><p class="center" style="color:#0086E5;font-weight:normal; ">Änderungen wurden gespeichert</p><br /></div>'
-	echo '<br /><p class="center"><button name="page" value="edit" class="blue_button">Weiter...</button></p><br />'
+	echo '<button name="page" value="edit" class="blue_button synotr-flash-go">Weiter</button>'
 	echo '</div><div class="clear"></div>'
 fi
 
@@ -118,12 +128,22 @@ if [[ "$page" == "edit-import-query" ]] || [[ "$page" == "edit-import" ]]; then
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "endgueltigloeschen" "$endgueltigloeschen"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "cutlistat_ID" "$cutlistat_ID"
             	"$set_var" "$dir/app/etc/Konfiguration.txt" "useallcutlistformat" "$useallcutlistformat"
+            	case "${CutEditorQueue:-miss_both}" in
+            	    miss_both|no_local|all_uncut) ;;
+            	    *) CutEditorQueue="miss_both" ;;
+            	esac
+            	case "${CutEditorOtrkeyMp4:-off}" in
+            	    on) CutEditorOtrkeyMp4="on" ;;
+            	    *) CutEditorOtrkeyMp4="off" ;;
+            	esac
+            	"$set_var" "$dir/app/etc/Konfiguration.txt" "CutEditorQueue" "$CutEditorQueue"
+            	"$set_var" "$dir/app/etc/Konfiguration.txt" "CutEditorOtrkeyMp4" "$CutEditorOtrkeyMp4"
             
                 # neue Konfiguration laden:
                 source "$dir/app/etc/Konfiguration.txt"
                 
     	        echo '<div class="synotr-flash"><br /><p class="center">Die Konfiguration wurde importiert</p>
-    	<br /><p class="center"><button name="page" value="edit" class="blue_button">Fertig ...</button></p><br />
+    	<button name="page" value="edit" class="blue_button synotr-flash-go">Weiter</button>
             <div class="clear"></div></div>' >> "$stop"
             else
                 echo '<p class="center">Die Quellkonfiguration konnte nicht im angegebenen Verzeichnis gefunden werden!</p>
@@ -151,7 +171,7 @@ if [[ "$page" == "edit-export" ]]; then
     	echo '<br /><div class="warning"><br /><p class="center">Konfigurationsdatei und die synOTR-Datenbank<br>konnte nicht in das Arbeitsverzeichnis gesichert werden,
     	<br>da kein Arbeitsverzeichnis in den Einstellungen definiert wurde!</p><br /></div>'
     fi
-	echo '<br /><p class="center"><button name="page" value="edit" class="blue_button">Weiter...</button></p><br />'
+	echo '<br /><p class="center"><button name="page" value="edit" class="blue_button synotr-flash-go">Weiter</button></p><br />'
 	if [ ! -z "$WORKDIR" ] ; then
 		echo '</div>'
 	fi
@@ -174,7 +194,7 @@ if [[ "$page" == "edit-restore-query" ]] || [[ "$page" == "edit-restore" ]]; the
     		chmod 755 "$dir/app/etc/Konfiguration.txt"
     	fi	
     	echo '<div class="synotr-flash"><p class="center" style="'"$green"';"><b>Werkseinstellungen wurden wiederhergestellt</b></p>
-    	    <br /><p class="center"><button name="page" value="edit" class="blue_button">Weiter...</button></p><br /></div>' >> "$stop"
+    	    <button name="page" value="edit" class="blue_button synotr-flash-go">Weiter</button></div>' >> "$stop"
 	fi
 fi
 
@@ -497,6 +517,14 @@ if [[ "$page" == "edit" ]]; then
 
 	synotr_form_text "cutlistat_ID" "Benutzer-ID von cutlist.at" "$cutlistat_ID" \
 		'Bitte registriert euch bei Cutlist.at und tragt hier die 64 Zeichen lange ID ein (ohne http://cutlist.at/ und ohne abschließenden Slash).<br>Eure geladenen Cutlists werden in eurem persönlichen Bereich auf cutlist.at aufgelistet. Bitte bewertet sie dort.<br><br>Bei Nichtnutzung leer lassen'
+
+	_ce_q_opts="$(synotr_option "miss_both" "keine lokale und keine Online-Cutlist" "${CutEditorQueue:-miss_both}")$(synotr_option "no_local" "keine lokale Cutlist" "${CutEditorQueue:-miss_both}")$(synotr_option "all_uncut" "alle ungeschnittenen" "${CutEditorQueue:-miss_both}")"
+	synotr_form_select "CutEditorQueue" "CutEditor-Warteliste" \
+		'Welche Dateien der CutEditor anbietet. Standard: weder lokale noch Online-Cutlist (Online-Status kommt vom letzten synOTR-Lauf, nicht von der GUI).<br>Frisch dekodierte Dateien erscheinen erst nach einem Cut-Lauf mit erfolgloser Online-Suche.' \
+		"$_ce_q_opts"
+
+	synotr_form_switch "CutEditorOtrkeyMp4" "otrkey-AVI im CutEditor als MP4" "${CutEditorOtrkeyMp4:-off}" \
+		'ein =&gt; AVI ohne Cutlist können für den Eigengebrauch nach MP4 remuxt und im CutEditor geschnitten werden (avcut 0.8 auf der MP4). Diese Cutlists sind privat und nicht für cutlist.at gedacht.<br>aus =&gt; nur otr2-MP4.<br><br>Kein Stammtausch AVI↔MP4 in der Datenbank. Packed-Bitstream kann zittern.'
 
 	synotr_form_range "FrameversatzAnfangCut" "Frameversatz Anfang-Cut" "$FrameversatzAnfangCut" \
 		'Frameversatz, um Cuts manuell zu justieren (positive Werte verschieben jeden Cut nach hinten, negative nach vorn).<br>Bereich ±25 Frames.<br><br>=&gt; dieser Wert verschiebt den <b>Beginn</b> der gewünschten Filmteile beim framegenauen Schneiden<br><br>(greift für avcut: .otrkey 4.3.1 und .otr2 0.8)' \

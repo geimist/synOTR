@@ -21,7 +21,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/syno/bin:/usr/syno/sbin
 
     # Cache-bust CSS/JS: Query ändert sich mit Datei-mtime (wie synOCR), auch ohne Versionsbump.
     synotr_asset_ver=0
-    for _synotr_f in "${app_home}/css/synotr.css" "${app_home}/js/chartsloader.js" "${app_home}/js/synotr-folderpicker.js" "${app_home}/js/synotr-namesyntax-editor.js"; do
+    for _synotr_f in "${app_home}/css/synotr.css" "${app_home}/js/chartsloader.js" "${app_home}/js/synotr-folderpicker.js" "${app_home}/js/synotr-namesyntax-editor.js" "${app_home}/app/synotr_cuteditor/static/editor.js" "${app_home}/app/synotr_cuteditor/static/editor.css"; do
         [ -f "${_synotr_f}" ] || continue
         _synotr_m=$(stat -c %Y "${_synotr_f}" 2>/dev/null)
         [ -z "${_synotr_m}" ] && _synotr_m=$(stat -f %m "${_synotr_f}" 2>/dev/null)
@@ -217,6 +217,28 @@ if [ -z "$page" ]; then
 	mainpage="main"
 fi
 
+# CutEditor JSON/Media/HTML: nur index.cgi ist unter DSM 3rdparty erreichbar.
+# Ein zweites *.cgi liefert die DSM-404-Seite („Seite konnte nicht gefunden werden“).
+if [ "$page" = "cuteditor-api" ]; then
+	# shellcheck source=includes/synotr_cuteditor_env.sh
+	. ./includes/synotr_cuteditor_env.sh
+	synotr_cuteditor_env "$dir"
+	export SYNOTR_CUTEDITOR_API="index.cgi?page=cuteditor-api"
+	cd "$dir" || {
+		echo "Content-type: text/html; charset=utf-8"
+		echo
+		echo "<p>CutEditor: Paketverzeichnis fehlt.</p>"
+		exit 0
+	}
+	if [ ! -x "$SYNOTR_PYTHON" ]; then
+		echo "Content-type: text/html; charset=utf-8"
+		echo
+		echo "<p>CutEditor: Python3 nicht gefunden.</p>"
+		exit 0
+	fi
+	exec "$SYNOTR_PYTHON" -m synotr_cuteditor
+fi
+
 "$set_var" "$var" "page" "" >/dev/null 2>&1
 
 # Layout - Grundgerüst öffnen inkl. Navigation -
@@ -255,6 +277,14 @@ else
 	<li><a class="navitem" href="index.cgi?page=start"><img class="svg" src="images/home_grey3@geimist.svg" height="25" width="25"/>Übersicht</a></li>'
 fi
 
+if [[ "$mainpage" == "cuteditor" ]]; then
+	echo '
+	<li><a class="navitemselc" href="index.cgi?page=cuteditor"><img class="svg" src="images/cut_white@geimist.svg" height="25" width="25"/>CutEditor</a></li>'
+else
+	echo '
+	<li><a class="navitem" href="index.cgi?page=cuteditor"><img class="svg" src="images/cut_grey3@geimist.svg" height="25" width="25"/>CutEditor</a></li>'
+fi
+
 if [[ "$mainpage" == "edit" ]]; then
 	echo '
 	<li><a class="navitemselc" href="index.cgi?page=edit"><img class="svg" src="images/settings_white@geimist.svg" height="25" width="25"/>Konfiguration</a></li>'
@@ -280,7 +310,7 @@ echo '</ul>
 
 
 echo '
-<p style="padding: 15px;">
+<div class="synotr-page">
 <div class="clear"></div>'
 
 # Layout - Dynamischer Seitenaustausch
@@ -335,6 +365,7 @@ fi
 # Layout - Grundgerüst schließen -
 echo '
 	</form>
+	</div>
     </div>
 <script type="text/javascript">
 (function () {
@@ -360,7 +391,7 @@ echo '
 	var fadeMs = 500;
 	var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 	function findContinue(el) {
-		var btn = el.querySelector("button.blue_button, a.blue_button");
+		var btn = el.querySelector("button.blue_button, a.blue_button, button.synotr-flash-go, a.synotr-flash-go");
 		if (btn) return btn;
 		var n = el.nextElementSibling;
 		while (n) {
@@ -373,6 +404,17 @@ echo '
 			return el.parentNode.querySelector("button.blue_button, a.blue_button");
 		}
 		return null;
+	}
+	var goBtn = findContinue(flash);
+	if (goBtn) goBtn.classList.add("synotr-flash-go");
+	if (!flash.querySelector(".synotr-flash-bar")) {
+		var bar = document.createElement("div");
+		bar.className = "synotr-flash-bar";
+		bar.setAttribute("aria-hidden", "true");
+		var fill = document.createElement("span");
+		fill.style.animationDuration = delayMs + "ms";
+		bar.appendChild(fill);
+		flash.appendChild(bar);
 	}
 	function go() {
 		var btn = findContinue(flash);

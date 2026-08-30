@@ -44,6 +44,12 @@ echo '
     </ol>
     <hr>
     <p>
+    <b>CutEditor:</b> Unter „CutEditor“ in der Seitenleiste kannst du für wartende otr2-MP4 (und optional remuxte otrkey-AVI) Cutlists setzen.
+    Filter und otrkey-MP4-Schalter stehen auch in den Einstellungen. Standard-Warteliste: keine lokale und keine Online-Cutlist
+    (Online-Status speichert der synOTR-Lauf). otrkey-Schnitte im Editor sind nur für den Eigengebrauch, nicht für cutlist.at.
+    Packed-Bitstream kann nach AVI→MP4 zittern.
+    </p>
+    <p>
     Weitere Hilfe findest du derzeit auf der synOTR Homepage: https://synotr.geimist.eu/faq/faq.html
     </p>'
 echo '

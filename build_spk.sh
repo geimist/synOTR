@@ -152,6 +152,13 @@ echo ""
 echo " - INFO: Dateirechte anpassen ..."
 chmod -R 755 "${build_tmp}/$APP/"
 chmod -R 755 "${build_tmp}/$PKG/"
+chmod 755 "${build_tmp}/${APP}/ui/cuteditor.cgi" 2>/dev/null || true
+chmod 755 "${build_tmp}/${APP}/ui/includes/synotr_cuteditor_remux.sh" 2>/dev/null || true
+
+if [ -d "${build_tmp}/synotr_cuteditor" ]; then
+	rm -rf "${build_tmp}/${APP}/ui/app/synotr_cuteditor"
+	cp -a "${build_tmp}/synotr_cuteditor" "${build_tmp}/${APP}/ui/app/synotr_cuteditor"
+fi
 
 if command -v xattr >/dev/null 2>&1; then
 	xattr -cr "${build_tmp}/$APP" "${build_tmp}/$PKG" 2>/dev/null || true

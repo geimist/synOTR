@@ -82,6 +82,12 @@
     	if ! cat ./$CONFIG | grep -q "useallcutlistformat" ; then
     	    echo "useallcutlistformat=1" >> ./$CONFIG
         fi
+    	if ! grep -q '^CutEditorQueue=' ./$CONFIG ; then
+    	    echo "CutEditorQueue=\"miss_both\"" >> ./$CONFIG
+        fi
+    	if ! grep -q '^CutEditorOtrkeyMp4=' ./$CONFIG ; then
+    	    echo "CutEditorOtrkeyMp4=\"off\"" >> ./$CONFIG
+        fi
     	
     # MP4-Konvertierung:	
     	if ! cat ./$CONFIG | grep -q "OTRavi2mp4active" ; then

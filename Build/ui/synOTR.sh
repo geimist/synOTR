@@ -28,6 +28,8 @@
     AudioDelayMs=0              # Tonversatz in ms beim ffmpeg-Remux (positiv = Ton später); leer/unset fällt auf MP4BOX_DELAY zurück
     niceness=15                 # Die Priorität liegt im Bereich von -20 bis +19 (in ganzzahligen Schritten), wobei -20 die höchste Priorität (=meiste Rechenleistung) und 19 die niedrigste Priorität (=geringste Rechenleistung) ist. Die Standardpriorität ist 0. AUF NEGATIVE WERTE SOLLTE UNBEDINGT VERZICHTET WERDEN!
     WaitOfCutlist="on"          # mit dem weiterverarbeiten eines Filmes wird so lange gewartet, bis eine Cutlist verfügbar ist
+    CutEditorQueue="miss_both"  # miss_both | no_local | all_uncut
+    CutEditorOtrkeyMp4="off"    # otrkey-AVI als MP4 für den CutEditor (Eigengebrauch)
     useallcutlistformat=0       # Cutlits für alternative Formate berücksichtigen
     timediff=1                  # Abweichung der Dateiänderungszeit in Minuten um laufende FTP-Pushaufträge nicht zu decodieren
     TVDBlang="de"               # Sprache, in welcher nach Serien auf theTVDB.com gesucht werden soll (de/deu)
@@ -67,6 +69,14 @@
     case "${OTRotr2audio:-both}" in
         aac|ac3|both) ;;
         *) OTRotr2audio="both" ;;
+    esac
+    case "${CutEditorQueue:-miss_both}" in
+        miss_both|no_local|all_uncut) ;;
+        *) CutEditorQueue="miss_both" ;;
+    esac
+    case "${CutEditorOtrkeyMp4:-off}" in
+        on) CutEditorOtrkeyMp4="on" ;;
+        *) CutEditorOtrkeyMp4="off" ;;
     esac
     if [ -z "$APPRISEURL" ] && [ -n "$PBTOKEN" ]; then
         case "$PBTOKEN" in
@@ -945,8 +955,10 @@ if [ "$decoderactiv" = "on" ] && [ ! -z "$filetest" ] ; then
                     case "$filename" in
                         *.otr2) _file_source="otr2" ;;
                     esac
-                    sSQL="INSERT INTO raw ( file_original, file_encrypted, file_source, OTRtitle, OTRcomment) VALUES ('$_sql_deco', '$_sql_enc', '$_file_source', '$OTRtitle', '$OTRcomment')"
-                    unset _sql_deco _sql_enc _file_source
+                    _orig_sz=$(wc -c < "${DECODIR}/$decofilename" | tr -d ' ')
+                    [ -z "$_orig_sz" ] && _orig_sz=0
+                    sSQL="INSERT INTO raw ( file_original, file_encrypted, file_source, OTRtitle, OTRcomment, file_orig_size, cutlist_online) VALUES ('$_sql_deco', '$_sql_enc', '$_file_source', '$OTRtitle', '$OTRcomment', $_orig_sz, 'unset')"
+                    unset _sql_deco _sql_enc _file_source _orig_sz
                     # leider werden Umlaute und Sonderzeichen nicht korrekt codiert … !
                     sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "$sSQL"
                     
@@ -1423,6 +1435,7 @@ if [ "$OTRcutactiv" = "on" ] ; then
         # Hier wird die Suchanfrage überprüft
         if [ "$continue" == "1" ]; then
             echo -e "                                 L==> Es wurde leider keine Cutlist gefunden!"
+            synotr_db_set_cutlist_online none
         else
             sed -i 's/<rating><\/rating>/<rating>0.00<\/rating>/g' "$tmp/search.xml"     # fehlendes rating durch 0.00 ersetzen / -i ändert die Quelldatei
             sed -i $'s/\r$//' "$tmp/search.xml"                                          # convert Dos to Unix
@@ -1543,6 +1556,7 @@ if [ "$OTRcutactiv" = "on" ] ; then
             if [ $? -eq 0 ] && AC_test_cutlist && [ -f "$tmp/$CUTLIST" ]; then
                 echo -e "okay"
                 continue=0
+                synotr_db_set_cutlist_online found
                 if [ "$LOGlevel" = "1" ] || [ "$LOGlevel" = "2" ] ; then
                     cp "$tmp/$CUTLIST" "${DECODIR}/_LOGsynOTR/${CUTLIST}"
                 fi
@@ -1897,6 +1911,13 @@ if [ "$OTRcutactiv" = "on" ] ; then
                 synotr_apprise_notify "Film [$filedestname] ist fertig."
             fi
             synotr_cut_archive_source "$film"
+            if [ "${synotr_cut_private_sidecar:-0}" = "1" ] && [ -n "${origfile:-}" ] && [ -f "$origfile" ]; then
+                if [ "$endgueltigloeschen" = "on" ]; then
+                    rm -f "$origfile"
+                else
+                    mv "$origfile" "$OTRkeydeldir"
+                fi
+            fi
         else
             echo -e "Schnitt fehlgeschlagen."
             continue=1
@@ -1943,6 +1964,7 @@ if [ "$OTRcutactiv" = "on" ] ; then
                 SMARTRENDERING=$SMARTRENDERINGold
                 origfile="$i"
                 LOCAL_CUTLIST=""
+                synotr_cut_private_sidecar=0
 
                 echo -e ; echo "    SCHNEIDE:        ---> $filename"
                 echo -n "                          "; date; echo -e
@@ -1997,7 +2019,7 @@ if [ "$OTRcutactiv" = "on" ] ; then
                 echo -n "Suche nach einer lokalen Cutlist ---> "
                 _local_found=0
                 _pick_why=""
-                for _cldir in "$DECODIR" "$OTRkeydir" "$OTRlocalcutlistdir"; do
+                for _cldir in "$DECODIR" "$OTRkeydir" "$OTRlocalcutlistdir" "${DECODIR}/_cuteditor"; do
                     [ -n "$_cldir" ] && [ -d "$_cldir" ] || continue
                     if synotr_pick_local_cutlist "$_cldir"; then
                         _local_found=1
@@ -2034,6 +2056,13 @@ if [ "$OTRcutactiv" = "on" ] ; then
                 if [ "$continue" == "0" ]; then
                     film="$i"
                     filename=$(basename "$i")
+                    if [ -f "$tmp/$CUTLIST" ] && grep -q '^Private=1' "$tmp/$CUTLIST" && [ -n "${synotr_file_editor_mp4:-}" ] && [ -f "$synotr_file_editor_mp4" ]; then
+                        echo "    Eigengebrauch: Schnitt am Editor-MP4 (avcut 0.8), nicht am AVI."
+                        film="$synotr_file_editor_mp4"
+                        filename=$(basename "$film")
+                        synotr_cut_private_sidecar=1
+                        synotr_file_source="otr2"
+                    fi
                     AC_name
                     if [ "$synotr_file_source" = "otrkey" ]; then
                         if [ "$is_hd" = "1" ]; then
@@ -2541,7 +2570,7 @@ UPDATE()
         echo "    Die synOTR-Datenbank ist nicht vorhanden und wird erstellt."
         # cp "${APPDIR}/app/etc/synOTR.sqlite_template" "${APPDIR}/app/etc/synOTR.sqlite"
         # ==>	DB nativ per SQL erzeugen:
-        sqlinst="CREATE TABLE \"raw\" (\"timestamp\" timestamp NOT NULL  DEFAULT (CURRENT_TIMESTAMP) ,\"file_original\" varchar(500) ,\"file_encrypted\" varchar(500) ,\"file_source\" varchar(16) ,\"file_rename\" varchar(500) ,\"miss_series\" tinyint(1) ,\"format\" varchar(5) ,\"titel\" varchar(500) ,\"datum\" date ,\"zeit\" time ,\"dauer\" int(5) ,\"sender\" varchar(100) ,\"otrid\" int(11) ,\"serie_titel\" varchar(500) ,\"serie_season\" int(11) ,\"serie_episode\" int(11) ,\"serie_episodentitel\" varchar(500) ,\"serie_episodebeschreibung\" varchar(10000) ,\"lastcheckday\" int(3) ,\"checkcount\" int(3) DEFAULT (null) ,\"fps\" Numeric(500) ,\"realdauer\" int(5) ,\"scantype\" varchar(2) ,\"pix_height\" int(5) ,\"pix_width\" int(5) ,\"aspect_ratio\" varchar(20) ,\"v_codec\" varchar(100) ,\"a_codec\" varchar(100) ,\"OTRtitle\" varchar(500) ,\"OTRcomment\" varchar(10000) ,\"cutlist_ID\" int(20) ); CREATE INDEX \"IDX_raw_check\" ON \"raw\" (\"lastcheckday\" ASC, \"checkcount\" ASC);"
+        sqlinst="CREATE TABLE \"raw\" (\"timestamp\" timestamp NOT NULL  DEFAULT (CURRENT_TIMESTAMP) ,\"file_original\" varchar(500) ,\"file_encrypted\" varchar(500) ,\"file_source\" varchar(16) ,\"file_rename\" varchar(500) ,\"miss_series\" tinyint(1) ,\"format\" varchar(5) ,\"titel\" varchar(500) ,\"datum\" date ,\"zeit\" time ,\"dauer\" int(5) ,\"sender\" varchar(100) ,\"otrid\" int(11) ,\"serie_titel\" varchar(500) ,\"serie_season\" int(11) ,\"serie_episode\" int(11) ,\"serie_episodentitel\" varchar(500) ,\"serie_episodebeschreibung\" varchar(10000) ,\"lastcheckday\" int(3) ,\"checkcount\" int(3) DEFAULT (null) ,\"fps\" Numeric(500) ,\"realdauer\" int(5) ,\"scantype\" varchar(2) ,\"pix_height\" int(5) ,\"pix_width\" int(5) ,\"aspect_ratio\" varchar(20) ,\"v_codec\" varchar(100) ,\"a_codec\" varchar(100) ,\"OTRtitle\" varchar(500) ,\"OTRcomment\" varchar(10000) ,\"cutlist_ID\" int(20) ,\"file_orig_size\" INTEGER ,\"cutlist_online\" varchar(16) ,\"file_editor_mp4\" varchar(500) ); CREATE INDEX \"IDX_raw_check\" ON \"raw\" (\"lastcheckday\" ASC, \"checkcount\" ASC);"
         sqliteinfo=$(sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "$sqlinst")
         echo "    $sqliteinfo"
 
@@ -2621,6 +2650,32 @@ UPDATE()
     if [ "$sqlerg" == "" ] ; then
         echo "    > Spalte (file_encrypted) wird hinzugefügt"
         sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "ALTER TABLE raw ADD COLUMN \"file_encrypted\" VARCHAR "
+    fi
+    sqlerg=$(sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "SELECT * FROM sqlite_master WHERE TYPE='table' AND tbl_name = 'raw' AND SQL LIKE '%file_orig_size%' ")
+    if [ "$sqlerg" == "" ] ; then
+        echo "    > Spalte (file_orig_size) wird hinzugefügt"
+        sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "ALTER TABLE raw ADD COLUMN \"file_orig_size\" INTEGER "
+    fi
+    sqlerg=$(sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "SELECT * FROM sqlite_master WHERE TYPE='table' AND tbl_name = 'raw' AND SQL LIKE '%cutlist_online%' ")
+    if [ "$sqlerg" == "" ] ; then
+        echo "    > Spalte (cutlist_online) wird hinzugefügt"
+        sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "ALTER TABLE raw ADD COLUMN \"cutlist_online\" VARCHAR "
+    fi
+    sqlerg=$(sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "SELECT * FROM sqlite_master WHERE TYPE='table' AND tbl_name = 'raw' AND SQL LIKE '%file_editor_mp4%' ")
+    if [ "$sqlerg" == "" ] ; then
+        echo "    > Spalte (file_editor_mp4) wird hinzugefügt"
+        sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "ALTER TABLE raw ADD COLUMN \"file_editor_mp4\" VARCHAR "
+    fi
+    # Backfill Größe nur für ungeschnittene Dateien, die noch in DECODIR liegen.
+    if [ -n "${DECODIR:-}" ] && [ -d "$DECODIR" ]; then
+        sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "SELECT rowid, file_original FROM raw WHERE file_orig_size IS NULL OR file_orig_size=''" 2>/dev/null | while IFS='|' read -r _rid _fn; do
+            [ -n "$_fn" ] || continue
+            _fp="${DECODIR}/${_fn}"
+            if [ -f "$_fp" ]; then
+                _sz=$(wc -c < "$_fp" | tr -d ' ')
+                sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "UPDATE raw SET file_orig_size=${_sz} WHERE rowid=${_rid}"
+            fi
+        done
     fi
 
     IFS=$OLDIFS

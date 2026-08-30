@@ -216,9 +216,9 @@ echo '<fieldset>
 	<details id="synotr-stats"><p>
     <summary>
         <span class="detailsitem">Status</span>
-    </summary></p>'
+	</summary></p>'
 
-echo '<table style="width: 700px;" >
+echo '<div class="synotr-scroll"><table class="synotr-ce-table">
     <tr>
         <th style="width: 1;"></th><th style="width: 250px;"></th><th></th><th style="width: 250px;"></th>
     </tr>
@@ -257,7 +257,7 @@ if [ "$rowcount" != "0" ]; then
 fi
 
     echo '
-    </table>
+    </table></div>
     </details>
     </fieldset>'
 

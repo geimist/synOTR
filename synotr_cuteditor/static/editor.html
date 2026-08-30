@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>synOTR CutEditor</title>
+	<link rel="stylesheet" href="index.cgi?page=cuteditor-api&amp;action=static&amp;name=editor.css"/>
+</head>
+<body class="ce-body">
+	<div class="ce-bar">
+		<a class="ce-back" href="index.cgi?page=cuteditor">Zurück zur Liste</a>
+		<h1 id="ceTitle">CutEditor</h1>
+		<span id="ceMeta" class="ce-meta"></span>
+	</div>
+	<p id="ceErr" class="ce-err" hidden></p>
+	<div class="ce-main">
+		<video id="ceVideo" controls playsinline></video>
+		<div class="ce-side">
+			<div class="ce-keys">
+				<button type="button" data-act="play">Play/Pause (K)</button>
+				<button type="button" data-act="back1">−1s (J)</button>
+				<button type="button" data-act="fwd1">+1s (L)</button>
+				<button type="button" data-act="prevf">−1 Frame (,)</button>
+				<button type="button" data-act="nextf">+1 Frame (.)</button>
+				<button type="button" data-act="markin">In (I)</button>
+				<button type="button" data-act="markout">Out (O)</button>
+				<button type="button" data-act="addkeep">Keep übernehmen (Enter)</button>
+				<button type="button" data-act="strip">Frame-Streifen</button>
+			</div>
+			<div id="ceStrip" class="ce-strip" hidden></div>
+			<ol id="ceKeeps" class="ce-keeps"></ol>
+			<p class="ce-hint">Keep-Intervalle = behaltene Filmteile. Nächster synOTR-Lauf schneidet damit.</p>
+			<button type="button" class="ce-save" id="ceSave">Cutlist speichern</button>
+			<p id="ceSaveMsg" class="ce-ok" hidden></p>
+		</div>
+	</div>
+	<div class="ce-time">
+		<input type="range" id="ceSeek" min="0" max="1000" value="0"/>
+		<span id="ceClock">0.000 s / Frame 0</span>
+	</div>
+	<script src="index.cgi?page=cuteditor-api&amp;action=static&amp;name=editor.js"></script>
+</body>
+</html>

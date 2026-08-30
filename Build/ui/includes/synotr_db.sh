@@ -36,9 +36,12 @@ synotr_db_clear_origin() {
     synotr_db_otrtitle=""
     synotr_db_serie_season=""
     synotr_db_serie_episode=""
+    synotr_file_orig_size=""
+    synotr_cutlist_online=""
+    synotr_file_editor_mp4=""
 }
 
-# _synotr_db_fill_from_row ROW (tab-separated, 7 Felder)
+# _synotr_db_fill_from_row ROW (tab-separated)
 _synotr_db_fill_from_row() {
     _row="$1"
     [ -n "$_row" ] || return 1
@@ -49,6 +52,9 @@ _synotr_db_fill_from_row() {
     synotr_db_otrtitle=$(printf '%s' "$_row" | awk -F'\t' '{print $5}')
     synotr_db_serie_season=$(printf '%s' "$_row" | awk -F'\t' '{print $6}')
     synotr_db_serie_episode=$(printf '%s' "$_row" | awk -F'\t' '{print $7}')
+    synotr_file_orig_size=$(printf '%s' "$_row" | awk -F'\t' '{print $8}')
+    synotr_cutlist_online=$(printf '%s' "$_row" | awk -F'\t' '{print $9}')
+    synotr_file_editor_mp4=$(printf '%s' "$_row" | awk -F'\t' '{print $10}')
     if [ -z "$synotr_file_source" ]; then
         case "$synotr_file_original" in
             *.avi|*.AVI) synotr_file_source="otrkey" ;;
@@ -62,7 +68,7 @@ _synotr_db_select_col() {
     _val="$1"
     _col="$2"
     _esc=$(synotr_sql_escape "$_val")
-    _sql="SELECT rowid, file_original, COALESCE(file_source,''), COALESCE(file_encrypted,''), COALESCE(OTRtitle,''), COALESCE(serie_season,''), COALESCE(serie_episode,'') FROM raw WHERE ${_col}='${_esc}' ORDER BY rowid DESC LIMIT 1"
+    _sql="SELECT rowid, file_original, COALESCE(file_source,''), COALESCE(file_encrypted,''), COALESCE(OTRtitle,''), COALESCE(serie_season,''), COALESCE(serie_episode,''), COALESCE(file_orig_size,''), COALESCE(cutlist_online,''), COALESCE(file_editor_mp4,'') FROM raw WHERE ${_col}='${_esc}' ORDER BY rowid DESC LIMIT 1"
     _row=$(sqlite3 -separator "$(printf '\t')" "${APPDIR}/app/etc/synOTR.sqlite" "$_sql" 2>/dev/null)
     if [ -n "$_row" ]; then
         _synotr_db_fill_from_row "$_row"
@@ -190,6 +196,22 @@ synotr_db_infer_origin_from_name() {
             return 1
             ;;
     esac
+}
+
+synotr_db_set_cutlist_online() {
+    _st="$1"
+    case "$_st" in
+        none|found|unset) ;;
+        *) unset _st; return 1 ;;
+    esac
+    if [ -z "${synotr_db_rowid:-}" ]; then
+        unset _st
+        return 1
+    fi
+    sqlite3 "${APPDIR}/app/etc/synOTR.sqlite" "UPDATE raw SET cutlist_online='${_st}' WHERE rowid='${synotr_db_rowid}'" 2>/dev/null || true
+    synotr_cutlist_online="$_st"
+    unset _st
+    return 0
 }
 
 synotr_cut_archive_source() {

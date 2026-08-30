@@ -1,5 +1,16 @@
 Release Notes 
 
+4.9.99.3 (2026-08-30)
+ 	IMPLEMENTIERUNGEN:
+ -  CutEditor (Stufe I/II): 
+ 	- Warteliste, HTML5-Player, Keep-Marken, lokale Cutlist, ffmpeg-Framevorschaubilder
+ 	-  Wartelisten-Filter CutEditorQueue (Standard miss_both: keine lokale und keine Online-Cutlist)
+ 	-  Optional otrkey-AVI als MP4 für den Eigengebrauch (CutEditorOtrkeyMp4), private Cutlists, Schnitt per avcut 0.8 auf dem Sidecar
+ 	-  SQLite: file_orig_size (Größe direkt nach Decode), cutlist_online, file_editor_mp4
+ -  Portables Python-Modul synotr_cuteditor (DSM-CGI und später Docker)
+ -  CutEditor läuft über index.cgi (page=cuteditor-api); ein zweites CGI würde unter DSM nur die 404-Seite zeigen
+ - GUI responsive gestaltet (flexible Breite)
+
 4.9.99.2 (2026-08-28)
  	IMPLEMENTIERUNGEN:
  -  OTR v3: Python-CLI-Decoder (.otr2 und .otrkey) statt der alten Binaries

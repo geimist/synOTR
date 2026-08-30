@@ -16,14 +16,17 @@ Generator (box-shadow, gradient, …)
 /* Define Layout Setup */
 div#wrapper {
     display:flex;
+	flex-wrap: wrap;
 	margin: 0;
-	width: 960px;
+	width: 100%;
+	max-width: 100%;
 }
 
 #navleft {
     flex-direction: column;
     width: 185px;
     position:fixed;
+    z-index: 20;
     height: 100%;
     box-shadow: inset -7px 0 9px -7px lightgrey; /* box-shadow: offsetLinks, offsetOben, (radiusWeichzeichner), (überfüllung), (farbe) */
 }
@@ -193,27 +196,47 @@ div#Content_1Col > div {
 
 div.Content_1Col_full {
     margin-left: 185px;
-/*    max-width: 775px;*/
-    width: 740px;
-    padding-bottom:50px; /* Höhe des Footers */
+    width: auto;
+    max-width: calc(100% - 185px);
+    min-width: 0;
+    padding: 0 16px 80px;
+    box-sizing: border-box;
+}
+
+.synotr-page {
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+	padding: 8px 0 0;
+	box-sizing: border-box;
 }
 
 
 footer {
     /* http://www.intensivstation.ch/assets/templates/fixed/fixed-footer-header/fixed-footer-header.html */
-    margin-left: 200px ;
+    margin-left: 185px;
     background: #fff;
-    width: 100%;
-    width: 760px;
-    height:auto;
+    width: calc(100% - 185px);
+    max-width: 100%;
+    height: auto;
     position: fixed;
     left: 0;
     bottom: 0;
+    z-index: 15;
     text-align: right;
+    box-sizing: border-box;
+    padding: 8px 12px;
     box-shadow: -5px 0px 0px white,
                  5px 0px 0px white,
                  0px -1px 4px lightgrey;
     }
+
+footer p > div {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 6px;
+}
 
 
 fieldset {
@@ -340,6 +363,7 @@ div.info {
 }
 
 .synotr-flash {
+	position: relative;
 	transition: opacity 0.5s ease;
 }
 
@@ -347,9 +371,47 @@ div.info {
 	opacity: 0;
 }
 
+.synotr-flash .synotr-flash-go {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+.synotr-flash-bar {
+	height: 4px;
+	margin: 12px 10px 8px;
+	background: rgba(0, 134, 229, 0.15);
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.synotr-flash-bar > span {
+	display: block;
+	height: 100%;
+	width: 100%;
+	background: #0086E5;
+	transform-origin: left center;
+	animation: synotr-flash-shrink 3s linear forwards;
+}
+
+@keyframes synotr-flash-shrink {
+	from { transform: scaleX(1); }
+	to { transform: scaleX(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.synotr-flash {
 		transition: none;
+	}
+	.synotr-flash-bar > span {
+		animation: none;
+		transform: scaleX(0);
 	}
 }
     
@@ -1664,6 +1726,97 @@ button.synotr-fp-btn-primary:disabled:hover {
 	opacity: 0.45;
 	cursor: default;
 	background-image: linear-gradient(#32AAFF, #1994EB);
+}
+
+.synotr-ce-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 1em; }
+.synotr-ce-table th, .synotr-ce-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #d7dfe8; word-break: break-word; }
+.synotr-ce-table th { color: #53657D; }
+
+.synotr-scroll {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+table.synotr-fluid,
+.synotr-scroll > table {
+	width: 100%;
+	max-width: 100%;
+}
+
+@media (max-width: 900px) {
+	.synotr-form-page .synotr-form-row,
+	.synotr-form-page .synotr-form-row.synotr-namesyntax-row {
+		grid-template-columns: 1fr auto;
+	}
+	.synotr-form-page .synotr-form-row > label:first-child {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (max-width: 720px) {
+	#navleft {
+		position: relative;
+		width: 100%;
+		height: auto;
+		box-shadow: none;
+		border-bottom: 1px solid #d7dfe8;
+		background: #fff;
+	}
+	#navleftinbox {
+		width: 100%;
+		margin: 0;
+		padding: 4px 8px;
+	}
+	#navleftinbox ul.li_blank {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+	.navitem,
+	.navitemselc {
+		width: auto;
+		height: 42px;
+		padding: 0 10px 0 8px;
+		font-size: 13px;
+	}
+	div.Content_1Col_full,
+	footer {
+		margin-left: 0;
+		width: 100%;
+		max-width: 100%;
+	}
+	footer {
+		position: static;
+		box-shadow: 0 -1px 4px lightgrey;
+	}
+	.title {
+		font-size: 22px;
+		line-height: 1.25;
+		padding: 16px 0;
+	}
+	fieldset {
+		margin: 0 8px;
+		padding-left: 0;
+		padding-right: 0;
+	}
+	div#HorCrumb > div {
+		min-width: 0;
+		width: 100%;
+		float: none;
+	}
+	.synotr-fp-dialog {
+		width: auto;
+		max-width: calc(100vw - 24px);
+		margin: 12px;
+	}
+}
+
+@media (max-width: 480px) {
+	.synotr-form-page .synotr-form-row {
+		grid-template-columns: 1fr;
+	}
 }
 
 
