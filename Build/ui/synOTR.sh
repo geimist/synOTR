@@ -1098,13 +1098,23 @@ if [ "$OTRcutactiv" = "on" ] ; then
             _pick="${_cldir}/${_filmOhnePfad}.cutlist"
             _pick_why="Dateiname"
         fi
+        # CutEditor: Cutlist liegt neben der Sidecar-MP4 (STEM.mp4.cutlist), Film ist noch die AVI.
+        if [ -z "$_pick" ]; then
+            _ce_mp4cl="${_cldir}/${_filmOhnePfad%.*}.mp4.cutlist"
+            if [ -f "$_ce_mp4cl" ]; then
+                _pick="$_ce_mp4cl"
+                _pick_why="Editor-MP4"
+            fi
+            unset _ce_mp4cl
+        fi
 
         if [ -z "$_pick" ]; then
+            _ce_mp4base="${_filmOhnePfad%.*}.mp4"
             for f in "${_cldir}"/*.cutlist; do
                 [ -f "$f" ] || continue
                 _cl_apply=$(grep -m1 '^ApplyToFile=' "$f" | cut -d= -f2- | /usr/bin/tr -d "\r")
                 _cl_size=$(grep -m1 '^OriginalFileSizeBytes=' "$f" | cut -d= -f2- | /usr/bin/tr -d "\r")
-                if [ "$_cl_apply" = "$_filmOhnePfad" ]; then
+                if [ "$_cl_apply" = "$_filmOhnePfad" ] || [ "$_cl_apply" = "$_ce_mp4base" ]; then
                     _pick=$f
                     _pick_why="ApplyToFile"
                     break
@@ -1114,7 +1124,17 @@ if [ "$OTRcutactiv" = "on" ] ; then
                     _pick_why="OriginalFileSizeBytes"
                     break
                 fi
+                _ce_mp4sz=""
+                if [ -n "${synotr_file_editor_mp4:-}" ] && [ -f "$synotr_file_editor_mp4" ]; then
+                    _ce_mp4sz=$(wc -c < "$synotr_file_editor_mp4" | tr -d ' ')
+                fi
+                if [ -n "$_cl_size" ] && [ -n "$_ce_mp4sz" ] && [ "$_cl_size" = "$_ce_mp4sz" ]; then
+                    _pick=$f
+                    _pick_why="OriginalFileSizeBytes (Editor-MP4)"
+                    break
+                fi
             done
+            unset _ce_mp4base _ce_mp4sz
         fi
 
         if [ -z "$_pick" ]; then
@@ -1947,9 +1967,12 @@ if [ "$OTRcutactiv" = "on" ] ; then
         # Es folgt die eigentliche Schleife zum Abarbeiten der Videos:          |
         # -----------------------------------------------------------------------
         SMARTRENDERINGold=$SMARTRENDERING
-        for i in $(find "$DECODIR" -maxdepth 1 -name "*.avi" -o -name "*.mp4" -type f)
+        for i in $(find "$DECODIR" -maxdepth 1 \( -name "*.avi" -o -name "*.mp4" \) -type f)
             do
                 IFS=$OLDIFS
+                case "$i" in
+                    */_cuteditor/*) continue ;;
+                esac
                 error_found=0           # Fehlertrigger zurücksetzen
                 continue=0              # Cut-Skript unterbrechen
                 array=0
@@ -1984,9 +2007,14 @@ if [ "$OTRcutactiv" = "on" ] ; then
                             synotr_file_source="otrkey"
                         fi
                         ;;
+                    *.mp4|*.MP4)
+                        if [ -z "$synotr_file_source" ]; then
+                            synotr_file_source="otr2"
+                        fi
+                        ;;
                 esac
                 if [ -z "$synotr_file_source" ]; then
-                    echo "    Keine DB-Herkunft für $filename (mehrdeutiges MP4 ohne file_source)."
+                    echo "    Keine DB-Herkunft für $filename (unbekannte Endung)."
                     echo "    Schnitt übersprungen – Datei neu decodieren oder Quelle in der DB prüfen."
                     if [ "$WaitOfCutlist" = "off" ]; then
                         mv "$i" "${WORKDIR}"
@@ -1996,7 +2024,13 @@ if [ "$OTRcutactiv" = "on" ] ; then
                     fi
                     continue
                 fi
+                if [ -z "${synotr_db_rowid:-}" ]; then
+                    echo "    Hinweis: keine DB-Zeile zu $filename – Schnitt als $synotr_file_source (ältere Datei oder umbenannt; eigene Cutlist gilt)."
+                fi
                 echo "    Dateiherkunft:         $synotr_file_source${synotr_file_encrypted:+ ($synotr_file_encrypted)}"
+                if [ "$synotr_file_source" = "otrkey" ] && synotr_resolve_editor_sidecar "$filename"; then
+                    echo "    Editor-MP4:           $synotr_file_editor_mp4"
+                fi
 
                 PXheight=$(echo "$AC_ffprobeInfo" | jq -r '[.streams[]? | select(.codec_type=="video") | .height] | .[0] // 0')
                 audiocodec=$(echo "$AC_ffprobeInfo" | jq -r '[.streams[]? | select(.codec_type=="audio") | .codec_name] | .[0] // "null"')
@@ -2056,12 +2090,24 @@ if [ "$OTRcutactiv" = "on" ] ; then
                 if [ "$continue" == "0" ]; then
                     film="$i"
                     filename=$(basename "$i")
-                    if [ -f "$tmp/$CUTLIST" ] && grep -q '^Private=1' "$tmp/$CUTLIST" && [ -n "${synotr_file_editor_mp4:-}" ] && [ -f "$synotr_file_editor_mp4" ]; then
-                        echo "    Eigengebrauch: Schnitt am Editor-MP4 (avcut 0.8), nicht am AVI."
-                        film="$synotr_file_editor_mp4"
-                        filename=$(basename "$film")
-                        synotr_cut_private_sidecar=1
-                        synotr_file_source="otr2"
+                    if [ -f "$tmp/$CUTLIST" ] && [ "$synotr_file_source" = "otrkey" ] && [ -n "${synotr_file_editor_mp4:-}" ] && [ -f "$synotr_file_editor_mp4" ]; then
+                        _ce_mp4b=$(basename "$synotr_file_editor_mp4")
+                        _ce_use=0
+                        if grep -q '^Private=1' "$tmp/$CUTLIST"; then
+                            _ce_use=1
+                        elif grep -q 'synOTR Eigengebrauch' "$tmp/$CUTLIST"; then
+                            _ce_use=1
+                        elif grep -F -q "ApplyToFile=${_ce_mp4b}" "$tmp/$CUTLIST"; then
+                            _ce_use=1
+                        fi
+                        if [ "$_ce_use" = "1" ]; then
+                            echo "    Eigengebrauch: Schnitt am Editor-MP4 (avcut 0.8), nicht am AVI."
+                            film="$synotr_file_editor_mp4"
+                            filename=$(basename "$film")
+                            synotr_cut_private_sidecar=1
+                            synotr_file_source="otr2"
+                        fi
+                        unset _ce_mp4b _ce_use
                     fi
                     AC_name
                     if [ "$synotr_file_source" = "otrkey" ]; then

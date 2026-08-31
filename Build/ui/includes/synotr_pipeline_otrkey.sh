@@ -222,12 +222,17 @@ synotr_otrkey_cut() {
         if [ -n "${avimerge:-}" ] && [ -f "$avimerge" ]; then
             [ -x "$avimerge" ] || chmod +x "$avimerge" 2>/dev/null || true
         fi
+        _avisplit_log="${tmp%/}/avisplit.log"
+        # avisplit schreibt je Frame eine CR-Zeile "[Datei] (Start-Aktuell)" –
+        # ungefiltert mehrere zehn MB im LOG. Header (avilib, Zeitraum, Frames) bleibt.
         # shellcheck disable=SC2086
-        AVISPLITLOG=$("$avisplit" -i "$film" -o "$_cut_avi" -t $time -c 2>&1)
+        "$avisplit" -i "$film" -o "$_cut_avi" -t $time -c 2>&1 | tr '\r' '\n' | awk '!/\] \([0-9][0-9]*-[0-9][0-9]*)/' > "$_avisplit_log"
         if [ "$LOGlevel" = "2" ]; then
             echo "avisplit Command: avisplit -i $film -o $_cut_avi -t $time -c"
-            echo "avisplit-LOG: $AVISPLITLOG"
+            echo "avisplit-LOG:"
+            cat "$_avisplit_log" 2>/dev/null
         fi
+        unset _avisplit_log
     fi
 
     if [ ! -f "$_cut_avi" ]; then

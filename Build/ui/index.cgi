@@ -169,6 +169,10 @@ for i in "$@"; do
 	fi
 	printf -v "$variable" '%s' "$decode_value"
 	printf -v "encode_$variable" '%s' "$encode_value"
+	# CutEditor-API: action/file nicht im geteilten Scratchpad (sonst falsche action beim nächsten Request).
+	case "$variable" in
+		action|file) continue ;;
+	esac
 	"$set_var" "$var" "$variable" "$decode_value" >/dev/null 2>&1
 	"$set_var" "$var" "encode_$variable" "$encode_value" >/dev/null 2>&1
 done

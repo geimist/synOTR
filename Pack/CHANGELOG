@@ -7,9 +7,19 @@ Release Notes
  	-  Wartelisten-Filter CutEditorQueue (Standard miss_both: keine lokale und keine Online-Cutlist)
  	-  Optional otrkey-AVI als MP4 für den Eigengebrauch (CutEditorOtrkeyMp4), private Cutlists, Schnitt per avcut 0.8 auf dem Sidecar
  	-  SQLite: file_orig_size (Größe direkt nach Decode), cutlist_online, file_editor_mp4
- -  Portables Python-Modul synotr_cuteditor (DSM-CGI und später Docker)
- -  CutEditor läuft über index.cgi (page=cuteditor-api); ein zweites CGI würde unter DSM nur die 404-Seite zeigen
+ 	-  Portables Python-Modul synotr_cuteditor (DSM-CGI und später Docker)
  - GUI responsive gestaltet (flexible Breite)
+ 
+
+ -  CutEditor: lokale Cutlist laden, vor Überschreiben nachfragen; Frame-Thumbs 160px, Anzahl nach Fensterbreite
+ -  otrkey-Remux: MP4 in den Dekodierordner, AVI in den Papierkorb; Keep-Tabelle; Keyframe-Tasten; Playhead-Klick im Keep
+
+ 	BUGFIXES:
+ -  CutEditor: Player-JS lief nicht (Syntaxfehler bei den Keyframe-Pfeiltasten)
+ -  JPEG-Vorschaucache (tmp_synotr_cutedit) wird beim Verlassen des Editors gelöscht
+ -  CutEditor-Remux nutzt OTRavi2mp4 inkl. paralleler AAC-Kodierung und AAC-/Delay-/Normalize-Konfig
+ -  Schnitt: MP4 ohne DB-Zeile (ältere Decode / umbenannt) als otr2 schneiden, nicht überspringen
+ -  avisplit-Fortschritt (CR je Frame) wird im LOG nicht mehr mitgeschrieben (sonst >40 MB bei HD)
 
 4.9.99.2 (2026-08-28)
  	IMPLEMENTIERUNGEN:

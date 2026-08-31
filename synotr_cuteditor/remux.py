@@ -1,20 +1,56 @@
-"""AVI→MP4 sidecar for the CutEditor (otrkey Eigengebrauch)."""
+"""AVI→MP4 in DECODIR for the CutEditor (otrkey Eigengebrauch)."""
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
-from typing import Optional, Tuple
+from typing import Tuple
 
-from synotr_cuteditor.paths import CutEditorConfig
+from synotr_cuteditor.paths import CutEditorConfig, parse_onoff
 from synotr_cuteditor.waiting import set_editor_mp4
+
+
+def _archive_source(avi_path: str) -> None:
+    if not avi_path or not os.path.isfile(avi_path):
+        return
+    wipe = parse_onoff(os.environ.get("SYNOTR_ENDGUELTIG", "off")) == "on"
+    if wipe:
+        try:
+            os.remove(avi_path)
+        except OSError:
+            pass
+        return
+    trash = (os.environ.get("SYNOTR_OTRKEYDELDIR") or "").rstrip("/")
+    if not trash:
+        return
+    try:
+        os.makedirs(trash, exist_ok=True)
+        dest = os.path.join(trash, os.path.basename(avi_path))
+        if os.path.realpath(avi_path) != os.path.realpath(dest):
+            if os.path.exists(dest):
+                os.remove(dest)
+            shutil.move(avi_path, dest)
+    except OSError:
+        pass
 
 
 def remux_otrkey(cfg: CutEditorConfig, avi_path: str, rowid: int) -> Tuple[bool, str]:
     if not avi_path or not os.path.isfile(avi_path):
         return False, "AVI fehlt"
-    os.makedirs(cfg.editor_dir(), exist_ok=True)
+    deco = cfg.deco_dir.rstrip("/")
+    if not deco:
+        return False, "Dekodierordner fehlt"
+    os.makedirs(deco, exist_ok=True)
     stem = os.path.splitext(os.path.basename(avi_path))[0]
-    dst = os.path.join(cfg.editor_dir(), stem + ".mp4")
+    dst = os.path.join(deco, stem + ".mp4")
+    legacy = os.path.join(cfg.editor_dir(), stem + ".mp4")
+    if os.path.isfile(legacy) and os.path.realpath(legacy) != os.path.realpath(dst):
+        if not os.path.isfile(dst) or os.path.getsize(dst) < 1024:
+            try:
+                shutil.move(legacy, dst)
+            except OSError:
+                pass
+
     helper = os.environ.get("SYNOTR_CUTEDITOR_REMUX", "")
     if helper and os.path.isfile(helper):
         env = os.environ.copy()
@@ -23,6 +59,7 @@ def remux_otrkey(cfg: CutEditorConfig, avi_path: str, rowid: int) -> Tuple[bool,
             return False, "Remux-Skript fehlgeschlagen (exit %s)" % rc
         if rowid:
             set_editor_mp4(cfg.sqlite_path, rowid, dst)
+        _archive_source(avi_path)
         return True, dst
 
     if not cfg.ffmpeg:
@@ -54,4 +91,5 @@ def remux_otrkey(cfg: CutEditorConfig, avi_path: str, rowid: int) -> Tuple[bool,
     os.replace(tmp, dst)
     if rowid:
         set_editor_mp4(cfg.sqlite_path, rowid, dst)
+    _archive_source(avi_path)
     return True, dst

@@ -118,6 +118,16 @@ synotr_db_lookup_origin() {
             done
             ;;
     esac
+    # CutEditor/Umbenennung: Prefix own_ vor dem OTR-Dateinamen
+    case "$_q" in
+        own_*)
+            _q_own="${_q#own_}"
+            if [ -n "$_q_own" ] && synotr_db_lookup_origin "$_q_own"; then
+                return 0
+            fi
+            synotr_db_clear_origin
+            ;;
+    esac
     return 1
 }
 
@@ -179,7 +189,9 @@ synotr_db_lookup_origin_cut() {
     return 1
 }
 
-# Ohne DB-Zeile: nur eindeutige Endung. Mehrdeutiges .mp4 nicht raten.
+# Ohne DB-Zeile: Endung. .avi immer otrkey. .mp4 = otr2-Pipeline
+# (natives .otr2 oder ältere Datei/eigene Cutlist ohne file_source).
+# Kein AVI↔MP4-Stammtausch in der DB – nur Laufzeit-Herkunft für den Schnitt.
 synotr_db_infer_origin_from_name() {
     _n="$1"
     case "$_n" in
@@ -188,14 +200,42 @@ synotr_db_infer_origin_from_name() {
             return 0
             ;;
         *.mp4|*.MP4)
-            synotr_file_source=""
-            return 1
+            synotr_file_source="otr2"
+            return 0
             ;;
         *)
             synotr_file_source=""
             return 1
             ;;
     esac
+}
+
+# Editor-MP4: DECODIR/STEM.mp4 (nach Remux; AVI im Papierkorb). Fallback _cuteditor/.
+synotr_resolve_editor_sidecar() {
+    _fn="$1"
+    case "$_fn" in
+        *.avi|*.AVI) ;;
+        *) return 1 ;;
+    esac
+    if [ -n "${synotr_file_editor_mp4:-}" ] && [ -f "$synotr_file_editor_mp4" ]; then
+        return 0
+    fi
+    _st=${_fn%.*}
+    _try="${DECODIR%/}/${_st}.mp4"
+    if [ -n "$DECODIR" ] && [ -f "$_try" ]; then
+        synotr_file_editor_mp4="$_try"
+        unset _fn _st _try
+        return 0
+    fi
+    _try="${DECODIR%/}/_cuteditor/${_st}.mp4"
+    if [ -n "$DECODIR" ] && [ -f "$_try" ]; then
+        synotr_file_editor_mp4="$_try"
+        unset _fn _st _try
+        return 0
+    fi
+    synotr_file_editor_mp4=""
+    unset _fn _st _try
+    return 1
 }
 
 synotr_db_set_cutlist_online() {

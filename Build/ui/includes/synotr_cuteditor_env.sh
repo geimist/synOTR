@@ -54,6 +54,7 @@ synotr_cuteditor_env() {
         SYNOTR_PYTHON=$(command -v python3 2>/dev/null || echo python3)
     fi
 
+    export SYNOTR_PYTHON
     export SYNOTR_DECODIR="$DECODIR"
     export SYNOTR_SQLITE="${APPDIR}/app/etc/synOTR.sqlite"
     export SYNOTR_WORKDIR="${WORKDIR}"
@@ -62,6 +63,8 @@ synotr_cuteditor_env() {
     export SYNOTR_MP4BOX="$mp4box"
     export SYNOTR_LOCALCUTLIST="${OTRlocalcutlistdir:-}"
     export SYNOTR_OTRKEYDIR="${OTRkeydir:-}"
+    export SYNOTR_OTRKEYDELDIR="${OTRkeydeldir:-}"
+    export SYNOTR_ENDGUELTIG="${endgueltigloeschen:-off}"
     export SYNOTR_CUTEDITOR_QUEUE="${CutEditorQueue:-miss_both}"
     export SYNOTR_CUTEDITOR_OTRKEYMP4="${CutEditorOtrkeyMp4:-off}"
     export SYNOTR_CUTLIST_AUTHOR="${cutlistat_ID:-}"

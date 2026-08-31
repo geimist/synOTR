@@ -1731,6 +1731,8 @@ button.synotr-fp-btn-primary:disabled:hover {
 .synotr-ce-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 1em; }
 .synotr-ce-table th, .synotr-ce-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #d7dfe8; word-break: break-word; }
 .synotr-ce-table th { color: #53657D; }
+.synotr-ce-warn { cursor: help; font-size: 1.05em; }
+.synotr-ce-hint { margin: 0.8em 0 0; font-size: 12px; color: #53657D; }
 
 .synotr-scroll {
 	width: 100%;

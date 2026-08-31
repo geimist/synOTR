@@ -44,6 +44,31 @@ def _fetch(con: sqlite3.Connection, col: str, val: str) -> Optional[sqlite3.Row]
         return row
 
 
+def deco_play_mp4(cfg: CutEditorConfig, basename: str) -> Optional[str]:
+    """Player-MP4: nach dem Remux liegt sie im Dekodierordner (gleicher Stem) oder in _cuteditor/."""
+    base = os.path.basename(basename or "")
+    if not base:
+        return None
+    deco = (cfg.deco_dir or "").rstrip("/")
+    if not deco:
+        return None
+    stem, ext = os.path.splitext(base)
+    names = []
+    if ext.lower() == ".mp4":
+        names.append(base)
+    names.append(stem + ".mp4")
+    seen = set()
+    for name in names:
+        if name in seen:
+            continue
+        seen.add(name)
+        for folder in (deco, os.path.join(deco, "_cuteditor")):
+            cand = os.path.join(folder, name)
+            if os.path.isfile(cand):
+                return os.path.realpath(cand)
+    return None
+
+
 def lookup_row(con: sqlite3.Connection, basename: str) -> Optional[sqlite3.Row]:
     esc = basename
     for col in ("file_original", "file_encrypted"):
@@ -52,6 +77,10 @@ def lookup_row(con: sqlite3.Connection, basename: str) -> Optional[sqlite3.Row]:
             return row
     stem, ext = os.path.splitext(basename)
     if ext.lower() == ".mp4":
+        for try_avi in (stem + ".avi", stem + ".AVI"):
+            row = _fetch(con, "file_original", try_avi)
+            if row:
+                return row
         for try_name in (basename + ".otr2", stem + ".mp4.otr2", stem + ".otr2"):
             row = _fetch(con, "file_encrypted", try_name)
             if row:
@@ -65,8 +94,9 @@ def lookup_row(con: sqlite3.Connection, basename: str) -> Optional[sqlite3.Row]:
 
 
 def _source_of(row: Optional[sqlite3.Row], basename: str) -> str:
-    if row and row["file_source"]:
-        return str(row["file_source"])
+    src = _row_get(row, "file_source") if row else ""
+    if src:
+        return src
     low = basename.lower()
     if low.endswith(".avi"):
         return "otrkey"
@@ -82,7 +112,10 @@ def _row_get(row: Optional[sqlite3.Row], key: str, default: str = "") -> str:
         return default
     if v is None:
         return default
-    return str(v)
+    text = str(v)
+    if text in ("null", "None", "NULL"):
+        return default
+    return text
 
 
 def _online_of(row: Optional[sqlite3.Row]) -> str:
@@ -100,6 +133,18 @@ def _editor_mp4(row: Optional[sqlite3.Row]) -> str:
     return _row_get(row, "file_editor_mp4").strip()
 
 
+def _local_cutlist(cfg: CutEditorConfig, path: str, row: Optional[sqlite3.Row]) -> str:
+    extra = []
+    sidecar = _editor_mp4(row)
+    if sidecar:
+        extra.append(os.path.basename(sidecar))
+    search = list(cutlist_search_dirs(cfg))
+    local = find_local_cutlist(path, search, extra_names=extra)
+    if not local and sidecar and os.path.isfile(sidecar):
+        local = find_local_cutlist(sidecar, search)
+    return local or ""
+
+
 def list_waiting(cfg: CutEditorConfig) -> List[Dict[str, Any]]:
     queue = parse_queue(cfg.queue)
     otrkey_on = parse_onoff(cfg.otrkey_mp4) == "on"
@@ -108,7 +153,6 @@ def list_waiting(cfg: CutEditorConfig) -> List[Dict[str, Any]]:
     if not deco or not os.path.isdir(deco):
         return out
     con = _connect(cfg.sqlite_path)
-    search = list(cutlist_search_dirs(cfg))
     try:
         names = sorted(os.listdir(deco))
     except OSError:
@@ -131,23 +175,21 @@ def list_waiting(cfg: CutEditorConfig) -> List[Dict[str, Any]]:
                 continue
             src = "otrkey"
         else:
+            avi_sib = os.path.join(deco, os.path.splitext(name)[0] + ".avi")
             if src == "otrkey":
-                continue
-            if not src:
+                if os.path.isfile(avi_sib):
+                    continue
+            elif not src:
                 src = "otr2"
-            if src != "otr2":
+            elif src != "otr2":
                 continue
-        extra = []
         sidecar = _editor_mp4(row)
-        if sidecar:
-            extra.append(os.path.basename(sidecar))
-        local = find_local_cutlist(path, search, extra_names=extra)
-        if sidecar and os.path.isfile(sidecar):
-            local = local or find_local_cutlist(sidecar, search)
+        local = _local_cutlist(cfg, path, row)
         has_local = bool(local)
         online = _online_of(row)
         if queue == "miss_both":
-            if has_local or online != "none":
+            # unset = noch keine Online-Suche (frisch dekodiert) → wie „keine Online-Cutlist“.
+            if has_local or online not in ("none", "unset"):
                 continue
         elif queue == "no_local":
             if has_local:
@@ -155,9 +197,11 @@ def list_waiting(cfg: CutEditorConfig) -> List[Dict[str, Any]]:
         # all_uncut: keep
         play = path
         needs_remux = False
-        if src == "otrkey":
-            if sidecar and os.path.isfile(sidecar):
-                play = sidecar
+        if src == "otrkey" and low.endswith(".avi"):
+            found = deco_play_mp4(cfg, name)
+            if found:
+                play = found
+                sidecar = found
             else:
                 needs_remux = True
                 play = ""
@@ -176,6 +220,7 @@ def list_waiting(cfg: CutEditorConfig) -> List[Dict[str, Any]]:
             "private": src == "otrkey",
             "rowid": int(row["rowid"]) if row else 0,
             "editor_mp4": sidecar,
+            "local_cutlist": local,
         }
         out.append(item)
     if con:
@@ -184,37 +229,64 @@ def list_waiting(cfg: CutEditorConfig) -> List[Dict[str, Any]]:
 
 
 def item_for(cfg: CutEditorConfig, basename: str) -> Optional[Dict[str, Any]]:
+    base = os.path.basename(basename)
     for it in list_waiting(cfg):
-        if it["file"] == basename:
+        if it["file"] == base:
             return it
     # all_uncut-style lookup even if filtered out
-    path = os.path.join(cfg.deco_dir, os.path.basename(basename))
+    deco = cfg.deco_dir or ""
+    path = os.path.join(deco, base) if deco else base
     if not os.path.isfile(path):
-        return None
+        stem, ext = os.path.splitext(base)
+        if ext.lower() == ".avi":
+            alt = os.path.join(deco, stem + ".mp4")
+            if deco and os.path.isfile(alt):
+                return item_for(cfg, os.path.basename(alt))
+            legacy = os.path.join(cfg.editor_dir(), stem + ".mp4")
+            if os.path.isfile(legacy):
+                path = legacy
+            else:
+                return None
+        elif ext.lower() == ".mp4":
+            legacy = os.path.join(cfg.editor_dir(), base)
+            if os.path.isfile(legacy):
+                path = legacy
+            else:
+                return None
+        else:
+            return None
     con = _connect(cfg.sqlite_path)
     row = lookup_row(con, os.path.basename(path)) if con else None
     if con:
         con.close()
     src = _source_of(row, os.path.basename(path))
     sidecar = _editor_mp4(row)
-    play = sidecar if sidecar and os.path.isfile(sidecar) else path
-    if src == "otrkey" and not (sidecar and os.path.isfile(sidecar)):
+    local = _local_cutlist(cfg, path, row)
+    low = path.lower()
+    found = deco_play_mp4(cfg, os.path.basename(path)) or deco_play_mp4(cfg, base)
+    play = found or path
+    needs_remux = False
+    if low.endswith(".avi") and not found:
         play = ""
+        needs_remux = True
+    elif found:
+        play = found
     return {
         "file": os.path.basename(path),
         "path": path,
         "play_path": play,
-        "source": src or ("otrkey" if path.lower().endswith(".avi") else "otr2"),
-        "has_local": False,
+        "source": src or ("otrkey" if low.endswith(".avi") else "otr2"),
+        "has_local": bool(local),
         "cutlist_online": _online_of(row),
         "title": _row_get(row, "OTRtitle") or _row_get(row, "titel"),
         "sender": _row_get(row, "sender"),
         "file_orig_size": int(_row_get(row, "file_orig_size") or "0") if _row_get(row, "file_orig_size").isdigit() else 0,
         "size": os.path.getsize(path),
-        "needs_remux": src == "otrkey" and not (sidecar and os.path.isfile(sidecar)),
-        "private": (src or "") == "otrkey" or path.lower().endswith(".avi"),
+        "needs_remux": needs_remux,
+        "private": (src or "") == "otrkey" or low.endswith(".avi"),
         "rowid": int(row["rowid"]) if row else 0,
         "editor_mp4": sidecar,
+        "local_cutlist": local,
     }
 
 

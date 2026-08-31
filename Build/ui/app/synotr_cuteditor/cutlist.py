@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import re
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 
@@ -20,6 +21,8 @@ def cutlist_stem(name: str) -> str:
 
 def parse_cutlist(text: str) -> Dict[str, Any]:
     general: Dict[str, str] = {}
+    info: Dict[str, str] = {}
+    meta: Dict[str, str] = {}
     cuts: List[Dict[str, str]] = []
     section = None
     current: Dict[str, str] = {}
@@ -38,13 +41,58 @@ def parse_cutlist(text: str) -> Dict[str, Any]:
         key, val = line.split("=", 1)
         key = key.strip()
         val = val.strip()
-        if section is None or section.lower() == "general":
+        sl = (section or "general").lower()
+        if sl == "general" or section is None:
             general[key] = val
-        elif section.lower().startswith("cut"):
+        elif sl == "info":
+            info[key] = val
+        elif sl == "meta":
+            meta[key] = val
+        elif sl.startswith("cut"):
             current[key] = val
     if section and section.lower().startswith("cut") and current:
         cuts.append(current)
-    return {"general": general, "cuts": cuts}
+    return {"general": general, "info": info, "meta": meta, "cuts": cuts}
+
+
+def editor_state_from_cutlist(text: str, fps_fallback: float = 25.0) -> Dict[str, Any]:
+    data = parse_cutlist(text)
+    g = data.get("general") or {}
+    fps = fps_fallback
+    try:
+        fps = float(g.get("FramesPerSecond") or fps_fallback)
+    except (TypeError, ValueError):
+        fps = fps_fallback
+    if fps <= 0:
+        fps = fps_fallback or 25.0
+    keeps: List[Dict[str, Any]] = []
+    for c in data.get("cuts") or []:
+        try:
+            start = float(c.get("Start") or 0)
+            duration = float(c.get("Duration") or 0)
+        except (TypeError, ValueError):
+            continue
+        if duration < 0:
+            duration = 0.0
+        keep: Dict[str, Any] = {"start": start, "duration": duration}
+        if c.get("StartFrame") not in (None, ""):
+            try:
+                keep["start_frame"] = int(float(c["StartFrame"]))
+            except (TypeError, ValueError):
+                pass
+        if c.get("DurationFrames") not in (None, ""):
+            try:
+                keep["duration_frames"] = int(float(c["DurationFrames"]))
+            except (TypeError, ValueError):
+                pass
+        keeps.append(keep)
+    return {
+        "keeps": keeps,
+        "info": dict(data.get("info") or {}),
+        "fps": fps,
+        "private": g.get("Private", "0") == "1",
+        "apply_to": g.get("ApplyToFile", ""),
+    }
 
 
 def is_private_cutlist(path: str) -> bool:
@@ -54,10 +102,23 @@ def is_private_cutlist(path: str) -> bool:
     except OSError:
         return False
     g = data.get("general") or {}
+    info = data.get("info") or {}
     if g.get("Private", "0") == "1":
         return True
-    comment = g.get("UserComment", "")
+    comment = info.get("UserComment") or g.get("UserComment", "")
     return "synOTR Eigengebrauch" in comment
+
+
+def _ini_line(key: str, value: Any) -> str:
+    text = str(value if value is not None else "")
+    text = text.replace("\r", " ").replace("\n", " ").strip()
+    return "%s=%s" % (key, text)
+
+
+def _flag01(value: Any) -> str:
+    if value in (True, 1, "1", "on", "true", "True"):
+        return "1"
+    return "0"
 
 
 def write_cutlist(
@@ -70,26 +131,34 @@ def write_cutlist(
     private: bool = False,
     app: str = "synOTR CutEditor",
     version: str = "1.0",
+    aspect: str = "",
+    info: Optional[Dict[str, Any]] = None,
 ) -> None:
     if fps <= 0:
         fps = 25.0
+    extra = dict(info or {})
+    author = str(extra.pop("Author", author) or author)
+    comment = str(extra.get("UserComment") or "")
+    if private and "synOTR Eigengebrauch" not in comment:
+        note = "synOTR Eigengebrauch, nicht zu cutlist.at"
+        comment = (comment + " | " + note).strip(" |") if comment else note
+    extra["UserComment"] = comment
     lines = [
         "[General]",
-        "Application=%s" % app,
-        "Version=%s" % version,
+        _ini_line("Application", app),
+        _ini_line("Version", version),
         "FramesPerSecond=%.6g" % fps,
+        _ini_line("DisplayAspectRatio", aspect or extra.pop("DisplayAspectRatio", "")),
         "IntendedCutApplicationName=avcut",
-        "ApplyToFile=%s" % apply_to,
-        "OriginalFileSizeBytes=%s" % int(size_bytes),
-        "Author=%s" % (author or ""),
+        "IntendedCutApplication=avcut",
+        "VDUseSmartRendering=1",
+        "comment1=The following parts of the movie will be kept, the rest will be cut out.",
+        "comment2=All values are given in seconds.",
         "NoOfCuts=%s" % len(keeps),
+        _ini_line("ApplyToFile", apply_to),
+        "OriginalFileSizeBytes=%s" % int(size_bytes),
+        "Private=%s" % ("1" if private else "0"),
     ]
-    if private:
-        lines.append("Private=1")
-        lines.append("UserComment=synOTR Eigengebrauch, nicht zu cutlist.at")
-    else:
-        lines.append("Private=0")
-        lines.append("UserComment=")
     for i, k in enumerate(keeps):
         start = float(k["start"])
         duration = float(k["duration"])
@@ -106,6 +175,28 @@ def write_cutlist(
         lines.append("Duration=%.6f" % duration)
         lines.append("StartFrame=%d" % sf)
         lines.append("DurationFrames=%d" % df)
+    rating = str(extra.get("RatingByAuthor") or "").strip()
+    if rating not in ("1", "2", "3", "4", "5"):
+        rating = ""
+    lines.append("[Info]")
+    lines.append(_ini_line("Author", author))
+    lines.append(_ini_line("RatingByAuthor", rating))
+    for flag in (
+        "EPGError",
+        "MissingBeginning",
+        "MissingEnding",
+        "MissingVideo",
+        "MissingAudio",
+        "OtherError",
+    ):
+        lines.append("%s=%s" % (flag, _flag01(extra.get(flag, "0"))))
+    lines.append(_ini_line("ActualContent", extra.get("ActualContent", "")))
+    lines.append(_ini_line("OtherErrorDescription", extra.get("OtherErrorDescription", "")))
+    lines.append(_ini_line("SuggestedMovieName", extra.get("SuggestedMovieName", "")))
+    lines.append(_ini_line("UserComment", extra.get("UserComment", "")))
+    lines.append("[Meta]")
+    lines.append(_ini_line("GeneratedOn", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    lines.append("GeneratedBy=synOTR CutEditor")
     text = "\n".join(lines) + "\n"
     parent = os.path.dirname(path)
     if parent:

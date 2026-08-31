@@ -4,40 +4,87 @@
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>synOTR CutEditor</title>
-	<link rel="stylesheet" href="index.cgi?page=cuteditor-api&amp;action=static&amp;name=editor.css"/>
+	<link rel="stylesheet" href="index.cgi?page=cuteditor-api&amp;action=static&amp;name=editor.css&amp;v=20260831j"/>
 </head>
 <body class="ce-body">
-	<div class="ce-bar">
-		<a class="ce-back" href="index.cgi?page=cuteditor">Zurück zur Liste</a>
+	<header class="ce-bar">
+		<a class="ce-back" id="ceBack" href="index.cgi?page=cuteditor">← Liste</a>
 		<h1 id="ceTitle">CutEditor</h1>
+		<span id="ceWarn" class="ce-warn" hidden title="">⚠️</span>
 		<span id="ceMeta" class="ce-meta"></span>
-	</div>
+	</header>
 	<p id="ceErr" class="ce-err" hidden></p>
-	<div class="ce-main">
-		<video id="ceVideo" controls playsinline></video>
-		<div class="ce-side">
-			<div class="ce-keys">
-				<button type="button" data-act="play">Play/Pause (K)</button>
-				<button type="button" data-act="back1">−1s (J)</button>
-				<button type="button" data-act="fwd1">+1s (L)</button>
-				<button type="button" data-act="prevf">−1 Frame (,)</button>
-				<button type="button" data-act="nextf">+1 Frame (.)</button>
-				<button type="button" data-act="markin">In (I)</button>
-				<button type="button" data-act="markout">Out (O)</button>
-				<button type="button" data-act="addkeep">Keep übernehmen (Enter)</button>
-				<button type="button" data-act="strip">Frame-Streifen</button>
-			</div>
-			<div id="ceStrip" class="ce-strip" hidden></div>
-			<ol id="ceKeeps" class="ce-keeps"></ol>
-			<p class="ce-hint">Keep-Intervalle = behaltene Filmteile. Nächster synOTR-Lauf schneidet damit.</p>
-			<button type="button" class="ce-save" id="ceSave">Cutlist speichern</button>
-			<p id="ceSaveMsg" class="ce-ok" hidden></p>
+	<div class="ce-stage">
+		<video id="ceVideo" playsinline></video>
+	</div>
+	<div class="ce-tl" id="ceTl" title="Klicken oder ziehen zum Springen">
+		<div class="ce-tl-inner" id="ceTlInner">
+			<div class="ce-tl-bg"></div>
+			<div id="ceTlSegs"></div>
+			<div class="ce-tl-flag ce-tl-in" id="ceTlIn" hidden></div>
+			<div class="ce-tl-flag ce-tl-out" id="ceTlOut" hidden></div>
+			<div class="ce-tl-head" id="ceTlHead"></div>
 		</div>
 	</div>
-	<div class="ce-time">
-		<input type="range" id="ceSeek" min="0" max="1000" value="0"/>
-		<span id="ceClock">0.000 s / Frame 0</span>
+	<div class="ce-bottom">
+		<div class="ce-tools" role="toolbar">
+			<button type="button" class="ce-btn" data-act="start" title="Zum Anfang (Home)">⏮</button>
+			<button type="button" class="ce-btn" data-act="back1" title="−1 Sekunde (J)">« 1s</button>
+			<button type="button" class="ce-btn" data-act="prevkf" title="Vorheriger Keyframe (←)">« KF</button>
+			<button type="button" class="ce-btn" data-act="prevf" title="Vorheriges Frame (,)">‹</button>
+			<button type="button" class="ce-btn ce-btn-play" data-act="play" title="Play/Pause (K / Leertaste)">▶</button>
+			<button type="button" class="ce-btn" data-act="nextf" title="Nächstes Frame (.)">›</button>
+			<button type="button" class="ce-btn" data-act="nextkf" title="Nächster Keyframe (→)">KF »</button>
+			<button type="button" class="ce-btn" data-act="fwd1" title="+1 Sekunde (L)">1s »</button>
+			<button type="button" class="ce-btn" data-act="end" title="Zum Ende (End)">⏭</button>
+			<span class="ce-sep"></span>
+			<button type="button" class="ce-btn ce-btn-io" data-act="markin" title="Segmentbeginn hier (I)">I</button>
+			<button type="button" class="ce-btn ce-btn-io" data-act="markout" title="Segmentende hier (O)">O</button>
+			<button type="button" class="ce-btn" data-act="addkeep" title="Keep übernehmen (Enter)">+ Keep</button>
+			<button type="button" class="ce-btn" data-act="split" title="Keep an Playhead teilen">✂</button>
+			<button type="button" class="ce-btn ce-btn-danger" data-act="delkeep" title="Gewähltes Keep löschen (Entf)">🗑</button>
+			<span class="ce-sep"></span>
+			<button type="button" class="ce-btn" data-act="strip" title="Frame-Streifen um die Playhead (Anzahl nach Fensterbreite)">🖼</button>
+			<button type="button" class="ce-btn" id="ceLoad" title="Vorhandene lokale Cutlist laden">Laden</button>
+			<button type="button" class="ce-btn ce-btn-save" id="ceSave" title="Cutlist speichern">Speichern</button>
+			<button type="button" class="ce-btn ce-btn-cut" id="ceCutNow" disabled title="Nach dem Speichern: sofort synOTR starten">Jetzt schneiden</button>
+		</div>
+		<div class="ce-clock" id="ceClock">00:00.000 / Frame 0</div>
 	</div>
-	<script src="index.cgi?page=cuteditor-api&amp;action=static&amp;name=editor.js"></script>
+	<p class="ce-legend"><span class="ce-leg-drop"></span> verworfen &nbsp; <span class="ce-leg-keep"></span> Keep</p>
+	<table class="ce-keeps" id="ceKeepsTable" hidden>
+		<thead><tr><th>#</th><th>Start</th><th>Ende</th><th>Dauer</th></tr></thead>
+		<tbody id="ceKeepsBody"></tbody>
+	</table>
+	<p id="ceSaveMsg" class="ce-ok" hidden></p>
+	<details class="ce-info">
+		<summary>Cutlist-Infos (cutlist.at)</summary>
+		<p class="ce-hint">Felder gemäß <a href="http://cutlist.at/faq/cutlist.html" target="_blank" rel="noopener">cutlist.at FAQ</a>. Nichts Persönliches eintragen – Cutlists können öffentlich werden (außer Eigengebrauch/Private).</p>
+		<div class="ce-info-grid">
+			<label>Autor <input id="ceAuthor" type="text" autocomplete="nickname"/></label>
+			<label>Bewertung
+				<select id="ceRating">
+					<option value="">–</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+				</select>
+			</label>
+			<label class="ce-span2">Vorgeschlagener Name <input id="ceSuggested" type="text"/></label>
+			<label class="ce-span2">Kommentar <textarea id="ceComment" rows="2"></textarea></label>
+			<label class="ce-span2">Tatsächlicher Inhalt <input id="ceActual" type="text"/></label>
+			<label class="ce-span2">Andere Fehler (Text) <input id="ceOtherDesc" type="text"/></label>
+			<label class="ce-chk"><input type="checkbox" id="ceEPG"/> EPG-Fehler</label>
+			<label class="ce-chk"><input type="checkbox" id="ceMissBeg"/> Anfang fehlt</label>
+			<label class="ce-chk"><input type="checkbox" id="ceMissEnd"/> Ende fehlt</label>
+			<label class="ce-chk"><input type="checkbox" id="ceMissVid"/> Video fehlt</label>
+			<label class="ce-chk"><input type="checkbox" id="ceMissAud"/> Audio fehlt</label>
+			<label class="ce-chk"><input type="checkbox" id="ceOther"/> anderer Fehler</label>
+		</div>
+	</details>
+	<div id="ceStrip" class="ce-strip" hidden></div>
+	<script src="index.cgi?page=cuteditor-api&amp;action=static&amp;name=editor.js&amp;v=20260831j"></script>
 </body>
 </html>

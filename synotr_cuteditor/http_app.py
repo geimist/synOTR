@@ -58,6 +58,9 @@ def serve(cfg: CutEditorConfig, host: str = "127.0.0.1", port: int = 8765) -> No
             mapping = {
                 "/api/waiting": "list",
                 "/api/item": "item",
+                "/api/cutlist": "cutlist",
+                "/api/keyframes": "keyframes",
+                "/api/purgecache": "purgecache",
                 "/media": "media",
                 "/frame": "frame",
                 "/strip": "strip",
