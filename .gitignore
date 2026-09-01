@@ -2,3 +2,7 @@
 *NOTES.md
 *.spk
 /.cursor
+__pycache__/
+*.py[cod]
+*$py.class
+
