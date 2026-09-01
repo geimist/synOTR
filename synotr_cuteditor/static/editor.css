@@ -34,6 +34,9 @@
 	font-size: 16px;
 	line-height: 1;
 }
+.ce-warn[hidden] {
+	display: none;
+}
 .ce-err { margin: 8px 12px; color: #f85149; }
 .ce-ok { margin: 0 12px 8px; color: #3fb950; font-size: 13px; }
 .ce-stage {

@@ -360,8 +360,13 @@
 		if (cachePurged || !file) return;
 		cachePurged = true;
 		var url = API + "&action=purgecache&file=" + encodeURIComponent(file);
-		fetch(url, { method: "GET", keepalive: true }).catch(function () {});
+		if (navigator.sendBeacon) {
+			navigator.sendBeacon(url, "");
+		} else {
+			fetch(url, { method: "POST", keepalive: true }).catch(function () {});
+		}
 	}
+	window.addEventListener("pagehide", purgeFrameCache);
 
 	function stripSpan() {
 		stripEl.hidden = false;
@@ -655,6 +660,9 @@
 			if (it.source === "otrkey") {
 				warn.hidden = false;
 				warn.title = OTRKEY_TIP;
+			} else {
+				warn.hidden = true;
+				warn.title = "";
 			}
 			if (it.loaded_cutlist && it.loaded_cutlist.keeps && it.loaded_cutlist.keeps.length) {
 				applyLoaded(it.loaded_cutlist);
@@ -668,7 +676,7 @@
 				if (/\.mp4$/i.test(bn)) playBase = bn;
 			}
 			if (it.needs_remux && !/\.mp4$/i.test(playBase)) {
-				showErr("Für otrkey-AVI zuerst „Für Editor als MP4“ auf der Liste ausführen.");
+				showErr("Für otrkey-AVI zuerst „Für Editor konvertieren“ auf der Liste ausführen.");
 				return;
 			}
 			video.addEventListener("error", function () {

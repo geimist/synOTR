@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from dataclasses import dataclass, field
 from typing import Iterable, List, Optional
 
@@ -39,6 +40,25 @@ class CutEditorConfig:
 
     def frame_cache_dir(self) -> str:
         return os.path.join(self.workdir.rstrip("/"), "tmp_synotr_cutedit")
+
+    def clear_frame_cache(self) -> int:
+        """Frame-JPEGs und tmp_synotr_cutedit entfernen (nur unter WORKDIR)."""
+        if not self.workdir:
+            return 0
+        cache = _norm(self.frame_cache_dir())
+        work = _norm(self.workdir.rstrip("/"))
+        if os.path.basename(cache) != "tmp_synotr_cutedit" or not is_under(cache, work):
+            return 0
+        if not os.path.isdir(cache):
+            return 0
+        n = 0
+        try:
+            for _root, _dirs, files in os.walk(cache):
+                n += len(files)
+            shutil.rmtree(cache, ignore_errors=True)
+        except OSError:
+            return n
+        return n
 
     def allowed_roots(self) -> List[str]:
         roots = [self.deco_dir, self.editor_dir(), self.workdir]

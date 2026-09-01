@@ -1,25 +1,15 @@
 Release Notes 
 
-4.9.99.3 (2026-08-30)
+4.9.99.3 (2026-09-01)
  	IMPLEMENTIERUNGEN:
- -  CutEditor (Stufe I/II): 
- 	- Warteliste, HTML5-Player, Keep-Marken, lokale Cutlist, ffmpeg-Framevorschaubilder
- 	-  Wartelisten-Filter CutEditorQueue (Standard miss_both: keine lokale und keine Online-Cutlist)
- 	-  Optional otrkey-AVI als MP4 für den Eigengebrauch (CutEditorOtrkeyMp4), private Cutlists, Schnitt per avcut 0.8 auf dem Sidecar
- 	-  SQLite: file_orig_size (Größe direkt nach Decode), cutlist_online, file_editor_mp4
- 	-  Portables Python-Modul synotr_cuteditor (DSM-CGI und später Docker)
- - GUI responsive gestaltet (flexible Breite)
- 
-
- -  CutEditor: lokale Cutlist laden, vor Überschreiben nachfragen; Frame-Thumbs 160px, Anzahl nach Fensterbreite
- -  otrkey-Remux: MP4 in den Dekodierordner, AVI in den Papierkorb; Keep-Tabelle; Keyframe-Tasten; Playhead-Klick im Keep
+ -  CutEditor (experimentell) – erstelle Cutlists direkt in synOTR
+    - derzeit ist [noch] kein Upload zu cutlist.at implementiert, da wir die Qualität der Schnitte zunächst verifizieren müssen
+	- alte otrkey-AVIs müssen vorher nach MP4 konvertiert werden (1-Klicklösung ist implementiert)
+ -  GUI responsive gestaltet (flexible Breite)
 
  	BUGFIXES:
- -  CutEditor: Player-JS lief nicht (Syntaxfehler bei den Keyframe-Pfeiltasten)
- -  JPEG-Vorschaucache (tmp_synotr_cutedit) wird beim Verlassen des Editors gelöscht
- -  CutEditor-Remux nutzt OTRavi2mp4 inkl. paralleler AAC-Kodierung und AAC-/Delay-/Normalize-Konfig
- -  Schnitt: MP4 ohne DB-Zeile (ältere Decode / umbenannt) als otr2 schneiden, nicht überspringen
- -  avisplit-Fortschritt (CR je Frame) wird im LOG nicht mehr mitgeschrieben (sonst >40 MB bei HD)
+ -  avisplit-Fortschritt (CR je Frame) wird im LOG nicht mehr mitgeschrieben
+
 
 4.9.99.2 (2026-08-28)
  	IMPLEMENTIERUNGEN:
@@ -59,18 +49,22 @@ Release Notes
  	BUGFIXES:
  -  Verschieben in den Zielordner: Zähler (1), (2), … wird am Dateisystem hochgezählt, statt nach dem ersten Treffer abzubrechen
 
+
 4.3.1 (2023-08-18)
  	BUGFIXES:
  -  Wechsel von DSM-ffmpeg zu 3rdParty-ffmpeg6 (zu installieren von hier: https://synocommunity.com/package/ffmpeg6)
  
+
 4.3.0 (2023-06-11)
  	IMPLEMENTIERUNGEN:
  -  OTR-Decoder (x86_64) für DSM7.2 ergänzt
  -  DSM7-Portierung
  
+
 4.2.1 (2021-05-11)
  	IMPLEMENTIERUNGEN:
  -  OTR-Decoder (x86_64) aktualisiert
+
 
 4.2.0 (RELEASE)
  	IMPLEMENTIERUNGEN:
@@ -80,11 +74,13 @@ Release Notes
  -  es wurde ein Fehler behoben, aufgrund dessen synOTR gestartet werden konnte, obwohl der vorhergehende Arbeitsablauf noch nicht abgeschlossen war
  -  bestimmte Sonderzeichen im Episodentitel von thetvdb führten zu einer fehlerhaften Umbenennung
 
+
 4.1.1 (RELEASE)
  	IMPLEMENTIERUNGEN:
  -  Die Berechtigung für das Paket synOTR kann in der DSM-Systemsteuerung > Berechtigung für einzelne User konfiguriert werden (bitte beachte, dass nur eine gemeinsame Konfiguration verwendet wird!).
  	BUGFIXES:
  -  es wurde ein Fehler behoben, aufgrund dessen aus dem Autorkommentar einer Cutlist keine Serieninformation abgeleitet werden konnte (der Parameter wurde scheinbar umbenannt).
+
 
 4.1.0 (RELEASE)
  	IMPLEMENTIERUNGEN:
@@ -95,11 +91,13 @@ Release Notes
  -  Detailänderungen in der GUI
  -  Detailänderungen der Benachrichtigungstexte
 
+
 4.0.8 (RELEASE)
  	BUGFIXES:
  -  OTRdecoder für Intel 64bit auf "Dynamisch gelinkt, 64 Bit" gewechselt (Dateien über 4GB ließen sich nicht decodieren)
  -  Grenzwert für Smartrendering von 500 MB auf 490 MB gesenkt
  -  Prüfung auf korrekte Cutlist.at-ID (mit ungültiger ID konnten keine Cutlisten heruntergeladen werden)
+
 
 4.0.7 (RELEASE)
  	IMPLEMENTIERUNGEN:
@@ -111,6 +109,7 @@ Release Notes
  -  diverse Bugfixes
     (in diesem Release wird kein ffmpeg [x86_64/i686] mitgeliefert. Daher steht auch kein Fraunhofer FDK AAC zur Verfügung)
 
+
 4.0.5 (RELEASE)
  	IMPLEMENTIERUNGEN:
  -  auf Wunsch werden jetzt auch Cutlits für alternative Formate gefunden 
@@ -118,11 +117,13 @@ Release Notes
     BUGFIXES:
  -  die Cutlistauswahl / Bewertungsanalyse wurde überarbeitet und sollte jetzt etwas robuster und genauer sein
 
+
 4.0.4 (RELEASE)
  	IMPLEMENTIERUNGEN:
  -  Einbindung der persönlichen cutlist.at-ID
     BUGFIXES:
  -  diverse Bugfixes
+
 
 4.0.3 (RELEASE)
  	IMPLEMENTIERUNGEN:
@@ -132,6 +133,7 @@ Release Notes
  -  ein Fehler in Verbindung mit Leerzeichen in Ordnernamen beim AC3-Muxing (vielen Dank an Thomas!)
  -  Detailverbesserungen
 
+
 4.0.2 (RELEASE)
  	IMPLEMENTIERUNGEN:
  -  Konfigurationsimport implementiert um den Umstieg für User, die noch die bisherige Skriptversion verwenden, zu erleichtern
@@ -140,9 +142,11 @@ Release Notes
  -  Fehler abgefangen, wenn JSON-Abfragen nicht korrekt ausgewertet werden konnten
  -  Detailverbesserungen
 
+
 4.0.1 (RELEASE)
     BUGFIXES:
  -  ein Fehler im CSS behoben, wodurch der Bereich "sonstige Einstellungen" verdeckt war
+
 
 4.0.0 (RELEASE)
     IMPLEMENTIERUNGEN:

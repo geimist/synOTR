@@ -206,6 +206,17 @@ class WaitingTests(unittest.TestCase):
             self.assertFalse(via_avi["needs_remux"])
             self.assertTrue(via_avi["play_path"].endswith("film.mpg.HQ.mp4"))
 
+    def test_clear_frame_cache(self):
+        with tempfile.TemporaryDirectory() as td:
+            cfg = CutEditorConfig(deco_dir=td, sqlite_path="", workdir=td)
+            cache = cfg.frame_cache_dir()
+            os.makedirs(cache)
+            with open(os.path.join(cache, "a.mp4_w160_1.000.jpg"), "wb") as fh:
+                fh.write(b"x")
+            self.assertEqual(cfg.clear_frame_cache(), 1)
+            self.assertFalse(os.path.isdir(cache))
+            self.assertEqual(cfg.clear_frame_cache(), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

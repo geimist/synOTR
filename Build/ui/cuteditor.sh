@@ -91,7 +91,7 @@ if [[ "$page" == "cuteditor-remux" ]] || [[ "$page" == "cuteditor-remuxwait" ]];
 		_ce_mp4q=$(printf '%s' "${_ce_stem}.mp4" | "$SYNOTR_PYTHON" -c 'import sys,urllib.parse; print(urllib.parse.quote(sys.stdin.read().rstrip("\n"), safe=""))')
 		echo '<p>MP4 für den Editor ist fertig (Dekodierordner). Die AVI liegt im Papierkorb.</p>'
 		echo '<meta http-equiv="refresh" content="0; URL=index.cgi?page=cuteditor-api&amp;action=editor&amp;file='"$_ce_mp4q"'"/>'
-		echo '<p><a href="index.cgi?page=cuteditor-api&amp;action=editor&amp;file='"$_ce_mp4q"'">Zum Editor</a></p>'
+		echo '<p><a class="blue_button synotr-ce-act" href="index.cgi?page=cuteditor-api&amp;action=editor&amp;file='"$_ce_mp4q"'">Zum Editor</a></p>'
 	elif [ -f "$_ce_state" ] && grep -q '^fail$' "$_ce_state"; then
 		echo '<p class="center" style="color:#BD0010;">Konvertierung fehlgeschlagen.</p>'
 		echo '<pre class="synotr-scroll">'
@@ -103,7 +103,7 @@ if [[ "$page" == "cuteditor-remux" ]] || [[ "$page" == "cuteditor-remuxwait" ]];
 		echo '<p><code>'"$_ce_esc"'</code></p>'
 		echo '<p>Diese Seite aktualisiert sich selbst. Bitte warten …</p>'
 		echo '<meta http-equiv="refresh" content="4; URL=index.cgi?page=cuteditor-remuxwait&amp;file='"$_ce_fileq"'"/>'
-		echo '<p><a href="index.cgi?page=cuteditor-remuxwait&amp;file='"$_ce_fileq"'">Status neu laden</a></p>'
+		echo '<p><a class="blue_button synotr-ce-act" href="index.cgi?page=cuteditor-remuxwait&amp;file='"$_ce_fileq"'">Status neu laden</a></p>'
 	fi
 	echo '</div><div class="clear"></div>'
 	unset _ce_file _ce_esc _ce_fileq _ce_lockdir _ce_tag _ce_state _ce_log _ce_pidf _ce_stem _ce_mp4 _ce_running _ce_pid _ec
@@ -141,7 +141,9 @@ import json, os, sys
 sys.path.insert(0, os.environ.get("PYTHONPATH","").split(":")[0])
 from synotr_cuteditor.cli import load_config_from_env
 from synotr_cuteditor.waiting import list_waiting
-print(json.dumps(list_waiting(load_config_from_env()), ensure_ascii=False))
+_cfg = load_config_from_env()
+_cfg.clear_frame_cache()
+print(json.dumps(list_waiting(_cfg), ensure_ascii=False))
 ' 2>/dev/null)
 
 _ce_otrkey_tip="otrkey-AVI: Remux kann mehrere Minuten dauern. Packed-Bitstream kann am Schnitt zittern – nur Eigengebrauch, kein Upload nach cutlist.at."
@@ -164,11 +166,12 @@ if command -v jq >/dev/null 2>&1 && [ -n "$_ce_items" ]; then
 			if [ "$_src" = "otrkey" ]; then
 				echo ' <span class="synotr-ce-warn" title="'"$(printf '%s' "$_ce_otrkey_tip" | sed 's/"/\&quot;/g')"'">⚠️</span>'
 			fi
-			echo '</td><td>'"$_on"'</td><td>'
+			echo '</td><td>'"$_on"'</td><td class="synotr-ce-actions">'
 			if [ "$_remux" = "true" ]; then
-				echo '<a href="index.cgi?page=cuteditor-remux&amp;file='"$_fileq"'">Für Editor als MP4</a> '
+				echo '<a class="blue_button synotr-ce-act" href="index.cgi?page=cuteditor-remux&amp;file='"$_fileq"'">Für Editor konvertieren</a>'
+			else
+				echo '<a class="blue_button synotr-ce-act" href="index.cgi?page=cuteditor-api&amp;action=editor&amp;file='"$_fileq"'">Editor</a>'
 			fi
-			echo '<a href="index.cgi?page=cuteditor-api&amp;action=editor&amp;file='"$_fileq"'">Editor</a>'
 			echo '</td></tr>'
 			_i=$((_i + 1))
 		done

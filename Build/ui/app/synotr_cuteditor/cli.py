@@ -357,28 +357,7 @@ def dispatch_cgi(cfg: CutEditorConfig) -> int:
         _json({"ok": True, "keyframes": times})
         return 0
     if action == "purgecache":
-        path = _play_file(cfg, qs.get("file") or "")
-        cache = cfg.frame_cache_dir()
-        n = 0
-        if os.path.isdir(cache):
-            prefix = os.path.basename(path) if path else ""
-            try:
-                names = os.listdir(cache)
-            except OSError:
-                names = []
-            for name in names:
-                if prefix and not name.startswith(prefix):
-                    continue
-                if not prefix and not name.lower().endswith(".jpg"):
-                    continue
-                fp = os.path.join(cache, name)
-                if not os.path.isfile(fp):
-                    continue
-                try:
-                    os.remove(fp)
-                    n += 1
-                except OSError:
-                    pass
+        n = cfg.clear_frame_cache()
         _json({"ok": True, "removed": n})
         return 0
     if action == "remux":
